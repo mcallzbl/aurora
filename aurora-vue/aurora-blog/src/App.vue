@@ -45,6 +45,7 @@ import Dia from '@/components/Dia.vue'
 import AuroraNavigator from '@/components/AuroraNavigator.vue'
 import UserCenter from '@/components/UserCenter.vue'
 import api from './api/api'
+import defaultCover from '@/assets/default-cover.jpg'
 export default defineComponent({
   name: 'App',
   components: {
@@ -158,7 +159,7 @@ export default defineComponent({
       theme: computed(() => appStore.themeConfig.theme),
       headerImage: computed(() => {
         return {
-          backgroundImage: `url(${commonStore.headerImage}), url(${require('@/assets/default-cover.jpg')})`,
+          backgroundImage: `url(${commonStore.headerImage}), url(${defaultCover})`,
           opacity: commonStore.headerImage !== '' ? 1 : 0
         }
       }),

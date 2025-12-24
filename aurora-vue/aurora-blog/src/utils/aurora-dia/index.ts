@@ -260,15 +260,17 @@ class AuroraBotSoftware {
     this.showMessage(text, 7000, 8)
   }
   loadLocaleMessages() {
-    const locales = require.context('./messages/', true, /[A-Za-z0-9-_,\s]+\.json$/i)
+    const locales = import.meta.glob<{ default: { [key: string]: { [key: string]: string } } }>(
+      './messages/*.json',
+      { eager: true }
+    )
     const messages: {
       [key: string]: { [key: string]: { [key: string]: string } }
     } = {}
-    locales.keys().forEach((key) => {
-      const matched = key.match(/([A-Za-z0-9-_]+)\./i)
-      if (matched && matched.length > 1) {
-        const locale = matched[1]
-        messages[locale] = locales(key)
+    Object.keys(locales).forEach((key) => {
+      const matched = key.match(/([A-Za-z0-9-_]+)\.json$/i)
+      if (matched && matched[1]) {
+        messages[matched[1]] = locales[key].default
       }
     })
     this.locales = messages
