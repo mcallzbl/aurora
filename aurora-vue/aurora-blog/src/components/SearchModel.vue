@@ -163,7 +163,7 @@
                 alt="ObsidianNext Logo"
                 class="mr-1.5"
                 height="20"
-                src="https://static.linhaojun.top/aurora/config/cc36e9fa5aeb214e41495c1e2268f2db.png"
+                src="@/assets/elasticsearch-logo.svg"
                 width="20" />
               <span class="text-ob">ElasticSearch</span>
             </a>
