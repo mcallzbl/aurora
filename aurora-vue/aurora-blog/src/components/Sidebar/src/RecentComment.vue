@@ -13,7 +13,7 @@
                 <img :src="comment.avatar" alt="" class="avatar-img" />
               </template>
               <template v-else>
-                <img :src="default" alt="" class="avatar-img" />
+                <img :src="defaultAvatar" alt="" class="avatar-img" />
               </template>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default defineComponent({
     }
     return {
       comments: toRef(commentStore.$state, 'recentComment'),
-      default: 'https://static.linhaojun.top/aurora/config/0af1901da1e64dfb99bb61db21e716c4.jpeg',
+      defaultAvatar: 'https://bucket.devillusion.asia/aurora/avatar/c80e915a1b7f235b17072419e4094abd.png',
       t
     }
   }

@@ -6,7 +6,7 @@
       <div class="profile absolute w-full flex flex-col justify-center items-center">
         <div class="flex flex-col justify-center items-center">
           <img v-if="websiteConfig.authorAvatar" :class="avatarClass" :src="websiteConfig.authorAvatar" />
-          <img v-else :class="avatarClass" :src="default" />
+          <img v-else :class="avatarClass" :src="defaultAvatar" />
           <h2 class="text-center pt-4 text-4xl font-semibold text-ob-bright">
             <template v-if="websiteConfig.author">
               {{ websiteConfig.author }}
@@ -63,7 +63,7 @@ export default defineComponent({
     const appStore = useAppStore()
     const { t } = useI18n()
     return {
-      default: 'https://static.linhaojun.top/aurora/config/52a81cd2772167b645569342e81ce312.jpg',
+      defaultAvatar: 'https://bucket.devillusion.asia/aurora/avatar/c80e915a1b7f235b17072419e4094abd.png',
       avatarClass: computed(() => {
         return {
           'ob-avatar': true,
