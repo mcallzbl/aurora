@@ -8,9 +8,9 @@ import 'prismjs/themes/prism.css'
 import 'mavon-editor/dist/css/index.css'
 import 'katex/dist/katex.min.css'
 
+import { createPinia } from 'pinia'
 import router from './router'
 import './router/guard'
-import { createPinia } from 'pinia'
 import { i18n } from './locales'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
@@ -27,19 +27,20 @@ import api from './api/api'
 import axios from 'axios'
 
 import { useUserStore } from '@/stores/user'
+import defaultCover from '@/assets/default-cover.jpg'
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 export const app = createApp(App)
-  .use(router)
   .use(pinia)
+  .use(router)
   .use(i18n)
   .use(VueClickAway)
   .use(infiniteScroll)
   .use(v3ImgPreview, {})
   .use(lazyPlugin, {
-    loading: '@/assets/default-cover.jpg', // 使用默认封面作为加载图
-    error: '@/assets/default-cover.jpg'
+    loading: defaultCover, // 使用默认封面作为加载图
+    error: defaultCover
   })
 const userStore = useUserStore()
 axios.interceptors.request.use((config: any) => {
