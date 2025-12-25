@@ -11,13 +11,13 @@
           </span>
         </h2>
       </div>
-      <span class="absolute top-0 w-full h-full z-0" :style="gradientBackground" />
+      <span :style="gradientBackground" class="absolute top-0 w-full h-full z-0" />
     </div>
 
     <ul class="grid lg:grid-cols-2 gap-8">
       <template v-if="featuredArticles.length > 0">
         <li v-for="article in featuredArticles" :key="article.id">
-          <ArticleCard class="home-featured-article" :data="article" />
+          <ArticleCard :data="article" class="home-featured-article" />
         </li>
       </template>
       <template v-else>
@@ -58,7 +58,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style>
 .home-featured-article {
   .article-content {
     p {
@@ -68,6 +68,7 @@ export default defineComponent({
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
     }
+
     .article-footer {
       margin-top: 13px;
     }

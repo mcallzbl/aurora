@@ -18,7 +18,7 @@
               </h2>
             </div>
           </li>
-          <li class="timeline-item" v-for="article in archive.articles" :key="article.id">
+          <li v-for="article in archive.articles" :key="article.id" class="timeline-item">
             <div class="timeline-info">
               <span>
                 {{ t(`settings.months[${new Date(article.createTime).getMonth()}]`) }}
@@ -29,7 +29,7 @@
             <div class="timeline-content">
               <h3 class="timeline-title article-title" @click="toArticle(article)">
                 <span>{{ article.articleTitle }}</span>
-                <svg-icon v-if="article.status == 2" icon-class="lock" class="lock-svg" />
+                <svg-icon v-if="article.status == 2" class="lock-svg" icon-class="lock" />
               </h3>
               <p>
                 {{ article.articleContent }}
@@ -39,9 +39,9 @@
         </template>
       </ul>
       <Paginator
+        :page="pagination.current"
         :pageSize="pagination.size"
         :pageTotal="pagination.total"
-        :page="pagination.current"
         @pageChange="pageChangeHanlder" />
     </div>
   </div>
@@ -51,7 +51,7 @@
 import { useArticleStore } from '@/stores/article'
 import { useCommonStore } from '@/stores/common'
 import { useUserStore } from '@/stores/user'
-import { defineComponent, onMounted, onUnmounted, reactive, toRef, getCurrentInstance } from 'vue'
+import { defineComponent, getCurrentInstance, onMounted, onUnmounted, reactive, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -167,6 +167,7 @@ export default defineComponent({
 .timeline-item {
   padding-left: 40px;
   position: relative;
+
   &:last-child {
     padding-bottom: 0;
   }
@@ -188,6 +189,7 @@ export default defineComponent({
   bottom: 0;
   left: 0;
   width: 15px;
+
   &:before {
     background: var(--text-accent);
     border: 3px solid transparent;
@@ -201,6 +203,7 @@ export default defineComponent({
     width: 15px;
     transition: background 0.3s ease-in-out, border 0.3s ease-in-out;
   }
+
   &:after {
     content: '';
     width: 3px;
@@ -211,10 +214,12 @@ export default defineComponent({
     bottom: 0;
     left: 6px;
   }
+
   .timeline-item:last-child &:after {
     content: none;
   }
 }
+
 .timeline-item:not(.period):hover .timeline-marker:before {
   background: transparent;
   border: 3px solid var(--text-accent);
@@ -222,6 +227,7 @@ export default defineComponent({
 
 .timeline-content {
   padding-bottom: 40px;
+
   p {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -236,6 +242,7 @@ export default defineComponent({
 .timeline-title {
   @apply pb-2 mb-4 text-ob-bright relative text-2xl;
   font-weight: 600;
+
   &:after {
     @apply absolute bottom-0 h-1 w-24 rounded-full;
     content: '';
@@ -246,9 +253,11 @@ export default defineComponent({
 
 .period {
   padding: 0;
+
   .timeline-info {
     display: none;
   }
+
   .timeline-marker {
     &:before {
       background: transparent;
@@ -263,17 +272,21 @@ export default defineComponent({
       border-top: 3px solid var(--text-normal);
       border-bottom: 3px solid var(--text-normal);
     }
+
     &:after {
       content: '';
       height: 32px;
       top: auto;
     }
   }
+
   .timeline-content {
     padding: 40px 0 70px;
   }
+
   .timeline-title {
     margin: 0;
+
     &:after {
       content: none;
     }
@@ -346,6 +359,7 @@ export default defineComponent({
       float: right;
       text-align: left;
       padding-left: 30px;
+
       .timeline-title {
         &:after {
           left: 0;
@@ -362,6 +376,7 @@ export default defineComponent({
       float: left;
       text-align: right;
       padding-right: 30px;
+
       .timeline-title {
         &:after {
           right: 0;

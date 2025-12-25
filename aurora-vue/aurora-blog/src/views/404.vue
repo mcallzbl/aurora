@@ -11,7 +11,7 @@
         </div>
       </div>
       <div class="right-section">
-        <svg class="svgimg" xmlns="http://www.w3.org/2000/svg" viewBox="51.5 -15.288 385 505.565">
+        <svg class="svgimg" viewBox="51.5 -15.288 385 505.565" xmlns="http://www.w3.org/2000/svg">
           <g class="bench-legs">
             <path
               d="M202.778,391.666h11.111v98.611h-11.111V391.666z M370.833,390.277h11.111v100h-11.111V390.277z M183.333,456.944h11.111
@@ -48,23 +48,23 @@
               d="M149.306,71.528c0,3.242-13.37,13.889-29.861,13.889S89.583,75.232,89.583,71.528c0-4.166,13.369-13.889,29.861-13.889
           S149.306,67.362,149.306,71.528z" />
             <radialGradient
-              class="light-gradient"
               id="SVGID_1_"
+              class="light-gradient"
               cx="119.676"
               cy="44.22"
-              r="65"
-              gradientUnits="userSpaceOnUse">
+              gradientUnits="userSpaceOnUse"
+              r="65">
               <stop offset="0%" style="stop-color: #ffffff; stop-opacity: 1" />
               <stop offset="50%" style="stop-color: #ededed; stop-opacity: 0.5">
                 <animate
                   attributeName="stop-opacity"
-                  values="0.0; 0.5; 0.0"
                   dur="5000ms"
-                  repeatCount="indefinite"></animate>
+                  repeatCount="indefinite"
+                  values="0.0; 0.5; 0.0"></animate>
               </stop>
               <stop offset="100%" style="stop-color: #ededed; stop-opacity: 0" />
             </radialGradient>
-            <circle class="lamp-light__glow" fill="url(#SVGID_1_)" cx="119.676" cy="44.22" r="65" />
+            <circle class="lamp-light__glow" cx="119.676" cy="44.22" fill="url(#SVGID_1_)" r="65" />
             <path
               class="lamp-bottom"
               d="M135.417,487.781c0,1.378-1.244,2.496-2.778,2.496H106.25c-1.534,0-2.778-1.118-2.778-2.496v-74.869
@@ -78,6 +78,7 @@
 
 <style lang="css" scoped>
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans');
+
 .left-section .inner-content {
   position: absolute;
   top: 50%;
@@ -99,6 +100,7 @@
   background: linear-gradient(var(--background-primary), var(--background-secondary));
   border-radius: 18px;
 }
+
 .background .ground {
   @apply shadow-xl;
   position: absolute;
@@ -109,6 +111,7 @@
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
 }
+
 @media (max-width: 770px) {
   .background .ground {
     height: 0vh;
@@ -126,6 +129,7 @@
   justify-content: space-around;
   border-radius: 18px;
 }
+
 @media (max-width: 770px) {
   .container {
     flex-direction: column;
@@ -141,6 +145,7 @@
 .left-section {
   width: 40%;
 }
+
 @media (max-width: 770px) {
   .left-section {
     width: 100%;
@@ -149,6 +154,7 @@
     top: 0;
   }
 }
+
 @media (max-width: 770px) {
   .left-section .inner-content {
     position: relative;
@@ -164,6 +170,7 @@
   padding: 0;
   text-shadow: 0 0 1rem #fefefe;
 }
+
 @media (max-width: 770px) {
   .heading {
     font-size: 7em;
@@ -180,6 +187,7 @@
   padding: 0 1rem;
   margin: 0 auto;
 }
+
 @media (max-width: 770px) {
   .subheading {
     font-size: 1.3em;
@@ -191,6 +199,7 @@
 .right-section {
   width: 50%;
 }
+
 @media (max-width: 770px) {
   .right-section {
     width: 100%;
@@ -208,32 +217,40 @@
   max-width: 100%;
   max-height: 100%;
 }
+
 @media (max-width: 770px) {
   .svgimg {
     padding: 0;
   }
 }
+
 .svgimg .bench-legs {
   fill: #0c0e10;
 }
+
 .svgimg .top-bench,
 .svgimg .bottom-bench {
   stroke: #0c0e10;
   stroke-width: 1px;
   fill: #5b3e2b;
 }
+
 .svgimg .bottom-bench path:nth-child(1) {
   fill: #432d20;
 }
+
 .svgimg .lamp-details {
   fill: #202425;
 }
+
 .svgimg .lamp-accent {
   fill: #2c3133;
 }
+
 .svgimg .lamp-bottom {
   fill: linear-gradient(#202425, #0c0e10);
 }
+
 .svgimg .lamp-light {
   fill: #efefef;
 }

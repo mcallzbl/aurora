@@ -2,79 +2,79 @@
   <div
     v-if="openModal"
     id="search-modal"
+    tabindex="-1"
     @keydown.esc="handleStatusChange(false)"
     @keydown.meta.k.stop.prevent="handleStatusChange(false)"
     @keydown.arrow-up.stop.prevent="handleArrowUp"
     @keydown.arrow-down.stop.prevent="handleArrowDown"
     @keydown.enter.stop.prevent="handleEnterDown"
-    @click.self="handleStatusChange(false)"
-    tabindex="-1">
-    <transition name="fade-bounce-pure-y" mode="out-in">
-      <div class="search-container" v-if="openSearchContainer">
+    @click.self="handleStatusChange(false)">
+    <transition mode="out-in" name="fade-bounce-pure-y">
+      <div v-if="openSearchContainer" class="search-container">
         <header class="flex pt-4 pr-4 pl-4">
-          <form class="search-form" action="">
+          <form action="" class="search-form">
             <label id="search-label" class="items-center flex justify-center" for="search-input">
               <svg
                 class="text-ob fill-current stroke-current"
-                width="32"
+                data-reactroot=""
+                fill="none"
                 height="32"
                 viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                data-reactroot="">
+                width="32"
+                xmlns="http://www.w3.org/2000/svg">
                 <path
-                  stroke-linejoin="round"
-                  stroke-linecap="round"
-                  stroke-width="1"
+                  d="M15.9996 15.2877L15.2925 15.9948L21.2958 21.9981L22.0029 21.291L15.9996 15.2877Z"
                   stroke=""
-                  d="M15.9996 15.2877L15.2925 15.9948L21.2958 21.9981L22.0029 21.291L15.9996 15.2877Z"></path>
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1"></path>
                 <path
-                  stroke-linejoin="round"
-                  stroke-linecap="round"
-                  stroke-width="1"
-                  stroke=""
+                  d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z"
                   fill="rgba(0,0,0,0)"
-                  d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z"></path>
+                  stroke=""
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1"></path>
               </svg>
             </label>
             <input
-              type="search"
               id="search-input"
               ref="searchInput"
-              class="search-input"
-              autocomplete="off"
               v-model="keywords"
+              autocomplete="off"
+              class="search-input"
+              type="search"
               @input="searchKeywords" />
             <button
               v-show="keywords.length > 0"
               class="search-btn"
-              type="reset"
               title="Clear the query"
+              type="reset"
               @click="handleResetInput"></button>
           </form>
         </header>
-        <div id="Search-Dropdown" class="search-dropdown" v-if="searchResults !== null">
+        <div v-if="searchResults !== null" id="Search-Dropdown" class="search-dropdown">
           <div>
             <section v-if="searchResults.length > 0">
               <div class="search-hit-label">Found {{ searchResults.length }} records</div>
               <ul id="search-menu">
                 <li
                   v-for="(result, index) in searchResults"
+                  :id="'search-hit-item-' + index"
                   :key="result.id"
                   :class="{
                     'search-hit': true,
                     active: index == menuActiveIndex
-                  }"
-                  :id="'search-hit-item-' + index">
+                  }">
                   <a href="javascript:void(0)" @click="handleLinkClick(result)">
                     <div class="search-hit-container">
                       <div class="search-hit-icon">
-                        <svg width="20" height="20" viewBox="0 0 20 20">
+                        <svg height="20" viewBox="0 0 20 20" width="20">
                           <path
                             d="M17 6v12c0 .52-.2 1-1 1H4c-.7 0-1-.33-1-1V2c0-.55.42-1 1-1h8l5 5zM14 8h-3.13c-.51 0-.87-.34-.87-.87V4"
-                            stroke="currentColor"
                             fill="none"
                             fill-rule="evenodd"
+                            stroke="currentColor"
                             stroke-linejoin="round"></path>
                         </svg>
                       </div>
@@ -83,11 +83,11 @@
                         <span class="search-hit-path" v-html="result.articleTitle"></span>
                       </div>
                       <div class="search-hit-action">
-                        <svg class="DocSearch-Hit-Select-Icon" width="20" height="20" viewBox="0 0 20 20">
+                        <svg class="DocSearch-Hit-Select-Icon" height="20" viewBox="0 0 20 20" width="20">
                           <g
-                            stroke="currentColor"
                             fill="none"
                             fill-rule="evenodd"
+                            stroke="currentColor"
                             stroke-linecap="round"
                             stroke-linejoin="round">
                             <path d="M18 3v4c0 2-2 4-4 4H2"></path>
@@ -107,21 +107,21 @@
               <ul id="search-menu">
                 <li
                   v-for="(result, index) in recentResults"
+                  :id="'search-hit-item-' + index"
                   :key="result.id"
                   :class="{
                     'search-hit': true,
                     active: index == menuActiveIndex
-                  }"
-                  :id="'search-hit-item-' + index">
+                  }">
                   <a href="javascript:void(0)" @click="handleLinkClick(result)">
                     <div class="search-hit-container">
                       <div class="search-hit-icon">
-                        <svg width="20" height="20" viewBox="0 0 20 20">
+                        <svg height="20" viewBox="0 0 20 20" width="20">
                           <path
                             d="M17 6v12c0 .52-.2 1-1 1H4c-.7 0-1-.33-1-1V2c0-.55.42-1 1-1h8l5 5zM14 8h-3.13c-.51 0-.87-.34-.87-.87V4"
-                            stroke="currentColor"
                             fill="none"
                             fill-rule="evenodd"
+                            stroke="currentColor"
                             stroke-linejoin="round"></path>
                         </svg>
                       </div>
@@ -130,11 +130,11 @@
                         <span class="search-hit-path" v-html="result.articleTitle"></span>
                       </div>
                       <div class="search-hit-action">
-                        <svg class="DocSearch-Hit-Select-Icon" width="20" height="20" viewBox="0 0 20 20">
+                        <svg class="DocSearch-Hit-Select-Icon" height="20" viewBox="0 0 20 20" width="20">
                           <g
-                            stroke="currentColor"
                             fill="none"
                             fill-rule="evenodd"
+                            stroke="currentColor"
                             stroke-linecap="round"
                             stroke-linejoin="round">
                             <path d="M18 3v4c0 2-2 4-4 4H2"></path>
@@ -149,21 +149,21 @@
             </section>
           </div>
         </div>
-        <div class="search-startscreen" v-else-if="!isEmpty">
+        <div v-else-if="!isEmpty" class="search-startscreen">
           <p>{{ t('settings.no-recent-search') }}</p>
         </div>
-        <div class="search-startscreen" v-else>
+        <div v-else class="search-startscreen">
           <p>{{ t('settings.no-search-result') }}</p>
         </div>
         <div class="search-footer">
           <div class="search-logo">
-            <a href="" target="_blank" rel="noopener noreferrer">
+            <a href="" rel="noopener noreferrer" target="_blank">
               <span class="search-label">{{ t('settings.searched-by') }}</span>
               <img
-                class="mr-1.5"
-                src="https://static.linhaojun.top/aurora/config/cc36e9fa5aeb214e41495c1e2268f2db.png"
                 alt="ObsidianNext Logo"
+                class="mr-1.5"
                 height="20"
+                src="https://static.linhaojun.top/aurora/config/cc36e9fa5aeb214e41495c1e2268f2db.png"
                 width="20" />
               <span class="text-ob">ElasticSearch</span>
             </a>
@@ -171,7 +171,7 @@
           <ul class="search-commands">
             <li>
               <span class="search-commands-key">
-                <svg width="15" height="15">
+                <svg height="15" width="15">
                   <g
                     fill="none"
                     stroke="currentColor"
@@ -188,7 +188,7 @@
             </li>
             <li>
               <span class="search-commands-key">
-                <svg width="15" height="15">
+                <svg height="15" width="15">
                   <g
                     fill="none"
                     stroke="currentColor"
@@ -200,7 +200,7 @@
                 </svg>
               </span>
               <span class="search-commands-key">
-                <svg width="15" height="15">
+                <svg height="15" width="15">
                   <g
                     fill="none"
                     stroke="currentColor"
@@ -217,7 +217,7 @@
             </li>
             <li>
               <span class="search-commands-key">
-                <svg width="15" height="15">
+                <svg height="15" width="15">
                   <g
                     fill="none"
                     stroke="currentColor"

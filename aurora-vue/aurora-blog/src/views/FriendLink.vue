@@ -11,7 +11,7 @@
             <el-row :gutter="36">
               <template v-for="link in links" :key="link.id">
                 <el-col :span="8" :xs="{ span: 20, offset: 2 }" class="mb-3">
-                  <el-card shadow="never" class="shadow-md">
+                  <el-card class="shadow-md" shadow="never">
                     <div class="block">
                       <el-avatar :size="60" :src="link.linkAvatar" />
                     </div>
@@ -44,9 +44,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, provide, computed, toRefs, onMounted } from 'vue'
+import { computed, defineComponent, onMounted, provide, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Sidebar, Profile } from '../components/Sidebar'
+import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { Comment } from '../components/Comment'
 import { useCommentStore } from '@/stores/comment'
@@ -138,11 +138,13 @@ export default defineComponent({
   display: inline-block;
   width: 24%;
 }
+
 .info {
   display: inline-block;
   width: 76%;
   height: 100%;
 }
+
 .link-name {
   margin-left: 20px;
   margin-bottom: 5px;
@@ -150,11 +152,13 @@ export default defineComponent({
   color: var(--text-normal);
   font-size: large;
 }
+
 .link-intro {
   margin-left: 20px;
   margin-bottom: 1px;
   color: var(--text-normal);
 }
+
 .el-card {
   background: var(--background-primary);
   border-radius: 10px;

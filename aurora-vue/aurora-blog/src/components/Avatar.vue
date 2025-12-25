@@ -1,14 +1,14 @@
 <template>
   <div class="flex-shrink-0">
     <div class="rounded-full ring-gray-100 overflow-hidden shaodw-lg w-9 xl:w-10">
-      <template v-if="url != null"> <img class="avatar-img" :src="url" alt="" /></template>
-      <template v-else><img class="avatar-img" :src="default" alt="" /></template>
+      <template v-if="url != null"><img :src="url" alt="" class="avatar-img" /></template>
+      <template v-else><img :src="default" alt="" class="avatar-img" /></template>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, computed } from 'vue'
+import { computed, defineComponent, toRefs } from 'vue'
 import { useAppStore } from '@/stores/app'
 
 export default defineComponent({
@@ -30,6 +30,7 @@ export default defineComponent({
   transition-duration: 800ms;
   transform: rotate(-360deg);
 }
+
 .avatar-img:hover {
   transform: rotate(360deg);
 }

@@ -1,15 +1,15 @@
 <template>
   <div class="flex flex-row items-center hover:opacity-50 mr-2 mb-2 cursor-pointer transition-all">
     <router-link
-      class="bg-ob-deep-900 text-center px-3 py-1 rounded-tl-md rounded-bl-md text-sm"
+      :style="stylingTag()"
       :to="{ path: '/article-list/' + id, query: { tagName: name } }"
-      :style="stylingTag()">
+      class="bg-ob-deep-900 text-center px-3 py-1 rounded-tl-md rounded-bl-md text-sm">
       <em class="opacity-50">#</em>
       {{ name }}
     </router-link>
     <span
-      class="bg-ob-deep-900 text-ob-secondary text-center px-2 py-1 rounded-tr-md rounded-br-md text-sm opacity-70"
-      :style="stylingTag()">
+      :style="stylingTag()"
+      class="bg-ob-deep-900 text-ob-secondary text-center px-2 py-1 rounded-tr-md rounded-br-md text-sm opacity-70">
       {{ count }}
     </span>
   </div>

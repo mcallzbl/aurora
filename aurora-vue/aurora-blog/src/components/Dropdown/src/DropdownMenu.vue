@@ -39,6 +39,7 @@ export default defineComponent({
 .dropdown-content-leave-active {
   transition: all 0.2s;
 }
+
 .dropdown-content-enter,
 .dropdown-content-leave-to {
   opacity: 0;

@@ -8,21 +8,21 @@
           <div class="flex justify-between mt-3 text-xs text-gray-400 space-x-3 md:space-x-16">
             <span>{{ comment.nickname }} | {{ time }}</span>
             <div>
-              <span @click="clickOnReply" class="cursor-pointer reply-button">Reply</span>
+              <span class="cursor-pointer reply-button" @click="clickOnReply">Reply</span>
             </div>
           </div>
         </div>
         <CommentReplyForm
           v-show="show"
-          :replyUserId="comment.userId"
           :initialContent="replyContent"
+          :replyUserId="comment.userId"
           @changeShow="changeShow" />
         <transition-group name="fade">
           <CommentReplyItem
             v-for="reply in comment.replyDTOs"
             :key="reply.id"
-            :reply="reply"
-            :commentUserId="comment.userId" />
+            :commentUserId="comment.userId"
+            :reply="reply" />
         </transition-group>
       </div>
     </div>
@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs, provide } from 'vue'
+import { defineComponent, provide, reactive, toRefs } from 'vue'
 import Avatar from '@/components/Avatar.vue'
 import CommentReplyItem from './CommentReplyItem.vue'
 import CommentReplyForm from './CommentReplyForm.vue'
@@ -85,12 +85,15 @@ export default defineComponent({
   left: -8px;
   top: 14px;
 }
+
 .reply {
   background: var(--background-primary);
 }
+
 .reply-button {
   color: var(--text-accent);
 }
+
 .commentContent {
   line-height: 26px;
   white-space: pre-line;

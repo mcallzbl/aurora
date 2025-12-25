@@ -1,5 +1,5 @@
 <template>
-  <transition name="fade-bounce-y" mode="out-in">
+  <transition mode="out-in" name="fade-bounce-y">
     <div v-show="showDia" id="bot-container">
       <div id="Aurora-Dia--body" :style="cssVariables">
         <div id="Aurora-Dia--tips-wrapper">
@@ -69,6 +69,7 @@ export default defineComponent({
   width: 70px;
   height: 60px;
 }
+
 #Aurora-Dia--body {
   position: relative;
   display: flex;
@@ -95,6 +96,7 @@ export default defineComponent({
   --aurora-dia--linear-gradient-hover: linear-gradient(to bottom, #25b0cc, #3f60de);
   --aurora-dia--platform-light: #b712ac;
 }
+
 .Aurora-Dia {
   position: absolute;
   bottom: 30px;
@@ -107,6 +109,7 @@ export default defineComponent({
   cursor: pointer;
   z-index: 1;
 }
+
 .Aurora-Dia::before {
   content: '';
   position: absolute;
@@ -121,6 +124,7 @@ export default defineComponent({
   opacity: 1;
   transition: 0.3s linear all;
 }
+
 .Aurora-Dia.active {
   animation: deactivate 0.75s linear, bounce-then-breathe 5s linear infinite;
 }
@@ -135,12 +139,15 @@ export default defineComponent({
   box-shadow: 0 0 7px rgba(255, 255, 255, 0.5);
   animation: blink 5s linear infinite;
 }
+
 .Aurora-Dia--eyes > .Aurora-Dia--eye.left {
   left: 25%;
 }
+
 .Aurora-Dia--eyes > .Aurora-Dia--eye.right {
   right: 25%;
 }
+
 .Aurora-Dia--eyes.moving > .Aurora-Dia--eye {
   animation: none;
 }
@@ -152,7 +159,7 @@ export default defineComponent({
   width: var(--auora-dia--platform-size);
   height: var(--auora-dia--platform-size);
   box-shadow: 0 0 var(--auora-dia--platform-size) var(--aurora-dia--platform-light),
-    0 0 15px var(--aurora-dia--platform-light) inset;
+  0 0 15px var(--aurora-dia--platform-light) inset;
   animation: jump-pulse 3s linear infinite;
 }
 
@@ -166,14 +173,17 @@ export default defineComponent({
   height: var(--auora-dia--hover-height);
   transform: translateY(-7px);
 }
+
 .Aurora-Dia:hover::before {
   background: var(--aurora-dia--linear-gradient-hover);
 }
+
 .Aurora-Dia:hover,
 .Aurora-Dia:hover > .Aurora-Dia--eyes > .Aurora--Dia-eye {
   border-color: var(--text-accent);
   box-shadow: 0 0 5px var(--text-accent);
 }
+
 .Aurora-Dia:hover + .Aurora-Dia--platform {
   box-shadow: 0 0 var(--auora-dia--platform-size) var(--text-accent), 0 0 15px var(--text-accent) inset;
   animation: shake-pulse 0.5s linear;

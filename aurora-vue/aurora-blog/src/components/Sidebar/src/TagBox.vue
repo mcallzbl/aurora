@@ -3,7 +3,7 @@
     <SubTitle :title="'titles.tag_list'" icon="tag" />
     <TagList>
       <template v-if="tags != '' && tags.length > 0">
-        <TagItem v-for="tag in tags" :key="tag.id" :id="tag.id" :name="tag.tagName" :count="tag.count" size="xs" />
+        <TagItem v-for="tag in tags" :id="tag.id" :key="tag.id" :count="tag.count" :name="tag.tagName" size="xs" />
         <div class="flex flex-row items-center hover:opacity-50 mr-2 mb-2 cursor-pointer transition-all">
           <span class="text-center px-3 py-1 rounded-md text-sm">
             <b class="border-b-2 border-ob hover:text-ob">
@@ -20,7 +20,7 @@
 import { defineComponent, onMounted, toRef } from 'vue'
 import { SubTitle } from '@/components/Title'
 import { useTagStore } from '@/stores/tag'
-import { TagList, TagItem } from '@/components/Tag'
+import { TagItem, TagList } from '@/components/Tag'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/api'
 

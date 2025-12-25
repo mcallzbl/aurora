@@ -9,28 +9,28 @@
         <ob-skeleton
           v-else
           class="post-title text-white uppercase"
-          width="100%"
-          height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)" />
+          height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)"
+          width="100%" />
       </div>
       <div class="main-grid">
         <div class="relative">
-          <div v-if="about" class="post-html" ref="postRef" v-html="about" />
+          <div v-if="about" ref="postRef" class="post-html" v-html="about" />
           <div v-else class="bg-ob-deep-800 px-14 py-16 rounded-2xl shadow-xl block min-h-screen">
-            <ob-skeleton tag="div" :count="1" height="36px" width="150px" class="mb-6" />
+            <ob-skeleton :count="1" class="mb-6" height="36px" tag="div" width="150px" />
             <br />
-            <ob-skeleton tag="div" :count="35" height="16px" width="100px" class="mr-2" />
+            <ob-skeleton :count="35" class="mr-2" height="16px" tag="div" width="100px" />
             <br />
             <br />
-            <ob-skeleton tag="div" :count="25" height="16px" width="100px" class="mr-2" />
+            <ob-skeleton :count="25" class="mr-2" height="16px" tag="div" width="100px" />
           </div>
           <Comment />
         </div>
         <div class="col-span-1">
           <Sidebar>
             <Profile author="blog-author" />
-            <Sticky :stickyTop="32" endingElId="footer" dynamicElClass="#sticky-sidebar">
+            <Sticky :stickyTop="32" dynamicElClass="#sticky-sidebar" endingElId="footer">
               <div id="sticky-sidebar">
-                <transition name="fade-slide-y" mode="out-in">
+                <transition mode="out-in" name="fade-slide-y">
                   <div class="sidebar-box mb-4">
                     <SubTitle :title="'titles.toc'" icon="toc" />
                     <div id="toc2"></div>
@@ -47,10 +47,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, toRefs, ref, reactive, nextTick, provide, computed } from 'vue'
+import { computed, defineComponent, nextTick, onMounted, onUnmounted, provide, reactive, ref, toRefs } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { useI18n } from 'vue-i18n'
-import { Sidebar, Profile, Navigator } from '@/components/Sidebar'
+import { Navigator, Profile, Sidebar } from '@/components/Sidebar'
 import { useCommonStore } from '@/stores/common'
 import { useCommentStore } from '@/stores/comment'
 import Sticky from '@/components/Sticky.vue'
@@ -131,14 +131,14 @@ export default defineComponent({
         headingSelector: 'h1, h2, h3',
         collapseDepth: 3,
         disableTocScrollSync: true,
-        onClick: function (e) {
+        onClick: function(e) {
           e.preventDefault()
         }
       })
       const imgs = postRef.value.getElementsByTagName('img')
       for (var i = 0; i < imgs.length; i++) {
         reactiveData.images.push(imgs[i].src)
-        imgs[i].addEventListener('click', function (e: any) {
+        imgs[i].addEventListener('click', function(e: any) {
           handlePreview(e.target.currentSrc)
         })
       }
@@ -195,20 +195,24 @@ export default defineComponent({
   font-size: clamp(1.2rem, calc(1rem + 3.5vw), 4rem);
   text-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
 }
+
 .post-stats {
   @apply w-full flex flex-row text-sm lg:text-base mb-6;
   span {
     @apply text-white stroke-current flex flex-row items-center pr-4;
   }
 }
+
 .post-html {
   word-wrap: break-word;
   word-break: break-all;
 }
+
 #toc2 {
   max-height: 470px;
   overflow: hidden scroll;
 }
+
 #toc2 > ol {
   list-style: none;
   counter-reset: li;
@@ -219,9 +223,11 @@ export default defineComponent({
     &.is-active-li > .node-name--H1 {
       @apply text-ob;
     }
+
     &.is-active-li > .node-name--H2 {
       @apply text-ob;
     }
+
     &.is-active-li > .node-name--H3 {
       @apply text-ob;
     }
@@ -230,15 +236,19 @@ export default defineComponent({
   ol li {
     @apply font-medium mt-1.5 mb-1.5;
     padding-left: 1.5rem;
+
     &.is-active-li > .node-name--H2 {
       @apply text-ob;
     }
+
     &.is-active-li > .node-name--H3 {
       @apply text-ob;
     }
+
     ol li {
       @apply font-medium mt-1.5 mb-1.5;
       padding-left: 1.5rem;
+
       &.is-active-li .node-name--H3 {
         @apply text-ob;
       }

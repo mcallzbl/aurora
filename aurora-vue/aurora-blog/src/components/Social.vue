@@ -1,58 +1,58 @@
 <template>
   <ul class="flex flex-row justify-evenly flex-wrap w-full py-4 px-2 text-center items-center">
-    <a :href="websiteConfig.github" target="_blank" ref="github" v-if="websiteConfig.github">
+    <a v-if="websiteConfig.github" ref="github" :href="websiteConfig.github" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="github" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="github" />
       </li>
     </a>
-    <a :href="websiteConfig.gitee" target="_blank" ref="github" v-if="websiteConfig.gitee">
+    <a v-if="websiteConfig.gitee" ref="github" :href="websiteConfig.gitee" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="gitee" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="gitee" />
       </li>
     </a>
-    <a :href="websiteConfig.twitter" target="_blank" ref="twitter" v-if="websiteConfig.twitter">
+    <a v-if="websiteConfig.twitter" ref="twitter" :href="websiteConfig.twitter" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="twitter" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="twitter" />
       </li>
     </a>
-    <a :href="websiteConfig.stackoverflow" target="_blank" ref="stackoverflow" v-if="websiteConfig.stackoverflow">
+    <a v-if="websiteConfig.stackoverflow" ref="stackoverflow" :href="websiteConfig.stackoverflow" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="stackoverflow" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="stackoverflow" />
       </li>
     </a>
-    <a :href="websiteConfig.wechat" target="_blank" ref="wechat" v-if="websiteConfig.wechat">
+    <a v-if="websiteConfig.wechat" ref="wechat" :href="websiteConfig.wechat" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="wechat" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="wechat" />
       </li>
     </a>
-    <a :href="websiteConfig.qq" target="_blank" ref="qq" v-if="websiteConfig.qq">
+    <a v-if="websiteConfig.qq" ref="qq" :href="websiteConfig.qq" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="qq" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="qq" />
       </li>
     </a>
-    <a :href="websiteConfig.weibo" target="_blank" ref="weibo" v-if="websiteConfig.weibo">
+    <a v-if="websiteConfig.weibo" ref="weibo" :href="websiteConfig.weibo" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="weibo" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="weibo" />
       </li>
     </a>
-    <a :href="websiteConfig.csdn" target="_blank" ref="csdn" v-if="websiteConfig.csdn">
+    <a v-if="websiteConfig.csdn" ref="csdn" :href="websiteConfig.csdn" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="csdn" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="csdn" />
       </li>
     </a>
-    <a :href="websiteConfig.zhihu" target="_blank" ref="zhifu" v-if="websiteConfig.zhihu">
+    <a v-if="websiteConfig.zhihu" ref="zhifu" :href="websiteConfig.zhihu" target="_blank">
       <li class="diamond-clip-path diamond-icon">
-        <svg-icon icon-class="zhifu" class="fill-current" />
+        <svg-icon class="fill-current" icon-class="zhifu" />
       </li>
     </a>
-    <a :href="websiteConfig.juejin" target="_blank" ref="juejin" v-if="websiteConfig.juejin">
+    <a v-if="websiteConfig.juejin" ref="juejin" :href="websiteConfig.juejin" target="_blank">
       <li class="diamond-clip-path diamond-icon">掘</li>
     </a>
   </ul>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRefs, toRef } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { useAppStore } from '@/stores/app'
 
 export default defineComponent({

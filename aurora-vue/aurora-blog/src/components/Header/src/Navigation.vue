@@ -2,43 +2,43 @@
   <nav class="items-center flex-1 hidden lg:flex">
     <ul class="flex flex-row list-none px-6 text-white">
       <li
-        class="not-italic font-medium text-xs h-full relative flex flex-col items-center justify-center cursor-pointer text-center py-4 px-2"
         v-for="route in routes"
-        :key="route.path">
+        :key="route.path"
+        class="not-italic font-medium text-xs h-full relative flex flex-col items-center justify-center cursor-pointer text-center py-4 px-2">
         <div
-          class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase cursor-pointer"
-          @click="pushPage(route.path)"
           v-if="route.children && route.children.length === 0"
-          :data-menu="route.name">
-          <span class="relative z-50" v-if="$i18n.locale === 'cn' && route.i18n.cn">
+          :data-menu="route.name"
+          class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase cursor-pointer"
+          @click="pushPage(route.path)">
+          <span v-if="$i18n.locale === 'cn' && route.i18n.cn" class="relative z-50">
             {{ route.i18n.cn }}
           </span>
-          <span class="relative z-50" v-else-if="$i18n.locale === 'en' && route.i18n.en">
+          <span v-else-if="$i18n.locale === 'en' && route.i18n.en" class="relative z-50">
             {{ route.i18n.en }}
           </span>
-          <span class="relative z-50" v-else>{{ route.name }}</span>
+          <span v-else class="relative z-50">{{ route.name }}</span>
         </div>
         <Dropdown
-          @command="pushPage"
-          hover
           v-else
-          class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase">
-          <span class="relative z-50" v-if="$i18n.locale === 'cn' && route.i18n.cn">
+          class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase"
+          hover
+          @command="pushPage">
+          <span v-if="$i18n.locale === 'cn' && route.i18n.cn" class="relative z-50">
             {{ route.i18n.cn }}
           </span>
-          <span class="relative z-50" v-else-if="$i18n.locale === 'en' && route.i18n.en">
+          <span v-else-if="$i18n.locale === 'en' && route.i18n.en" class="relative z-50">
             {{ route.i18n.en }}
           </span>
-          <span class="relative z-50" v-else>{{ route.name }}</span>
+          <span v-else class="relative z-50">{{ route.name }}</span>
           <DropdownMenu>
             <DropdownItem v-for="sub in route.children" :key="sub.path" :name="sub.path">
-              <span class="relative z-50" v-if="$i18n.locale === 'cn' && sub.i18n.cn">
+              <span v-if="$i18n.locale === 'cn' && sub.i18n.cn" class="relative z-50">
                 {{ sub.i18n.cn }}
               </span>
-              <span class="relative z-50" v-else-if="$i18n.locale === 'en' && sub.i18n.en">
+              <span v-else-if="$i18n.locale === 'en' && sub.i18n.en" class="relative z-50">
                 {{ sub.i18n.en }}
               </span>
-              <span class="relative z-50" v-else>{{ sub.name }}</span>
+              <span v-else class="relative z-50">{{ sub.name }}</span>
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
@@ -46,12 +46,12 @@
       <li
         class="not-italic font-medium text-xs h-full relative flex flex-col items-center justify-center cursor-pointer text-center py-4 px-2"
         data-menu="PhotoAlbums">
-        <Dropdown hover class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase">
-          <span class="relative z-50" v-if="$i18n.locale === 'cn'"> 相册 </span>
-          <span class="relative z-50" v-else-if="$i18n.locale === 'en'"> PhotoAlbums </span>
+        <Dropdown class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase" hover>
+          <span v-if="$i18n.locale === 'cn'" class="relative z-50"> 相册 </span>
+          <span v-else-if="$i18n.locale === 'en'" class="relative z-50"> PhotoAlbums </span>
           <DropdownMenu>
             <template v-for="item in albums" :key="item.id">
-              <DropdownItem @click="pushPage(`/photos/${item.id}`)" :name="item.albumName">
+              <DropdownItem :name="item.albumName" @click="pushPage(`/photos/${item.id}`)">
                 <span class="relative z-50">{{ item.albumName }}</span>
               </DropdownItem>
             </template>
@@ -64,10 +64,10 @@
 
 <script lang="ts">
 // @ts-nocheck
-import { defineComponent, onMounted, reactive, toRef, toRefs } from 'vue'
+import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Dropdown, DropdownMenu, DropdownItem } from '@/components/Dropdown'
+import { Dropdown, DropdownItem, DropdownMenu } from '@/components/Dropdown'
 import { isExternal } from '@/utils/validate'
 import config from '@/config/config'
 import api from '@/api/api'
@@ -119,6 +119,7 @@ export default defineComponent({
       @apply opacity-60;
     }
   }
+
   &:before {
     @apply absolute rounded-lg opacity-0 transition bg-ob-deep-800 z-40;
     content: '';

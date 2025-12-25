@@ -124,12 +124,12 @@ export default defineComponent({
         const endingPos =
           endingEl && endingEl instanceof HTMLElement
             ? documentHeight -
-              scrollTop -
-              height -
-              this.stickyTop -
-              this.stickyBottom -
-              endingEl.getBoundingClientRect().height -
-              endingElSpacing
+            scrollTop -
+            height -
+            this.stickyTop -
+            this.stickyBottom -
+            endingEl.getBoundingClientRect().height -
+            endingElSpacing
             : documentHeight
 
         if (offsetTop < this.stickyTop) {

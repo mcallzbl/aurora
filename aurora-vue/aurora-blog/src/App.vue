@@ -2,16 +2,16 @@
   <div id="App-Wrapper" :class="[appWrapperClass, theme]" :style="wrapperStyle">
     <div
       id="App-Container"
+      :style="cssVariables"
       class="app-container max-w-10/12 lg:max-w-screen-2xl px-3 lg:px-8"
-      @keydown.meta.k.stop.prevent=""
       tabindex="-1"
-      :style="cssVariables">
+      @keydown.meta.k.stop.prevent="">
       <HeaderMain />
-      <div class="app-banner app-banner-image" :style="headerImage" />
-      <div class="app-banner app-banner-screen" :style="headerBaseBackground" />
+      <div :style="headerImage" class="app-banner app-banner-image" />
+      <div :style="headerBaseBackground" class="app-banner app-banner-screen" />
       <div class="relative z-10">
         <router-view v-slot="{ Component }">
-          <transition name="fade-slide-y" mode="out-in">
+          <transition mode="out-in" name="fade-slide-y">
             <component :is="Component" />
           </transition>
         </router-view>
@@ -20,7 +20,7 @@
     <div id="loading-bar-wrapper" :class="loadingBarClass"></div>
   </div>
   <Footer id="footer" :style="cssVariables" />
-  <div class="App-Mobile-sidebar" v-if="isMobile">
+  <div v-if="isMobile" class="App-Mobile-sidebar">
     <div id="App-Mobile-Profile" class="App-Mobile-wrapper">
       <MobileMenu />
     </div>
@@ -46,6 +46,7 @@ import AuroraNavigator from '@/components/AuroraNavigator.vue'
 import UserCenter from '@/components/UserCenter.vue'
 import api from './api/api'
 import defaultCover from '@/assets/default-cover.jpg'
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -137,21 +138,21 @@ export default defineComponent({
         return
       }
       // 获取 head 标签
-      var head = document.getElementsByTagName('head')[0];
+      var head = document.getElementsByTagName('head')[0]
       // 获取当前 favicon 元素
-      var favicon = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      var favicon = document.querySelector('link[rel*=\'icon\']') || document.createElement('link')
       // Cast favicon to HTMLLinkElement
-      var faviconLink = favicon as HTMLLinkElement;
+      var faviconLink = favicon as HTMLLinkElement
 
-      faviconLink.type = 'image/x-icon';
-      faviconLink.rel = 'shortcut icon';
+      faviconLink.type = 'image/x-icon'
+      faviconLink.rel = 'shortcut icon'
 
       // 设置新的 favicon 地址
-      faviconLink.href = faviconUrl;
+      faviconLink.href = faviconUrl
 
       // 如果当前 head 标签中不存在 favicon 元素，则将新的 favicon 添加到 head 标签中
-      if (!document.querySelector("link[rel*='icon']")) {
-          head.appendChild(faviconLink);
+      if (!document.querySelector('link[rel*=\'icon\']')) {
+        head.appendChild(faviconLink)
       }
     }
     return {
@@ -193,7 +194,8 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style lang="css">
+@reference "./styles/index.css"
 .arrow-left > .icon,
 .arrow-right > .icon {
   display: inline !important;
@@ -201,12 +203,15 @@ export default defineComponent({
 .img-error {
   display: none !important;
 }
+
 .el-drawer {
   background-color: var(--background-primary) !important;
 }
+
 .el-dialog {
   background-color: var(--background-primary) !important;
 }
+
 body {
   background: var(--background-primary-alt);
 }
@@ -218,12 +223,14 @@ body {
 #app {
   @apply relative min-w-full min-h-screen h-full;
   font-family: Rubik, Avenir, Helvetica, Arial, sans-serif;
+
   .app-wrapper {
     @apply bg-ob-deep-900 min-w-full h-full pb-12;
     transition-property: transform, border-radius;
     transition-duration: 350ms;
     transition-timing-function: ease;
     transform-origin: 0 42%;
+
     .app-container {
       color: var(--text-normal);
       margin: 0 auto;
@@ -240,6 +247,7 @@ body {
   .App-Mobile-sidebar {
     @apply fixed top-0 bottom-0 left-0;
   }
+
   .App-Mobile-wrapper {
     @apply relative overflow-y-auto h-full -mr-4 pr-6 pl-4 pt-8 opacity-0;
     transition: all 0.85s cubic-bezier(0, 1.8, 1, 1.2);

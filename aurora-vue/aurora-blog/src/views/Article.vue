@@ -3,13 +3,13 @@
     <div class="main-grid">
       <div class="post-header">
         <span class="post-labels">
-          <ob-skeleton v-if="loading" tag="b" height="20px" width="35px" />
+          <ob-skeleton v-if="loading" height="20px" tag="b" width="35px" />
           <b v-else-if="!loading && article.categoryName">
             <span>{{ article.categoryName }}</span>
           </b>
           <b v-else>{{ t('settings.default-category') }}</b>
           <ul>
-            <ob-skeleton v-if="loading" :count="2" tag="li" height="16px" width="35px" class="mr-2" />
+            <ob-skeleton v-if="loading" :count="2" class="mr-2" height="16px" tag="li" width="35px" />
             <template v-else-if="!loading && article.tags && article.tags.length > 0">
               <li v-for="tag in article.tags" :key="tag.id">
                 <em class="opacity-50">#</em>
@@ -30,14 +30,14 @@
         <ob-skeleton
           v-else
           class="post-title text-white uppercase"
-          width="100%"
-          height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)" />
+          height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)"
+          width="100%" />
         <div class="flex flex-row items-center justify-start mt-8 mb-4">
-          <div class="post-footer" v-if="article.author">
+          <div v-if="article.author" class="post-footer">
             <img
-              class="hover:opacity-50 cursor-pointer"
               v-lazy="article.author.avatar || ''"
               alt="author avatar"
+              class="hover:opacity-50 cursor-pointer"
               @click="handleAuthorClick(article.author.website)" />
             <span class="text-white opacity-80">
               <strong
@@ -51,15 +51,15 @@
               </span>
             </span>
           </div>
-          <div class="post-footer" v-else>
+          <div v-else class="post-footer">
             <div class="flex flex-row items-center">
-              <ob-skeleton class="mr-2" height="28px" width="28px" :circle="true" />
+              <ob-skeleton :circle="true" class="mr-2" height="28px" width="28px" />
               <span class="text-ob-dim mt-1">
                 <ob-skeleton height="20px" width="150px" />
               </span>
             </div>
           </div>
-          <div class="post-stats" v-if="wordNum !== '' && readTime !== ''">
+          <div v-if="wordNum !== '' && readTime !== ''" class="post-stats">
             <span>
               <svg-icon icon-class="text-outline" style="stroke: white" />
               <span class="pl-2 opacity-70">
@@ -77,13 +77,13 @@
             <span>
               <svg-icon icon-class="clock" />
               <span class="pl-2">
-                <ob-skeleton width="40px" height="16px" />
+                <ob-skeleton height="16px" width="40px" />
               </span>
             </span>
             <span>
               <svg-icon icon-class="text" />
               <span class="pl-2">
-                <ob-skeleton width="40px" height="16px" />
+                <ob-skeleton height="16px" width="40px" />
               </span>
             </span>
           </div>
@@ -94,25 +94,25 @@
       <div>
         <template v-if="article.articleContent">
           <div class="post-html">
-            <div class="markdown-body" ref="articleRef" v-html="article.articleContent" />
+            <div ref="articleRef" class="markdown-body" v-html="article.articleContent" />
           </div>
         </template>
         <div v-else class="bg-ob-deep-800 px-14 py-16 rounded-2xl shadow-xl block min-h-screen">
-          <ob-skeleton tag="div" :count="1" height="36px" width="150px" class="mb-6" />
+          <ob-skeleton :count="1" class="mb-6" height="36px" tag="div" width="150px" />
           <br />
-          <ob-skeleton tag="div" :count="35" height="16px" width="100px" class="mr-2" />
+          <ob-skeleton :count="35" class="mr-2" height="16px" tag="div" width="100px" />
           <br />
           <br />
-          <ob-skeleton tag="div" :count="25" height="16px" width="100px" class="mr-2" />
+          <ob-skeleton :count="25" class="mr-2" height="16px" tag="div" width="100px" />
         </div>
         <div class="flex flex-col lg:flex-row justify-start items-end my-8 my-gap">
-          <div class="w-full h-full self-stretch mr-0 lg:mr-4" v-if="preArticleCard">
-            <SubTitle title="settings.paginator.pre" icon="arrow-left-circle" />
-            <ArticleCard class="pre-and-next-article" :data="preArticleCard" />
+          <div v-if="preArticleCard" class="w-full h-full self-stretch mr-0 lg:mr-4">
+            <SubTitle icon="arrow-left-circle" title="settings.paginator.pre" />
+            <ArticleCard :data="preArticleCard" class="pre-and-next-article" />
           </div>
-          <div class="w-full h-full self-stretch mt-0" v-if="nextArticleCard">
-            <SubTitle title="settings.paginator.next" :side="!isMobile ? 'right' : 'left'" icon="arrow-right-circle" />
-            <ArticleCard class="pre-and-next-article" :data="nextArticleCard" />
+          <div v-if="nextArticleCard" class="w-full h-full self-stretch mt-0">
+            <SubTitle :side="!isMobile ? 'right' : 'left'" icon="arrow-right-circle" title="settings.paginator.next" />
+            <ArticleCard :data="nextArticleCard" class="pre-and-next-article" />
           </div>
         </div>
         <Comment />
@@ -120,9 +120,9 @@
       <div>
         <Sidebar>
           <Profile />
-          <Sticky :stickyTop="32" endingElId="footer" dynamicElClass="#sticky-sidebar">
+          <Sticky :stickyTop="32" dynamicElClass="#sticky-sidebar" endingElId="footer">
             <div id="sticky-sidebar">
-              <transition name="fade-slide-y" mode="out-in">
+              <transition mode="out-in" name="fade-slide-y">
                 <div class="sidebar-box mb-4">
                   <SubTitle :title="'titles.toc'" icon="toc" />
                   <div id="toc1"></div>
@@ -138,20 +138,20 @@
 </template>
 
 <script lang="ts">
-import { Sidebar, Profile, Navigator } from '@/components/Sidebar'
+import { Navigator, Profile, Sidebar } from '@/components/Sidebar'
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   nextTick,
-  onUnmounted,
   onMounted,
+  onUnmounted,
+  provide,
   reactive,
   ref,
-  toRefs,
-  provide,
-  getCurrentInstance
+  toRefs
 } from 'vue'
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Comment } from '@/components/Comment'
 import { SubTitle } from '@/components/Title'
@@ -262,14 +262,14 @@ export default defineComponent({
         headingSelector: 'h1, h2, h3',
         collapseDepth: 3,
         disableTocScrollSync: true,
-        onClick: function (e) {
+        onClick: function(e) {
           e.preventDefault()
         }
       })
       const imgs = articleRef.value.getElementsByTagName('img')
       for (var i = 0; i < imgs.length; i++) {
         reactiveData.images.push(imgs[i].src)
-        imgs[i].addEventListener('click', function (e: any) {
+        imgs[i].addEventListener('click', function(e: any) {
           handlePreview(e.target.currentSrc)
         })
       }
@@ -382,10 +382,12 @@ export default defineComponent({
   word-wrap: break-word;
   word-break: break-all;
 }
+
 #toc1 {
   max-height: 470px;
   overflow: hidden scroll;
 }
+
 #toc1 > ol {
   list-style: none;
   counter-reset: li;
@@ -396,9 +398,11 @@ export default defineComponent({
     &.is-active-li > .node-name--H1 {
       @apply text-ob;
     }
+
     &.is-active-li > .node-name--H2 {
       @apply text-ob;
     }
+
     &.is-active-li > .node-name--H3 {
       @apply text-ob;
     }
@@ -407,15 +411,19 @@ export default defineComponent({
   ol li {
     @apply font-medium mt-1.5 mb-1.5;
     padding-left: 1.5rem;
+
     &.is-active-li > .node-name--H2 {
       @apply text-ob;
     }
+
     &.is-active-li > .node-name--H3 {
       @apply text-ob;
     }
+
     ol li {
       @apply font-medium mt-1.5 mb-1.5;
       padding-left: 1.5rem;
+
       &.is-active-li .node-name--H3 {
         @apply text-ob;
       }
@@ -462,6 +470,7 @@ export default defineComponent({
     border-left: 2px solid var(--text-accent);
   }
 }
+
 .pre-and-next-article {
   .article-content {
     p {
@@ -471,11 +480,13 @@ export default defineComponent({
       -webkit-line-clamp: 5;
       -webkit-box-orient: vertical;
     }
+
     .article-footer {
       margin-top: 13px;
     }
   }
 }
+
 .markdown-body .hljs-center {
   text-align: center;
   display: flex;

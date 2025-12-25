@@ -1,5 +1,5 @@
 <template>
-  <div id="footer" class="relative w-full pt-1" :style="gradientBackground">
+  <div id="footer" :style="gradientBackground" class="relative w-full pt-1">
     <span class="bg-ob-deep-900 flex justify-center">
       <div
         class="bg-ob-deep-900 rounded-lg max-w-10/12 lg:max-w-screen-2xl text-sm text-ob-normal w-full py-6 px-6 grid grid-rows-1 lg:grid-rows-none lg:grid-cols-4 justify-center items-center gap-8 h-36 mx-auto">
@@ -10,13 +10,15 @@
               Copyright © 2022 - {{ currentYear }}
               <b class="font-extrabold">&nbsp;{{ websiteConfig.author }}</b>
             </li>
-            <li v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined" class="flex flex-row mx-auto">
+            <li v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined"
+                class="flex flex-row mx-auto">
               <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11011402013558" target="_blank">
-                <img src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float:left;"/> &nbsp;
+                <img src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float:left;" /> &nbsp;
                 <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.gonganBeianNumber }} </b>
               </a>
             </li>
-            <li v-if="websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined" class="flex flex-row mx-auto">
+            <li v-if="websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined"
+                class="flex flex-row mx-auto">
               <a href="https://beian.miit.gov.cn/" target="_blank">
                 <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.beianNumber }} </b>
               </a>

@@ -1,10 +1,10 @@
 <template>
   <Toggle :status="defaultStatus" @changeStatus="handleChange">
     <template v-if="theme === 'theme-light'">
-      <svg-icon icon-class="sun" :style="svg" />
+      <svg-icon :style="svg" icon-class="sun" />
     </template>
     <template v-else>
-      <svg-icon icon-class="moon" :style="svg" />
+      <svg-icon :style="svg" icon-class="moon" />
     </template>
   </Toggle>
 </template>
@@ -21,7 +21,7 @@ export default defineComponent({
   },
   setup() {
     const appStore = useAppStore()
-    let defaultStatus = appStore.themeConfig.theme === 'theme-dark' ? true : false
+    let defaultStatus = appStore.themeConfig.theme === 'theme-dark'
     const svgStyle = reactive({
       fill: 'yellow',
       margin: '5.5px 3px 2px 5.5px'

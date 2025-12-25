@@ -4,8 +4,8 @@
     </CommentItem>
   </transition-group>
   <button
-    class="load-more-button mt-7 w-32 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex mx-auto"
-    v-if="haveMore">
+    v-if="haveMore"
+    class="load-more-button mt-7 w-32 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex mx-auto">
     <span class="text-center flex-grow" @click="loadMore">Load More</span>
   </button>
 </template>

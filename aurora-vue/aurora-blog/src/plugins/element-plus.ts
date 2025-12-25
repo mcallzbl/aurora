@@ -1,20 +1,21 @@
 import {
-  ElNotification,
-  ElDrawer,
-  ElRow,
-  ElCol,
-  ElCard,
-  ElSpace,
   ElAvatar,
-  ElImage,
-  ElUpload,
+  ElButton,
+  ElCard,
+  ElCol,
+  ElDialog,
+  ElDrawer,
   ElForm,
   ElFormItem,
+  ElImage,
   ElInput,
+  ElNotification,
+  ElRow,
+  ElSpace,
   ElSwitch,
-  ElButton,
-  ElDialog
+  ElUpload
 } from 'element-plus'
+
 export const components: any[] = [
   ElNotification,
   ElDrawer,

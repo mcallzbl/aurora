@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-start self-stretch relative" @click="handleClick">
     <div class="flex flex-col relative py-4 z-10 text-white font-medium ob-drop-shadow cursor-pointer" @click="">
-      <span class="flex text-3xl" v-if="websiteConfig.name">
+      <span v-if="websiteConfig.name" class="flex text-3xl">
         {{ websiteConfig.name }}
       </span>
       <span v-else class="flex text-3xl animation-text">LOADING</span>
@@ -9,7 +9,7 @@
         {{ websiteConfig.englishName || 'BLOG' }}
       </span>
     </div>
-    <img class="logo-image" :src="websiteConfig.logo" alt="site-logo" />
+    <img :src="websiteConfig.logo" alt="site-logo" class="logo-image" />
   </div>
 </template>
 

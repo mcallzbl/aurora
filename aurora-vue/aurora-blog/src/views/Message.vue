@@ -20,9 +20,9 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs, computed, provide } from 'vue'
+import { computed, defineComponent, onMounted, provide, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Sidebar, Profile } from '../components/Sidebar'
+import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { Comment } from '../components/Comment'
 import { useCommentStore } from '@/stores/comment'

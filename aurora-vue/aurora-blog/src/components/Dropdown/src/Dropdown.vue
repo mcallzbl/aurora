@@ -1,10 +1,10 @@
 <template>
   <div
+    v-click-away="onClickAway"
     class="ob-dropdown relative z-50"
     @click="toggle"
-    @mouseover="hoverHandler"
     @mouseleave="leaveHandler"
-    v-click-away="onClickAway">
+    @mouseover="hoverHandler">
     <slot />
   </div>
 </template>

@@ -4,15 +4,15 @@
     <ul class="mx-auto">
       <li class="pb-3">
         <span class="text-sm font-medium">{{ t('settings.running-time') }}:</span>
-        <span class="text-sm font-medium text-right float-right" v-if="websiteCreateTime != ''">
+        <span v-if="websiteCreateTime != ''" class="text-sm font-medium text-right float-right">
           {{ websiteCreateTime }}
         </span>
-        <ob-skeleton v-else class="float-right" tag="span" width="136px" height="16px" />
+        <ob-skeleton v-else class="float-right" height="16px" tag="span" width="136px" />
       </li>
       <li class="pb-2">
         <span class="text-sm font-medium">{{ t('settings.view-count') }}:</span>
-        <span class="text-sm font-medium text-right float-right" v-if="viewCount">{{ viewCount }}</span>
-        <ob-skeleton v-else class="float-right" tag="span" width="60px" height="16px" />
+        <span v-if="viewCount" class="text-sm font-medium text-right float-right">{{ viewCount }}</span>
+        <ob-skeleton v-else class="float-right" height="16px" tag="span" width="60px" />
       </li>
     </ul>
   </div>

@@ -5,14 +5,14 @@
       <textarea
         v-model="commentContent"
         class="w-full shadow-md rounded-md p-4 focus:outline-none input"
-        placeholder="Add comment..."
         cols="30"
+        placeholder="Add comment..."
         rows="5" />
       <div class="justify-between" style="text-align: right">
         <button
-          @click="saveComment"
           id="submit-button"
-          class="mt-5 w-32 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right">
+          class="mt-5 w-32 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
+          @click="saveComment">
           <span class="text-center flex-grow commit">Add Comment</span>
         </button>
       </div>
@@ -21,7 +21,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, toRefs, reactive, getCurrentInstance, computed } from 'vue'
+import { computed, defineComponent, getCurrentInstance, reactive, toRefs } from 'vue'
 import Avatar from '@/components/Avatar.vue'
 import { SubTitle } from '@/components/Title'
 import { useUserStore } from '@/stores/user'
@@ -120,10 +120,12 @@ export default defineComponent({
   background: var(--background-primary);
   resize: none;
 }
+
 #submit-button {
   outline: none;
   background: var(--main-gradient);
 }
+
 .wire {
   border-color: var(--text-normal);
 }

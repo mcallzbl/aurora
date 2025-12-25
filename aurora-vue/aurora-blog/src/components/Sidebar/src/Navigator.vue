@@ -14,8 +14,8 @@
     </li>
     <li
       class="flex justify-center py-3 w-full hover:opacity-50 hover:text-ob transition-all cursor-pointer"
-      @click="jumpToComments"
-      data-dia="jump-to-comment">
+      data-dia="jump-to-comment"
+      @click="jumpToComments">
       <svg-icon class="inline-block text-3xl" icon-class="quote" />
     </li>
   </ul>

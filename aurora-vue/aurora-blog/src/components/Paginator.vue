@@ -1,7 +1,7 @@
 <template>
   <div class="paginator">
     <ul>
-      <li class="text-ob-bright" v-if="currentPage > 1" @click="pageChangeEmitter(currentPage - 1)">
+      <li v-if="currentPage > 1" class="text-ob-bright" @click="pageChangeEmitter(currentPage - 1)">
         <svg-icon icon-class="arrow-left" />
         {{ t('settings.paginator.newer') }}
       </li>
@@ -24,7 +24,7 @@
         @click="pageChangeEmitter(paginator.end)">
         {{ paginator.end }}
       </li>
-      <li class="text-ob-bright" v-if="currentPage < pages" @click="pageChangeEmitter(currentPage + 1)">
+      <li v-if="currentPage < pages" class="text-ob-bright" @click="pageChangeEmitter(currentPage + 1)">
         {{ t('settings.paginator.older') }}
         <svg-icon icon-class="arrow-right" />
       </li>
@@ -104,11 +104,13 @@ export default defineComponent({
       &:hover {
         opacity: 0.5;
       }
+
       svg {
         @apply mx-2 font-extrabold text-ob;
       }
     }
   }
+
   .active {
     @apply text-ob;
   }

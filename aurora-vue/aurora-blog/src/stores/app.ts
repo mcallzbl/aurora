@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { i18n } from '@/locales/index'
+import { i18n } from '@/locales'
 import cookies from 'js-cookie'
 import nProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -11,12 +11,13 @@ nProgress.configure({
 })
 
 const setTheme = (theme: string) => {
+  const root = document.documentElement
   if (theme === 'theme-dark') {
-    document.body.classList.remove('theme-light')
-    document.body.classList.add('theme-dark')
+    root.classList.remove('theme-light')
+    root.classList.add('theme-dark')
   } else {
-    document.body.classList.remove('theme-dark')
-    document.body.classList.add('theme-light')
+    root.classList.remove('theme-dark')
+    root.classList.add('theme-light')
   }
 }
 

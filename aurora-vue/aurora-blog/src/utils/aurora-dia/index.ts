@@ -1,10 +1,12 @@
 interface AWFConfig {
   resourcePath: string
 }
+
 export class AuroraWaifu {
   configs: AWFConfig = {
     resourcePath: '/'
   }
+
   constructor(options?: AWFConfig) {
     if (options?.resourcePath) this.configs.resourcePath = options.resourcePath
     Promise.all([this.injectResources('live2d.min.js')]).then(() => {
@@ -16,6 +18,7 @@ export class AuroraWaifu {
       })
     })
   }
+
   async injectResources(url: string): Promise<any> {
     let tag = null
     return new Promise((resolve, reject) => {
@@ -27,10 +30,12 @@ export class AuroraWaifu {
     })
   }
 }
+
 export interface DiaConfig {
   locale: string
   tips?: { [key: string]: { selector: string; text: string | string[] } }
 }
+
 export class AuroraDia {
   configs: DiaConfig = {
     locale: 'en',
@@ -38,6 +43,7 @@ export class AuroraDia {
   }
   software = new AuroraBotSoftware()
   eyesAnimationTimer: number | undefined = undefined
+
   installSoftware(configs: DiaConfig): void {
     if (configs) {
       this.configs.locale = configs.locale
@@ -50,10 +56,12 @@ export class AuroraDia {
       messageId: 'Aurora-Dia--tips'
     })
   }
+
   on(): void {
     this.software.load()
     this.activateMotion()
   }
+
   activateMotion(): void {
     const leftEye = document.getElementById('Aurora-Dia--left-eye')
     const rightEye = document.getElementById('Aurora-Dia--right-eye')
@@ -75,6 +83,7 @@ export class AuroraDia {
     }
   }
 }
+
 interface ABConfig {
   botScript?: { [key: string]: { selector: string; text: string | string[] } }
   apiPath?: string
@@ -83,9 +92,11 @@ interface ABConfig {
   messageId: string
   locale: string
 }
+
 type BotLocales = {
   [locale: string]: any
 }
+
 class AuroraBotSoftware {
   config: ABConfig = {
     botScript: {},
@@ -114,6 +125,7 @@ class AuroraBotSoftware {
       }
     }
   }
+
   load() {
     this.loadLocaleMessages()
     this.injectBotScripts()
@@ -139,6 +151,7 @@ class AuroraBotSoftware {
       this.showWelcomeMessage()
     }, 3000)
   }
+
   injectBotScripts() {
     let botScriptKeys: string[] = []
     const botScript = this.config.botScript
@@ -154,6 +167,7 @@ class AuroraBotSoftware {
       }
     }
   }
+
   registerEventListener() {
     document.onkeydown = (event) => {
       if (event.key === 'F12') {
@@ -227,6 +241,7 @@ class AuroraBotSoftware {
       })
     }
   }
+
   showWelcomeMessage() {
     let text
     if (location.pathname === '/') {
@@ -259,6 +274,7 @@ class AuroraBotSoftware {
     }
     this.showMessage(text, 7000, 8)
   }
+
   loadLocaleMessages() {
     const locales = import.meta.glob<{ default: { [key: string]: { [key: string]: string } } }>(
       './messages/*.json',
@@ -275,6 +291,7 @@ class AuroraBotSoftware {
     })
     this.locales = messages
   }
+
   showMessage(text: string, timeout: number, priority: number) {
     const cacheMessage = sessionStorage.getItem(this.messageCacheKey) ?? ''
     if (!text || (cacheMessage !== '' && parseInt(cacheMessage) > priority)) return
@@ -303,9 +320,11 @@ class AuroraBotSoftware {
       }, timeout)
     }
   }
+
   randomSelection(obj: string[] | string) {
     return Array.isArray(obj) ? obj[Math.floor(Math.random() * obj.length)] : obj
   }
+
   showQuote() {
     if (this.config.locale === 'cn') {
       this.getHitokoto()
@@ -313,6 +332,7 @@ class AuroraBotSoftware {
       this.getTheySaidSo()
     }
   }
+
   getHitokoto() {
     fetch('https://v1.hitokoto.cn')
       .then((response) => response.json())
@@ -320,6 +340,7 @@ class AuroraBotSoftware {
         this.showMessage(result.hitokoto, 6000, 9)
       })
   }
+
   getTheySaidSo() {
     fetch('https://quotes.rest/qod?language=en')
       .then((response) => response.json())

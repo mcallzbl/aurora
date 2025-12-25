@@ -7,17 +7,17 @@
         <div class="flex justify-between mt-2 text-xs text-gray-400 space-x-3 md:space-x-16">
           <span> {{ reply.nickname }} | {{ time }}</span>
           <div>
-            <span @click="clickOnSonReply" class="cursor-pointer reply-button">Reply</span>
+            <span class="cursor-pointer reply-button" @click="clickOnSonReply">Reply</span>
           </div>
         </div>
       </div>
     </div>
     <a href="" target="_blank"></a>
     <CommentReplyForm
-      class="mt-5"
       v-show="show"
-      :replyUserId="reply.userId"
       :initialContent="replyContent"
+      :replyUserId="reply.userId"
+      class="mt-5"
       @changeShow="changeShow" />
   </div>
 </template>
@@ -84,12 +84,15 @@ export default defineComponent({
   left: -8px;
   top: 14px;
 }
+
 .reply {
   background: var(--background-primary);
 }
+
 .reply-button {
   color: var(--text-accent);
 }
+
 .commentContent {
   line-height: 26px;
   white-space: pre-line;

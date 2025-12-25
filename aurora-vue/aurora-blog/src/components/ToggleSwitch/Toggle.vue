@@ -2,11 +2,11 @@
   <div class="toggler" @click="changeStatus">
     <div class="toggle-track"></div>
     <div
-      class="slider"
       :style="{
         transform: toggleStyle.transform,
         backgroundColor: toggleStyle.background
-      }">
+      }"
+      class="slider">
       <slot />
     </div>
   </div>
@@ -59,6 +59,7 @@ export default defineComponent({
   box-sizing: border-box;
   transition: background-color 250ms ease;
 }
+
 .slider {
   top: -6px;
   left: -6px;

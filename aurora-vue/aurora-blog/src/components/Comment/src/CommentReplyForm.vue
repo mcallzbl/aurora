@@ -4,21 +4,21 @@
     <div class="reply flex flex-col flex-wrap-reverse w-full max-w-full-calc" style="width: fit-content">
       <textarea
         v-model="commentContent"
-        class="w-full shadow-md rounded-md p-4 focus:outline-none input"
         :placeholder="initialContent"
+        class="w-full shadow-md rounded-md p-4 focus:outline-none input"
         cols="30"
         rows="5" />
       <div class="justify-between" style="text-align: right">
         <button
-          @click="saveReply"
           id="submit-button"
-          class="mt-5 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right">
+          class="mt-5 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
+          @click="saveReply">
           <span class="text-center flex-grow commit">Reply</span>
         </button>
         <button
-          @click="CancelReply"
           id="submit-button"
-          class="mt-5 mr-3 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right">
+          class="mt-5 mr-3 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
+          @click="CancelReply">
           <span class="text-center flex-grow commit">Cancel</span>
         </button>
       </div>
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs, reactive, getCurrentInstance, inject, computed } from 'vue'
+import { computed, defineComponent, getCurrentInstance, inject, reactive, toRefs } from 'vue'
 import Avatar from '@/components/Avatar.vue'
 import emitter from '@/utils/mitt'
 import { useUserStore } from '@/stores/user'
@@ -142,14 +142,17 @@ export default defineComponent({
   left: -8px;
   top: 14px;
 }
+
 .input {
   background: var(--background-primary);
   resize: none;
 }
+
 #submit-button {
   outline: none;
   background: var(--main-gradient);
 }
+
 .wire {
   border-color: var(--text-normal);
 }

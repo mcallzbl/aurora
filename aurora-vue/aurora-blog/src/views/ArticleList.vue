@@ -7,7 +7,7 @@
       <ul class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
         <template v-if="haveArticles === true">
           <li v-for="article in articles" :key="article.id">
-            <ArticleCard class="tag-article" :data="article" />
+            <ArticleCard :data="article" class="tag-article" />
           </li>
         </template>
         <template v-else>
@@ -17,9 +17,9 @@
         </template>
       </ul>
       <Paginator
+        :page="pagination.current"
         :pageSize="pagination.size"
         :pageTotal="pagination.total"
-        :page="pagination.current"
         @pageChange="pageChangeHanlder" />
     </div>
   </div>
@@ -101,6 +101,7 @@ export default defineComponent({
       -webkit-line-clamp: 5;
       -webkit-box-orient: vertical;
     }
+
     .article-footer {
       margin-top: 13px;
     }

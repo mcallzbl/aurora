@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, h, inject, toRefs, computed } from 'vue'
+import { computed, defineComponent, h, inject, toRefs } from 'vue'
 import { SkeletonStyle } from './SkeletonTheme.vue'
 
 const isEmptyVNode = (children: any) => {
@@ -89,6 +89,7 @@ export default defineComponent({
   width: 100%;
   height: inherit;
 }
+
 @keyframes SkeletonLoading {
   0% {
     background-position: -200px 0;

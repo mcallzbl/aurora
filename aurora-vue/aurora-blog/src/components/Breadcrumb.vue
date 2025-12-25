@@ -23,9 +23,11 @@ export default defineComponent({
 .breadcrumbs {
   position: relative;
   z-index: 20;
+
   li {
     position: relative;
     z-index: 20;
+
     &:after {
       content: '>';
       position: absolute;
@@ -33,6 +35,7 @@ export default defineComponent({
       right: -0.95rem;
       opacity: 0.65;
     }
+
     &:last-of-type {
       &:after {
         content: '';

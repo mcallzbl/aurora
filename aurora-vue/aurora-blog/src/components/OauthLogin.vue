@@ -15,6 +15,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { useUserStore } from '@/stores/user'
 import api from '@/api/api'
+
 export default defineComponent({
   name: 'OauthLoginModel',
   setup() {
@@ -26,7 +27,7 @@ export default defineComponent({
       //@ts-ignore
       if (QC.Login.check()) {
         //@ts-ignore
-        QC.Login.getMe(function (openId, accessToken) {
+        QC.Login.getMe(function(openId, accessToken) {
           let params = {
             openId: openId,
             accessToken: accessToken
@@ -64,11 +65,13 @@ export default defineComponent({
   background: #fff;
   z-index: 1000;
 }
+
 #preloader_1 {
   position: relative;
   top: 45vh;
   left: 45vw;
 }
+
 #preloader_1 span {
   display: block;
   bottom: 0px;
@@ -78,22 +81,27 @@ export default defineComponent({
   position: absolute;
   animation: preloader_1 1.5s infinite ease-in-out;
 }
+
 #preloader_1 span:nth-child(2) {
   left: 11px;
   animation-delay: 0.2s;
 }
+
 #preloader_1 span:nth-child(3) {
   left: 22px;
   animation-delay: 0.4s;
 }
+
 #preloader_1 span:nth-child(4) {
   left: 33px;
   animation-delay: 0.6s;
 }
+
 #preloader_1 span:nth-child(5) {
   left: 44px;
   animation-delay: 0.8s;
 }
+
 @keyframes preloader_1 {
   0% {
     height: 5px;

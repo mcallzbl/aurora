@@ -8,9 +8,9 @@
       <div class="main-grid">
         <div class="relative space-y-5">
           <div
-            class="bg-ob-deep-800 flex p-4 lg:p-8 rounded-2xl shadow-xl mb-0 talk-item"
             v-for="item in talks"
             :key="item.id"
+            class="bg-ob-deep-800 flex p-4 lg:p-8 rounded-2xl shadow-xl mb-0 talk-item"
             @click="toTalk(item.id)">
             <Avatar :url="item.avatar" />
             <div class="talk-info">
@@ -23,19 +23,21 @@
                 {{ t(`settings.months[${new Date(item.createTime).getMonth()}]`) }}
                 {{ new Date(item.createTime).getDate() }}, {{ new Date(item.createTime).getFullYear() }}
                 <template v-if="item.isTop === 1">
-                  <svg-icon icon-class="top" class="top-svg" /><span style="color: #f21835">置顶</span>
+                  <svg-icon class="top-svg" icon-class="top" />
+                  <span style="color: #f21835">置顶</span>
                 </template>
-                <svg-icon icon-class="message" class="message-svg" />{{
+                <svg-icon class="message-svg" icon-class="message" />
+                {{
                   item.commentCount == null ? 0 : item.commentCount
                 }}
               </div>
               <div class="talk-content" v-html="item.content" />
-              <el-row class="talk-images" v-if="item.imgs">
-                <el-col :md="4" v-for="(img, index) of item.imgs" :key="index">
+              <el-row v-if="item.imgs" class="talk-images">
+                <el-col v-for="(img, index) of item.imgs" :key="index" :md="4">
                   <el-image
-                    class="images-items"
                     :src="img"
                     aspect-ratio="1"
+                    class="images-items"
                     max-height="200"
                     @click.stop="handlePreview(img)" />
                 </el-col>
@@ -43,9 +45,9 @@
             </div>
           </div>
           <Paginator
+            :page="pagination.current"
             :pageSize="pagination.size"
             :pageTotal="pagination.total"
-            :page="pagination.current"
             @pageChange="pageChangeHanlder" />
         </div>
         <div class="col-span-1">
@@ -62,7 +64,7 @@
 import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Breadcrumb from '@/components/Breadcrumb.vue'
-import { Sidebar, Profile } from '../components/Sidebar'
+import { Profile, Sidebar } from '../components/Sidebar'
 import Paginator from '@/components/Paginator.vue'
 import Avatar from '../components/Avatar.vue'
 import { v3ImgPreviewFn } from 'v3-img-preview'
@@ -142,25 +144,31 @@ export default defineComponent({
 .top-svg {
   margin-left: 5px;
 }
+
 .message-svg {
   margin-left: 5px;
   font-size: 15px;
 }
+
 .talk-item:hover {
   transform: scale(1.005);
 }
+
 .el-card {
   background: var(--background-primary);
   border-radius: 10px;
   border: 0;
 }
+
 .talk-info {
   flex: 1;
   margin-left: 10px;
 }
+
 .user-nickname {
   font-weight: 530;
 }
+
 .time {
   color: #999;
   font-size: 13px;
@@ -168,6 +176,7 @@ export default defineComponent({
     margin-top: 4px;
   }
 }
+
 .talk-content {
   margin-top: 10px;
   font-size: 14px;
@@ -176,9 +185,11 @@ export default defineComponent({
   word-wrap: break-word;
   word-break: break-all;
 }
+
 .talk-images {
   margin-top: 8px;
 }
+
 .images-items {
   cursor: pointer;
   border-radius: 3px;

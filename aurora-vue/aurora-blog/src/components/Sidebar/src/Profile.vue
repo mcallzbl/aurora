@@ -1,5 +1,5 @@
 <template>
-  <div class="h-98 w-full rounded-2xl relative shadow-xl mb-8" :style="gradientBackground">
+  <div :style="gradientBackground" class="h-98 w-full rounded-2xl relative shadow-xl mb-8">
     <div
       class="ob-gradient-cut-plate absolute bg-ob-deep-900 rounded-xl opacity-90 flex justify-center items-center pt-4 px-6 shadow-lg hover:shadow-2xl duration-300"
       data-dia="author">
@@ -13,7 +13,7 @@
             </template>
             <ob-skeleton v-else height="2.25rem" width="7rem" />
           </h2>
-          <span class="h-1 w-14 rounded-full mt-2" :style="gradientBackground" />
+          <span :style="gradientBackground" class="h-1 w-14 rounded-full mt-2" />
           <p
             v-if="websiteConfig.authorIntro"
             class="pt-6 px-10 w-full text-s text-center"

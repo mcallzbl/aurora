@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Logo, Navigation, Controls } from '../index'
+import { Controls, Logo, Navigation } from '../index'
 
 export default defineComponent({
   name: 'Header',

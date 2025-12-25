@@ -10,7 +10,7 @@
       <div class="flex flex-col relative">
         <ul :class="tabClass">
           <li :class="{ active: activeTab === 0 }" @click="handleTabChange(0)">
-            <span class="first-tab" :style="activeTabStyle(0)">
+            <span :style="activeTabStyle(0)" class="first-tab">
               {{ t('settings.button-all') }}
             </span>
           </li>
@@ -30,7 +30,7 @@
           </template>
           <template v-else-if="(categories.length = 0)">
             <li v-for="i in 6" :key="i" style="position: relative; top: -4px">
-              <ob-skeleton tag="span" width="60px" height="33px" />
+              <ob-skeleton height="33px" tag="span" width="60px" />
             </li>
           </template>
         </ul>
@@ -40,7 +40,7 @@
         <ul class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           <template v-if="haveArticles === true">
             <li v-for="article in articles" :key="article.id">
-              <ArticleCard class="home-article" :data="article" />
+              <ArticleCard :data="article" class="home-article" />
             </li>
           </template>
           <template v-else>
@@ -50,9 +50,9 @@
           </template>
         </ul>
         <Paginator
+          :page="pagination.current"
           :pageSize="pagination.size"
           :pageTotal="pagination.total"
-          :page="pagination.current"
           @pageChange="pageChangeHanlder" />
       </div>
       <div>
@@ -69,11 +69,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRefs, toRef, reactive } from 'vue'
+import { computed, defineComponent, onMounted, reactive, ref, toRef, toRefs } from 'vue'
 import { Feature, FeatureList } from '@/components/Feature'
 import { ArticleCard, HorizontalArticle } from '@/components/ArticleCard'
 import { Title } from '@/components/Title'
-import { Sidebar, Profile, RecentComment, TagBox, Notice, WebsiteInfo } from '@/components/Sidebar'
+import { Notice, Profile, RecentComment, Sidebar, TagBox, WebsiteInfo } from '@/components/Sidebar'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useArticleStore } from '@/stores/article'
@@ -269,6 +269,7 @@ export default defineComponent({
       -webkit-line-clamp: 5;
       -webkit-box-orient: vertical;
     }
+
     .article-footer {
       margin-top: 13px;
     }

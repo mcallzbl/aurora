@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="visible" direction="rtl" :with-header="false" :before-close="handleClose">
+  <el-drawer v-model="visible" :before-close="handleClose" :with-header="false" direction="rtl">
     <span class="text font-semibold text-2xl">用户中心</span>
     <template v-if="userInfo !== ''">
       <span class="text font-medium">(该页面的信息,本网站将严格保密)</span>
@@ -9,26 +9,26 @@
         </button>
         <avatar-cropper
           v-model="showCropper"
-          @uploaded="handleSuccess"
-          trigger="#pick-avatar"
           :request-options="options"
-          upload-url="/api/users/avatar" />
+          trigger="#pick-avatar"
+          upload-url="/api/users/avatar"
+          @uploaded="handleSuccess" />
         <el-form>
-          <el-form-item model="userInfo" label="昵称:" class="mt-5">
+          <el-form-item class="mt-5" label="昵称:" model="userInfo">
             <el-input v-model="userInfo.nickname" />
           </el-form-item>
-          <el-form-item model="userInfo" label="网址:" class="mt-5">
+          <el-form-item class="mt-5" label="网址:" model="userInfo">
             <el-input v-model="userInfo.website" placeholder="Please add https:// or http://" />
           </el-form-item>
-          <el-form-item model="userInfo" label="描述:" class="mt-5">
+          <el-form-item class="mt-5" label="描述:" model="userInfo">
             <el-input v-model="userInfo.intro" placeholder="Introduce youself" />
           </el-form-item>
-          <el-form-item model="userInfo" label="邮箱:" class="mt-5">
-            <el-input disabled :placeholder="userInfo.email">
-              <template #append v-if="userInfo.email === null">
+          <el-form-item class="mt-5" label="邮箱:" model="userInfo">
+            <el-input :placeholder="userInfo.email" disabled>
+              <template v-if="userInfo.email === null" #append>
                 <span class="text" @click="changeEmailDialogVisible">绑定</span>
               </template>
-              <template #append v-else>
+              <template v-else #append>
                 <span class="text" @click="changeEmailDialogVisible">修改</span>
               </template>
             </el-input>
@@ -36,18 +36,18 @@
           <el-form-item label="订阅:">
             <el-switch
               v-model="userInfo.isSubscribe"
-              :loading="loading"
-              :before-change="beforeChange"
-              @change="changeSubscribe"
-              active-color="#0fb6d6"
               :active-value="1"
-              :inactive-value="0" />
+              :before-change="beforeChange"
+              :inactive-value="0"
+              :loading="loading"
+              active-color="#0fb6d6"
+              @change="changeSubscribe" />
           </el-form-item>
           <button
-            @click="commit"
-            type="button"
             id="submit-button"
-            class="mt-5 w-20 text-white p-2 rounded-lg transition transform hover:scale-105 flex float-right">
+            class="mt-5 w-20 text-white p-2 rounded-lg transition transform hover:scale-105 flex float-right"
+            type="button"
+            @click="commit">
             <span class="text-center flex-grow commit">提交</span>
           </button>
         </el-form>
@@ -58,27 +58,27 @@
   </el-drawer>
   <el-dialog v-model="emailDialogVisible" width="30%">
     <el-form>
-      <el-form-item model="userInfo" class="mt-5">
+      <el-form-item class="mt-5" model="userInfo">
         <el-input v-model="email" placeholder="邮箱号" />
       </el-form-item>
-      <el-form-item model="userInfo" type="password" class="mt-8">
-        <el-input v-model="VerificationCode" type="password" placeholder="验证码">
+      <el-form-item class="mt-8" model="userInfo" type="password">
+        <el-input v-model="VerificationCode" placeholder="验证码" type="password">
           <template #append>
-            <button type="button" style="outline: none">
+            <button style="outline: none" type="button">
               <span class="text" @click="sendCode">{{ message }}</span>
             </button>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="bingingEmail" size="large" class="mx-auto mt-3">绑定</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="bingingEmail">绑定</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent, toRef, ref, reactive, toRefs, getCurrentInstance, computed, onMounted } from 'vue'
+import { computed, defineComponent, getCurrentInstance, reactive, ref, toRef, toRefs } from 'vue'
 import { useUserStore } from '@/stores/user'
 import AvatarCropper from 'vue-avatar-cropper'
 import api from '@/api/api'
@@ -225,10 +225,12 @@ export default defineComponent({
   outline: none;
   background: #0fb6d6;
 }
+
 .text {
   color: var(--text-normal);
   cursor: pointer;
 }
+
 #pick-avatar {
   outline: none;
 }
@@ -239,13 +241,16 @@ export default defineComponent({
   width: 70px;
   color: var(--text-normal) !important;
 }
+
 .el-input__inner {
   color: var(--text-normal) !important;
   background-color: var(--background-primary-alt) !important;
 }
+
 .el-input__wrapper {
   background: var(--background-primary-alt) !important;
 }
+
 .bangding-button {
   outline: none !important;
 }

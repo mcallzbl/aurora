@@ -18,17 +18,18 @@
                   {{ formatTime(talk.createTime) }},
                   {{ t(`settings.months[${new Date(talk.createTime).getMonth()}]`) }}
                   {{ new Date(talk.createTime).getDate() }}, {{ new Date(talk.createTime).getFullYear() }}
-                  <svg-icon icon-class="message" class="message-svg" />{{
+                  <svg-icon class="message-svg" icon-class="message" />
+                  {{
                     talk.commentCount == null ? 0 : talk.commentCount
                   }}
                 </div>
                 <div class="talk-content" v-html="talk.content" />
-                <el-row class="talk-images" v-if="talk.imgs">
-                  <el-col :md="4" v-for="(img, index) of talk.imgs" :key="index">
+                <el-row v-if="talk.imgs" class="talk-images">
+                  <el-col v-for="(img, index) of talk.imgs" :key="index" :md="4">
                     <el-image
-                      class="images-talks"
                       :src="img"
                       aspect-ratio="1"
+                      class="images-talks"
                       max-height="200"
                       @click.prevent="handlePreview(img)" />
                   </el-col>
@@ -49,11 +50,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs, provide, computed } from 'vue'
+import { computed, defineComponent, onMounted, provide, reactive, toRefs } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Breadcrumb from '@/components/Breadcrumb.vue'
-import { Sidebar, Profile } from '../components/Sidebar'
+import { Profile, Sidebar } from '../components/Sidebar'
 import { Comment } from '../components/Comment'
 import Avatar from '../components/Avatar.vue'
 import { useCommentStore } from '@/stores/comment'
@@ -173,21 +174,26 @@ export default defineComponent({
   margin-left: 5px;
   font-size: 15px;
 }
+
 .el-card {
   background: var(--background-primary);
   border-radius: 10px;
   border: 0;
 }
+
 .talk-user-avatar {
   flex: 1;
 }
+
 .talk-info {
   flex: 1;
   margin-left: 10px;
 }
+
 .user-nickname {
   font-weight: 530;
 }
+
 .time {
   color: #999;
   font-size: 13px;
@@ -195,6 +201,7 @@ export default defineComponent({
     margin-top: 4px;
   }
 }
+
 .talk-content {
   margin-top: 10px;
   font-size: 14px;
@@ -203,9 +210,11 @@ export default defineComponent({
   word-wrap: break-word;
   word-break: break-all;
 }
+
 .talk-images {
   margin-top: 8px;
 }
+
 .images-items {
   cursor: pointer;
   border-radius: 3px;

@@ -7,25 +7,25 @@
         <ob-skeleton
           v-else
           class="post-title text-white uppercase"
-          width="30%"
-          height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)" />
+          height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)"
+          width="30%" />
       </div>
       <div class="main-grid">
         <div class="relative">
           <div class="post-html">
             <div
-              class="list-lis"
               v-infinite-scroll="loadDataFromServer"
-              :infinite-scroll-immediate-check="false"
               :infinite-scroll-disabled="noResult"
-              infinite-scroll-watch-disabled="scrollDisabled"
-              :infinite-scroll-distance="isMobile ? 0 : 30">
+              :infinite-scroll-distance="isMobile ? 0 : 30"
+              :infinite-scroll-immediate-check="false"
+              class="list-lis"
+              infinite-scroll-watch-disabled="scrollDisabled">
               <div class="photo-wrap">
                 <img
                   v-for="(item, index) of photos"
-                  class="photo"
                   :key="index"
                   :src="item"
+                  class="photo"
                   @click="handlePreview(index)" />
               </div>
             </div>
@@ -44,8 +44,8 @@
 import { computed, defineComponent, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCommonStore } from '@/stores/common'
-import { useRoute, onBeforeRouteUpdate } from 'vue-router'
-import { Sidebar, Profile } from '../components/Sidebar'
+import { onBeforeRouteUpdate, useRoute } from 'vue-router'
+import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { v3ImgPreviewFn } from 'v3-img-preview'
 import api from '@/api/api'
@@ -106,6 +106,7 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
 }
+
 .photo {
   margin: 3px;
   cursor: pointer;
@@ -113,11 +114,13 @@ export default defineComponent({
   object-fit: cover;
   height: 200px;
 }
+
 .photo-wrap::after {
   content: '';
   display: block;
   flex-grow: 9999;
 }
+
 @media (max-width: 759px) {
   .photo {
     width: 100%;

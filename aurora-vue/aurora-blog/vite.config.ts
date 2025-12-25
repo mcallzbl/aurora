@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import path, { resolve } from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import prismjs from 'vite-plugin-prismjs'
 
@@ -17,6 +17,7 @@ export default defineConfig({
       theme: 'okaidia',
       css: true
     })
+    // tailwindcss(),
   ],
   resolve: {
     alias: {
@@ -38,5 +39,20 @@ export default defineConfig({
   },
   build: {
     sourcemap: false
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 自动为每个 scss 样式块注入 reference
+        additionalData: (content, filePath) => {
+          // 只给 Vue 组件里的 <style> 块自动注入
+          if (filePath.endsWith('.vue')) {
+            return `@reference "${path.resolve(__dirname, 'src/styles/index.css')}";\n${content}`
+          }
+          return content
+        }
+
+      }
+    }
   }
 })
