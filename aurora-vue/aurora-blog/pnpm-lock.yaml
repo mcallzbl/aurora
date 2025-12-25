@@ -38,6 +38,9 @@ importers:
       js-cookie:
         specifier: ^3.0.1
         version: 3.0.5
+      katex:
+        specifier: ^0.16.27
+        version: 0.16.27
       markdown-it:
         specifier: ^13.0.1
         version: 13.0.2

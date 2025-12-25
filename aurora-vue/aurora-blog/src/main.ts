@@ -1,28 +1,32 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+
+import 'normalize.css/normalize.css'
+import '@/styles/index.css'
+import 'element-plus/theme-chalk/index.css'
+import 'prismjs/themes/prism.css'
+import 'mavon-editor/dist/css/index.css'
+import 'katex/dist/katex.min.css'
+
 import router from './router'
 import './router/guard'
-// Bring in theme variables and component styles (Sass)
-import '@/styles/index.css'
-import 'normalize.css/normalize.css'
 import { createPinia } from 'pinia'
 import { i18n } from './locales'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+import 'prismjs'
 import VueClickAway from 'vue3-click-away'
 import lazyPlugin from 'vue3-lazy'
-import { registerSvgIcon } from '@/icons'
-import { registerObSkeleton } from '@/components/LoadingSkeleton'
-import 'prismjs/themes/prism.css'
-import 'prismjs'
-import 'element-plus/theme-chalk/index.css'
-import { components, plugins } from './plugins/element-plus'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import infiniteScroll from 'vue3-infinite-scroll-better'
 import v3ImgPreview from 'v3-img-preview'
-import 'mavon-editor/dist/css/index.css'
+import { components, plugins } from './plugins/element-plus'
+
+import { registerSvgIcon } from '@/icons'
+import { registerObSkeleton } from '@/components/LoadingSkeleton'
 import api from './api/api'
 import axios from 'axios'
+
 import { useUserStore } from '@/stores/user'
-import defaultCover from '@/assets/default-cover.jpg'
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
@@ -34,8 +38,8 @@ export const app = createApp(App)
   .use(infiniteScroll)
   .use(v3ImgPreview, {})
   .use(lazyPlugin, {
-    loading: defaultCover,
-    error: defaultCover
+    loading: '@/assets/default-cover.jpg', // 使用默认封面作为加载图
+    error: '@/assets/default-cover.jpg'
   })
 const userStore = useUserStore()
 axios.interceptors.request.use((config: any) => {

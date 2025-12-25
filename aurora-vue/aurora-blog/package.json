@@ -19,6 +19,7 @@
     "element-plus": "^2.2.9",
     "fast-glob": "^3.3.3",
     "js-cookie": "^3.0.1",
+    "katex": "^0.16.27",
     "markdown-it": "^13.0.1",
     "markdown-it-abbr": "^1.0.4",
     "markdown-it-container": "^3.0.0",
