@@ -1,32 +1,11 @@
-@import "tailwindcss";
+@import "./tailwind.css";
 @import './theme-variables.css';
 @import './components/article.scss';
 @import './components/sidebar-box.scss';
 @import './components/search-modal.scss';
 @import './transitions.scss';
 
-@theme {
-    /* --- Spacing 迁移 --- */
-    --spacing-97: 26rem;
-    --spacing-98: 28rem;
-    --spacing-12_10: 120%; /* v4 中建议用下划线代替小数点 */
-    /* --- Colors 迁移 --- */
-    /* v4 会自动根据变量名生成工具类，如 bg-ob, text-ob-normal 等 */
-    --color-ob: var(--text-accent);
-    --color-ob-normal: var(--text-normal);
-    --color-ob-trans: var(--background-trans);
-    --color-ob-accent-55: var(--bg-accent-55);
-    --color-ob-secondary: var(--text-sub-accent);
-    --color-ob-bright: var(--text-bright);
-    --color-ob-dim: var(--text-dim);
 
-    /* 嵌套结构在 v4 中直接扁平化编写 */
-    --color-ob-deep-800: var(--background-secondary);
-    --color-ob-deep-900: var(--background-primary);
-
-    /* --- Box Shadow 迁移 --- */
-    --shadow-ob: var(--accent-shadow);
-}
 .stroke-ob-bright {
     stroke: var(--text-bright) !important;
 }

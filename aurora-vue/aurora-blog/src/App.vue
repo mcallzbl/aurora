@@ -195,7 +195,7 @@ export default defineComponent({
 </script>
 
 <style lang="css">
-@reference "./styles/index.css"
+@reference "@/styles/tailwind.css"
 .arrow-left > .icon,
 .arrow-right > .icon {
   display: inline !important;

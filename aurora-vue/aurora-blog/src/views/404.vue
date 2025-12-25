@@ -76,7 +76,8 @@
   </div>
 </template>
 
-<style lang="css" scoped>
+<style>
+@reference "@/styles/tailwind.css"
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans');
 
 .left-section .inner-content {

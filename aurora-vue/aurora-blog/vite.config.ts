@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path, { resolve } from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import prismjs from 'vite-plugin-prismjs'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [
@@ -16,8 +17,8 @@ export default defineConfig({
       plugins: ['line-numbers', 'toolbar', 'copy-to-clipboard'],
       theme: 'okaidia',
       css: true
-    })
-    // tailwindcss(),
+    }),
+    tailwindcss()
   ],
   resolve: {
     alias: {
@@ -47,7 +48,7 @@ export default defineConfig({
         additionalData: (content, filePath) => {
           // 只给 Vue 组件里的 <style> 块自动注入
           if (filePath.endsWith('.vue')) {
-            return `@reference "${path.resolve(__dirname, 'src/styles/index.css')}";\n${content}`
+            return `@reference "${path.resolve(__dirname, 'src/styles/tailwind.css')}";\n${content}`
           }
           return content
         }
