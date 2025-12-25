@@ -2,4 +2,7 @@ spring:
   application:
     name: aurora-springboot
   profiles:
-    active: dev
+    active: prod
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher

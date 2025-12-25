@@ -4,8 +4,8 @@ package com.aurora.controller;
 import com.aurora.annotation.AccessLimit;
 import com.aurora.annotation.OptLog;
 import com.aurora.model.dto.*;
-import com.aurora.service.UserAuthService;
 import com.aurora.model.vo.*;
+import com.aurora.service.UserAuthService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +24,7 @@ public class UserAuthController {
     @Autowired
     private UserAuthService userAuthService;
 
-    @AccessLimit(seconds = 60,maxCount = 1)
+    @AccessLimit(seconds = 60, maxCount = 1)
     @ApiOperation(value = "发送邮箱验证码")
     @ApiImplicitParam(name = "username", value = "用户名", required = true, dataType = "String")
     @GetMapping("/users/code")

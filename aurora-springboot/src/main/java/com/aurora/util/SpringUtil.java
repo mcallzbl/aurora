@@ -18,16 +18,6 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
 
     private static ApplicationContext applicationContext;
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        SpringUtil.beanFactory = beanFactory;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringUtil.applicationContext = applicationContext;
-    }
-
     public static <T> T getBean(String name) throws BeansException {
         return (T) beanFactory.getBean(name);
     }
@@ -63,5 +53,15 @@ public class SpringUtil implements BeanFactoryPostProcessor, ApplicationContextA
     public static String getActiveProfile() {
         final String[] activeProfiles = getActiveProfiles();
         return activeProfiles != null && activeProfiles.length > 0 ? activeProfiles[0] : null;
+    }
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        SpringUtil.beanFactory = beanFactory;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        SpringUtil.applicationContext = applicationContext;
     }
 }

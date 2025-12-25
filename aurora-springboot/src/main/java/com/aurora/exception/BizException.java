@@ -9,9 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class BizException extends RuntimeException {
 
-    private Integer code = StatusCodeEnum.FAIL.getCode();
-
     private final String message;
+    private Integer code = StatusCodeEnum.FAIL.getCode();
 
     public BizException(String message) {
         this.message = message;

@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  * elasticsearch
  */
 @Repository
-public interface ElasticsearchMapper extends ElasticsearchRepository<ArticleSearchDTO,Integer> {
+public interface ElasticsearchMapper extends ElasticsearchRepository<ArticleSearchDTO, Integer> {
 
 }

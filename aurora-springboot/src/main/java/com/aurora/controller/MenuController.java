@@ -4,11 +4,11 @@ import com.aurora.annotation.OptLog;
 import com.aurora.model.dto.LabelOptionDTO;
 import com.aurora.model.dto.MenuDTO;
 import com.aurora.model.dto.UserMenuDTO;
-import com.aurora.model.vo.ResultVO;
-import com.aurora.service.MenuService;
 import com.aurora.model.vo.ConditionVO;
 import com.aurora.model.vo.IsHiddenVO;
 import com.aurora.model.vo.MenuVO;
+import com.aurora.model.vo.ResultVO;
+import com.aurora.service.MenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class MenuController {
         return ResultVO.ok(menuService.listMenus(conditionVO));
     }
 
-    @OptLog(optType =SAVE_OR_UPDATE)
+    @OptLog(optType = SAVE_OR_UPDATE)
     @ApiOperation(value = "新增或修改菜单")
     @PostMapping("/admin/menus")
     public ResultVO<?> saveOrUpdateMenu(@Valid @RequestBody MenuVO menuVO) {

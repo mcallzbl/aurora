@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class JobStatusVO {
 
-    @ApiModelProperty(name="任务id" ,value = "id",required = true, dataType = "Integer")
+    @ApiModelProperty(name = "任务id", value = "id", required = true, dataType = "Integer")
     private Integer id;
 
     @ApiModelProperty(name = "任务状态", value = "status", required = true, dataType = "Integer")

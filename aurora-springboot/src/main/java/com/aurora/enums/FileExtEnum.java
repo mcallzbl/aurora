@@ -19,6 +19,9 @@ public enum FileExtEnum {
 
     TXT(".txt", "txt文件");
 
+    private final String extName;
+    private final String desc;
+
     public static FileExtEnum getFileExt(String extName) {
         for (FileExtEnum value : FileExtEnum.values()) {
             if (value.getExtName().equalsIgnoreCase(extName)) {
@@ -27,9 +30,5 @@ public enum FileExtEnum {
         }
         return null;
     }
-
-    private final String extName;
-
-    private final String desc;
 
 }

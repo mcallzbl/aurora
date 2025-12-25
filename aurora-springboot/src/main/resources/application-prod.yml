@@ -1,13 +1,13 @@
 server:
-  port: 8080
+  port: 9000
 
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql的ip:3306/aurora?serverTimezone=Asia/Shanghai&allowMultiQueries=true
-    username: 账号
-    password: 密码
+    url: jdbc:mysql://${AURORA_BLOG_DATABASE_HOST:localhost}:${AURORA_BLOG_DATABASE_PORT:3306}/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true&createDatabaseIfNotExist=true
+    username: ${AURORA_BLOG_DATABASE_USERNAME:root}
+    password: ${AURORA_BLOG_DATABASE_PASSWORD:password}
     hikari:
       minimum-idle: 10
       idle-timeout: 180000
@@ -19,9 +19,9 @@ spring:
       connection-test-query: SELECT 1
 
   redis:
-    host: redis的ip
-    port: 6379
-    password: 密码
+    host: ${AURORA_BLOG_REDIS_HOST:localhost}
+    port: ${AURORA_BLOG_REDIS_PORT:6379}
+    password: ${AURORA_BLOG_REDIS_PASSWORD:password}
     database: 0
     lettuce:
       pool:
@@ -31,10 +31,10 @@ spring:
         max-wait: 10000
 
   rabbitmq:
-    host: rabbitmq的ip
-    port: 5672
-    username: 账号
-    password: 密码
+    host: ${AURORA_BLOG_RABBITMQ_HOST:localhost}
+    port: ${AURORA_BLOG_RABBITMQ_PORT:5672}
+    username: ${AURORA_BLOG_RABBITMQ_USERNAME:username}
+    password: ${AURORA_BLOG_RABBITMQ_PASSWORD:password}
     listener:
       simple:
         retry:
@@ -44,12 +44,12 @@ spring:
 
   elasticsearch:
     rest:
-      uris: es的ip:9200
+      uris: ${AURORA_BLOG_ELASTICSEARCH_URL:localhost}
 
   mail:
     host: smtp.163.com
-    username: 邮箱
-    password: 密码
+    username: ${AURORA_BLOG_MAIL_USERNAME:username}
+    password: ${AURORA_BLOG_MAIL_PASSWORD:password}
     default-encoding: UTF-8
     protocol: smtp
     port: 465
@@ -86,11 +86,11 @@ search:
 upload:
   mode: oss
   oss:
-    url: http://Bucket域名/
-    endpoint: OSS配置endpoint
-    accessKeyId: OSS配置accessKeyId
-    accessKeySecret: OSS配置accessKeySecret
-    bucketName: OSS配置bucketName
+    url: ${AURORA_BLOG_OSS_URL}
+    endpoint: ${AURORA_BLOG_OSS_ENDPOINT:oss-cn-beijing.aliyuncs.com}
+    accessKeyId: ${AURORA_BLOG_OSS_ACCESS_KEY_ID}
+    accessKeySecret: ${AURORA_BLOG_OSS_ACCESS_KEY_SECRET}
+    bucketName: ${AURORA_BLOG_OSS_BUCKET_NAME}
   minio:
     url: http://minio的ip:9000/
     endpoint: http://minio的ip:9000
@@ -99,7 +99,7 @@ upload:
     bucketName: 桶的名称
 
 website:
-  url: https://前台域名
+  url: ${AURORA_BLOG_WEBSITE_URL:https://www.devillusion.asia}
 
 qq:
   app-id: QQ APPID

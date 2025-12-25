@@ -1,8 +1,8 @@
 package com.aurora.config;
 
 
-import com.aurora.interceptor.PaginationInterceptor;
 import com.aurora.interceptor.AccessLimitInterceptor;
+import com.aurora.interceptor.PaginationInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -23,7 +23,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowCredentials(true)
                 .allowedHeaders("*")
-                .allowedOrigins("*")
+                .allowedOriginPatterns("*")  // ✅ 改为 allowedOriginPatterns
                 .allowedMethods("*");
     }
 

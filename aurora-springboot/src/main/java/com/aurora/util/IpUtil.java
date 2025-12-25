@@ -61,15 +61,6 @@ public class IpUtil {
         return StringUtils.substringBefore(ipAddress, ",");
     }
 
-    @PostConstruct
-    private void initIp2regionResource() throws Exception {
-        InputStream inputStream = new ClassPathResource("/ip/ip2region.db").getInputStream();
-        byte[] dbBinStr = FileCopyUtils.copyToByteArray(inputStream);
-        DbConfig dbConfig = new DbConfig();
-        searcher = new DbSearcher(dbConfig, dbBinStr);
-        method = searcher.getClass().getMethod("memorySearch", String.class);
-    }
-
     public static String getIpSource(String ipAddress) {
         if (ipAddress == null || !Util.isIpAddress(ipAddress)) {
             log.error("Error: Invalid ip address");
@@ -102,6 +93,15 @@ public class IpUtil {
 
     public static UserAgent getUserAgent(HttpServletRequest request) {
         return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+    }
+
+    @PostConstruct
+    private void initIp2regionResource() throws Exception {
+        InputStream inputStream = new ClassPathResource("/ip/ip2region.db").getInputStream();
+        byte[] dbBinStr = FileCopyUtils.copyToByteArray(inputStream);
+        DbConfig dbConfig = new DbConfig();
+        searcher = new DbSearcher(dbConfig, dbBinStr);
+        method = searcher.getClass().getMethod("memorySearch", String.class);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.aurora.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.aurora.model.dto.*;
 import com.aurora.entity.Article;
 import com.aurora.entity.Comment;
 import com.aurora.entity.Talk;
@@ -12,15 +11,15 @@ import com.aurora.mapper.ArticleMapper;
 import com.aurora.mapper.CommentMapper;
 import com.aurora.mapper.TalkMapper;
 import com.aurora.mapper.UserInfoMapper;
+import com.aurora.model.dto.*;
+import com.aurora.model.vo.CommentVO;
+import com.aurora.model.vo.ConditionVO;
+import com.aurora.model.vo.ReviewVO;
 import com.aurora.service.AuroraInfoService;
 import com.aurora.service.CommentService;
 import com.aurora.util.HTMLUtil;
 import com.aurora.util.PageUtil;
 import com.aurora.util.UserUtil;
-import com.aurora.model.vo.CommentVO;
-import com.aurora.model.vo.ConditionVO;
-import com.aurora.model.dto.PageResultDTO;
-import com.aurora.model.vo.ReviewVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -46,28 +45,21 @@ import static com.aurora.enums.CommentTypeEnum.*;
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
 
+    private static final List<Integer> types = new ArrayList<>();
     @Value("${website.url}")
     private String websiteUrl;
-
     @Autowired
     private CommentMapper commentMapper;
-
     @Autowired
     private ArticleMapper articleMapper;
-
     @Autowired
     private TalkMapper talkMapper;
-
     @Autowired
     private UserInfoMapper userInfoMapper;
-
     @Autowired
     private AuroraInfoService auroraInfoService;
-
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    private static final List<Integer> types = new ArrayList<>();
 
     @PostConstruct
     public void init() {

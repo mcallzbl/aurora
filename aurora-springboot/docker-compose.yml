@@ -1,0 +1,99 @@
+name: aurora-blog
+services:
+  mysql:
+    container_name: aurora-mysql
+    image: mysql:8
+    restart: always
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "3654:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: aurora-password
+      MYSQL_DATABASE: blog
+    volumes:
+      - ./data/mysql/data:/var/lib/mysql
+      - ./data/mysql/conf:/etc/mysql/conf.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp=true --lower_case_table_names=1
+    healthcheck:
+      start_period: 5s
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0
+    container_name: aurora-redis
+    restart: always
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "8436:6379"
+    volumes:
+      - ./data/redis:/data
+      - ./data/redis/logs:/logs
+    healthcheck:
+      start_period: 5s
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: redis-server --bind 0.0.0.0 --port 6379 --requirepass mcallzbl --appendonly yes
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    privileged: true
+    ports:
+      - "5642:5672"    # AMQP端口
+      - "13372:15672"  # 管理界面端口
+    environment:
+      - RABBITMQ_DEFAULT_USER=mcallzbl
+      - RABBITMQ_DEFAULT_PASS=mcallzbl
+      - RABBITMQ_DEFAULT_VHOST=/
+      - RABBITMQ_ERLANG_COOKIE=any-random-string-here
+    volumes:
+      - aurora_rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  es:
+    image: elasticsearch:8.18.4
+    container_name: aurora-es
+    restart: always
+    ports:
+      - "3560:9200"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - ELASTIC_PASSWORD=mcallzbl
+      - node.name=myrag-es01
+      - discovery.type=single-node
+      - xpack.license.self_generated.type=basic
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - cluster.name=myrag-es-cluster
+      - xpack.security.autoconfiguration.enabled=false
+
+      # 内存配置 (根据可用RAM调整)
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    command: >
+      bash -c "
+      if ! elasticsearch-plugin list | grep -q 'analysis-ik'; then
+        echo 'Installing analysis-ik plugin...';
+        elasticsearch-plugin install --batch https://release.infinilabs.com/analysis-ik/stable/elasticsearch-analysis-ik-8.18.4.zip;
+      else
+        echo 'analysis-ik plugin already installed.';
+      fi;
+      /usr/local/bin/docker-entrypoint.sh
+      "
+    healthcheck:
+      test: [ 'CMD', 'curl', '-s', 'http://localhost:9200/_cluster/health?pretty' ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  aurora_rabbitmq_data:

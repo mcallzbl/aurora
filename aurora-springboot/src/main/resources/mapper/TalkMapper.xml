@@ -14,7 +14,7 @@
         WHERE t.status = 1
         ORDER BY t.is_top DESC,
                  t.id DESC
-            LIMIT #{current}, #{size}
+        LIMIT #{current}, #{size}
     </select>
     <select id="getTalkById" resultType="com.aurora.model.dto.TalkDTO">
         SELECT t.id,
