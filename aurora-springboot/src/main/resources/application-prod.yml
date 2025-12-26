@@ -78,7 +78,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 
 jwt:
-  secret: aurora
+  secret: ${AURORA_BLOG_JWT_SECRET:aurorajwtsecretmustlongthan32byte}
 
 search:
   mode: elasticsearch
