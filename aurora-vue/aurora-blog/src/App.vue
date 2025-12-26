@@ -33,8 +33,8 @@
   </teleport>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onBeforeMount, onUnmounted, ref } from 'vue'
+<script lang="ts" setup>
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useCommonStore } from '@/stores/common'
 import { useMetaStore } from '@/stores/meta'
@@ -47,154 +47,135 @@ import UserCenter from '@/components/UserCenter.vue'
 import api from './api/api'
 import defaultCover from '@/assets/default-cover.jpg'
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    HeaderMain,
-    Footer,
-    Dia,
-    AuroraNavigator,
-    MobileMenu,
-    UserCenter
-  },
-  setup() {
-    const appStore = useAppStore()
-    const commonStore = useCommonStore()
-    const metaStore = useMetaStore()
-    const MOBILE_WITH = 996
-    const appWrapperClass = 'app-wrapper'
-    const loadingBarClass = ref({
-      'nprogress-custom-parent': false
+const appStore = useAppStore()
+const commonStore = useCommonStore()
+const metaStore = useMetaStore()
+const MOBILE_WIDTH = 996
+const appWrapperClass = 'app-wrapper'
+const loadingBarClass = ref({
+  'nprogress-custom-parent': false
+})
+const wrapperStyle = ref({ 'min-height': '100vh' })
+const isMobile = computed(() => {
+  return commonStore.isMobile
+})
+onMounted(() => {
+  initialApp()
+})
+onUnmounted(() => {
+  document.removeEventListener('copy', copyEventHandler)
+  window.removeEventListener('resize', resizeHandler)
+})
+const initialApp = () => {
+  initResizeEvent()
+  initialCopy()
+  initWindowOnload()
+  fetchWebsiteConfig()
+  let wrapperHeight = screen.height
+  const footerEl = document.getElementById('footer')
+  const footerHeight = footerEl?.getBoundingClientRect().height
+  if (typeof footerHeight === 'number') {
+    wrapperHeight = wrapperHeight - footerHeight * 2
+  }
+  wrapperStyle.value = {
+    'min-height': wrapperHeight + 'px'
+  }
+  appStore.initializeTheme(appStore.themeConfig.theme)
+}
+const fetchWebsiteConfig = async () => {
+  try {
+    const { data } = await api.getWebsiteConfig()
+    // 使用 $patch 批量更新 Store，减少响应式触发次数
+    appStore.$patch({
+      viewCount: data.data.viewCount,
+      articleCount: data.data.articleCount,
+      talkCount: data.data.talkCount,
+      categoryCount: data.data.categoryCount,
+      tagCount: data.data.tagCount,
+      websiteConfig: data.data.websiteConfigDTO
     })
-    const wrapperStyle = ref({ 'min-height': '100vh' })
-    const isMobile = computed(() => {
-      return commonStore.isMobile
-    })
-    onBeforeMount(() => {
-      initialApp()
-    })
-    onUnmounted(() => {
-      document.removeEventListener('copy', copyEventHandler)
-      window.removeEventListener('resize', resizeHander)
-    })
-    const initialApp = () => {
-      initResizeEvent()
-      intialCopy()
-      initWindowOnload()
-      fetchWebsiteConfig()
-      let wrapperHeight = screen.height
-      const footerEl = document.getElementById('footer')
-      const footerHeight = footerEl?.getBoundingClientRect().height
-      if (typeof footerHeight === 'number') {
-        wrapperHeight = wrapperHeight - footerHeight * 2
-      }
-      wrapperStyle.value = {
-        'min-height': wrapperHeight + 'px'
-      }
-      appStore.initializeTheme(appStore.themeConfig.theme)
-    }
-    const fetchWebsiteConfig = () => {
-      api.getWebsiteConfig().then(({ data }) => {
-        appStore.viewCount = data.data.viewCount
-        appStore.articleCount = data.data.articleCount
-        appStore.talkCount = data.data.talkCount
-        appStore.categoryCount = data.data.categoryCount
-        appStore.tagCount = data.data.tagCount
-        appStore.websiteConfig = data.data.websiteConfigDTO
-        initFavicon(data.data.websiteConfigDTO.favicon)
-      })
-    }
-    const copyEventHandler = (event: any) => {
-      if (document.getSelection() instanceof Selection) {
-        if (document.getSelection()?.toString() !== '' && event.clipboardData) {
-          event.clipboardData.setData('text', document.getSelection())
-          event.preventDefault()
-        }
-      }
-    }
-    const intialCopy = () => {
-      document.addEventListener('copy', copyEventHandler)
-    }
-    const resizeHander = () => {
-      const rect = document.body.getBoundingClientRect()
-      const mobileState = rect.width - 1 < MOBILE_WITH
-      if (isMobile.value !== mobileState) commonStore.changeMobileState(mobileState)
-    }
-    const initResizeEvent = () => {
-      resizeHander()
-      window.addEventListener('resize', resizeHander)
-    }
-    const initWindowOnload = () => {
-      window.onload = () => {
-        setTimeout(() => {
-          window.scrollTo({
-            top: 0
-          })
-        }, 10)
-      }
-    }
-    const initFavicon = (faviconUrl: string) => {
-      if (!faviconUrl) {
-        return
-      }
-      // 获取 head 标签
-      var head = document.getElementsByTagName('head')[0]
-      // 获取当前 favicon 元素
-      var favicon = document.querySelector('link[rel*=\'icon\']') || document.createElement('link')
-      // Cast favicon to HTMLLinkElement
-      var faviconLink = favicon as HTMLLinkElement
-
-      faviconLink.type = 'image/x-icon'
-      faviconLink.rel = 'shortcut icon'
-
-      // 设置新的 favicon 地址
-      faviconLink.href = faviconUrl
-
-      // 如果当前 head 标签中不存在 favicon 元素，则将新的 favicon 添加到 head 标签中
-      if (!document.querySelector('link[rel*=\'icon\']')) {
-        head.appendChild(faviconLink)
-      }
-    }
-    return {
-      title: computed(() => appStore.websiteConfig.websiteTitle || metaStore.title),
-      theme: computed(() => appStore.themeConfig.theme),
-      headerImage: computed(() => {
-        return {
-          backgroundImage: `url(${commonStore.headerImage}), url(${defaultCover})`,
-          opacity: commonStore.headerImage !== '' ? 1 : 0
-        }
-      }),
-      headerBaseBackground: computed(() => {
-        return {
-          background: appStore.themeConfig.header_gradient_css,
-          opacity: commonStore.headerImage !== '' ? 0.91 : 0.99
-        }
-      }),
-      wrapperStyle: computed(() => wrapperStyle.value),
-
-      isMobile: computed(() => commonStore.isMobile),
-      cssVariables: computed(() => {
-        if (appStore.themeConfig.theme === 'theme-dark') {
-          return `
-            --text-accent: ${appStore.themeConfig.gradient.color_1};
-            --text-sub-accent: ${appStore.themeConfig.gradient.color_3};
-            --main-gradient: ${appStore.themeConfig.header_gradient_css};
-          `
-        }
-        return `
-          --text-accent: ${appStore.themeConfig.gradient.color_3};
-          --text-sub-accent: ${appStore.themeConfig.gradient.color_2};
-          --main-gradient: ${appStore.themeConfig.header_gradient_css};
-        `
-      }),
-      appWrapperClass,
-      loadingBarClass
+    // 接口返回后更新标题
+    initFavicon(data.data.websiteConfigDTO.favicon)
+  } catch (error) {
+    console.error('配置获取失败', error)
+  }
+}
+const copyEventHandler = (event: any) => {
+  if (document.getSelection() instanceof Selection) {
+    if (document.getSelection()?.toString() !== '' && event.clipboardData) {
+      event.clipboardData.setData('text', document.getSelection())
+      event.preventDefault()
     }
   }
+}
+const initialCopy = () => {
+  document.addEventListener('copy', copyEventHandler)
+}
+const resizeHandler = () => {
+  const rect = document.body.getBoundingClientRect()
+  const mobileState = rect.width - 1 < MOBILE_WIDTH
+  if (isMobile.value !== mobileState) commonStore.changeMobileState(mobileState)
+}
+const initResizeEvent = () => {
+  resizeHandler()
+  window.addEventListener('resize', resizeHandler)
+}
+const initWindowOnload = () => {
+  window.onload = () => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0
+      })
+    }, 10)
+  }
+}
+const initFavicon = (faviconUrl: string) => {
+  if (!faviconUrl) {
+    return
+  }
+  let favicon = document.querySelector<HTMLLinkElement>('link[rel*=\'icon\']')
+  if (!favicon) {
+    favicon = document.createElement('link')
+    favicon.rel = 'icon'
+    document.head.appendChild(favicon)
+  }
+  if (favicon.href !== faviconUrl) {
+    favicon.href = faviconUrl
+  }
+}
+const title = computed(() => appStore.websiteConfig.websiteTitle || metaStore.title)
+const theme = computed(() => appStore.themeConfig.theme)
+const headerImage = computed(() => {
+  return {
+    backgroundImage: `url(${commonStore.headerImage}), url(${defaultCover})`,
+    opacity: commonStore.headerImage !== '' ? 1 : 0
+  }
+})
+const headerBaseBackground = computed(() => {
+  return {
+    background: appStore.themeConfig.header_gradient_css,
+    opacity: commonStore.headerImage !== '' ? 0.91 : 0.99
+  }
+})
+const cssVariables = computed(() => {
+  const { theme: currentTheme, gradient, header_gradient_css } = appStore.themeConfig
+
+  if (currentTheme === 'theme-dark') {
+    return `
+      --text-accent: ${gradient.color_1};
+      --text-sub-accent: ${gradient.color_3};
+      --main-gradient: ${header_gradient_css};
+    `
+  }
+  return `
+    --text-accent: ${gradient.color_3};
+    --text-sub-accent: ${gradient.color_2};
+    --main-gradient: ${header_gradient_css};
+  `
 })
 </script>
 
-<style lang="css">
+<style>
 @reference "@/styles/tailwind.css"
 .arrow-left > .icon,
 .arrow-right > .icon {
