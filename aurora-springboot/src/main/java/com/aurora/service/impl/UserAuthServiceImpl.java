@@ -175,7 +175,7 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public PageResultDTO<UserAdminDTO> listUsers(ConditionVO conditionVO) {
-        Integer count = userAuthMapper.countUser(conditionVO);
+        Long count = userAuthMapper.countUser(conditionVO);
         if (count == 0) {
             return new PageResultDTO<>();
         }

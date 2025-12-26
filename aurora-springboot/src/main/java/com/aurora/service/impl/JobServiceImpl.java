@@ -17,6 +17,7 @@ import com.aurora.util.ScheduleUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -100,7 +100,7 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, Job> implements JobSe
     public PageResultDTO<JobDTO> listJobs(JobSearchVO jobSearchVO) {
         CompletableFuture<Integer> asyncCount = CompletableFuture.supplyAsync(() -> jobMapper.countJobs(jobSearchVO));
         List<JobDTO> jobDTOs = jobMapper.listJobs(PageUtil.getLimitCurrent(), PageUtil.getSize(), jobSearchVO);
-        return new PageResultDTO<>(jobDTOs, asyncCount.get());
+        return new PageResultDTO<>(jobDTOs, (long) asyncCount.get());
     }
 
     @SneakyThrows

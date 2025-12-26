@@ -41,7 +41,7 @@ public class JobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLog> impleme
         Page<JobLog> page = new Page<>(PageUtil.getCurrent(), PageUtil.getSize());
         Page<JobLog> jobLogPage = jobLogMapper.selectPage(page, queryWrapper);
         List<JobLogDTO> jobLogDTOs = BeanCopyUtil.copyList(jobLogPage.getRecords(), JobLogDTO.class);
-        return new PageResultDTO<>(jobLogDTOs, (int) jobLogPage.getTotal());
+        return new PageResultDTO<>(jobLogDTOs, jobLogPage.getTotal());
     }
 
     @Override

@@ -2,8 +2,7 @@ package com.aurora.service;
 
 import com.aurora.model.dto.UserDetailsDTO;
 import io.jsonwebtoken.Claims;
-
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface TokenService {
 

@@ -46,7 +46,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     @SneakyThrows
     @Override
     public PageResultDTO<TagAdminDTO> listTagsAdmin(ConditionVO conditionVO) {
-        Integer count = tagMapper.selectCount(new LambdaQueryWrapper<Tag>()
+        Long count = tagMapper.selectCount(new LambdaQueryWrapper<Tag>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), Tag::getTagName, conditionVO.getKeywords()));
         if (count == 0) {
             return new PageResultDTO<>();
@@ -78,7 +78,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 
     @Override
     public void deleteTag(List<Integer> tagIds) {
-        Integer count = articleTagMapper.selectCount(new LambdaQueryWrapper<ArticleTag>()
+        Long count = articleTagMapper.selectCount(new LambdaQueryWrapper<ArticleTag>()
                 .in(ArticleTag::getTagId, tagIds));
         if (count > 0) {
             throw new BizException("删除失败，该标签下存在文章");

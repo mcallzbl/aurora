@@ -5,13 +5,16 @@ import com.aurora.strategy.SearchStrategy;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.log4j.Log4j2;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.HighlightQuery;
+import org.springframework.data.elasticsearch.core.query.highlight.Highlight;
+import org.springframework.data.elasticsearch.core.query.highlight.HighlightField;
+import org.springframework.data.elasticsearch.core.query.highlight.HighlightFieldParameters;
+import org.springframework.data.elasticsearch.core.query.highlight.HighlightParameters;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,7 +29,7 @@ import static com.aurora.enums.ArticleStatusEnum.PUBLIC;
 public class EsSearchStrategyImpl implements SearchStrategy {
 
     @Autowired
-    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private ElasticsearchOperations elasticsearchOperations;
 
     @Override
     public List<ArticleSearchDTO> searchArticle(String keywords) {
@@ -36,42 +39,54 @@ public class EsSearchStrategyImpl implements SearchStrategy {
         return search(buildQuery(keywords));
     }
 
-    private NativeSearchQueryBuilder buildQuery(String keywords) {
-        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("articleTitle", keywords))
-                        .should(QueryBuilders.matchQuery("articleContent", keywords)))
-                .must(QueryBuilders.termQuery("isDelete", FALSE))
-                .must(QueryBuilders.termQuery("status", PUBLIC.getStatus()));
-        nativeSearchQueryBuilder.withQuery(boolQueryBuilder);
-        return nativeSearchQueryBuilder;
+    private NativeQueryBuilder buildQuery(String keywords) {
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder();
+        queryBuilder.withQuery(q -> q
+                .bool(b -> b
+                        .must(m -> m.bool(sb -> sb
+                                .should(s -> s.match(ma -> ma.field("articleTitle").query(keywords)))
+                                .should(s -> s.match(ma -> ma.field("articleContent").query(keywords)))
+                        ))
+                        .must(m -> m.term(t -> t.field("isDelete").value(FALSE)))
+                        .must(m -> m.term(t -> t.field("status").value(PUBLIC.getStatus())))
+                )
+        );
+        return queryBuilder;
     }
 
-    private List<ArticleSearchDTO> search(NativeSearchQueryBuilder nativeSearchQueryBuilder) {
-        HighlightBuilder.Field titleField = new HighlightBuilder.Field("articleTitle");
-        titleField.preTags(PRE_TAG);
-        titleField.postTags(POST_TAG);
-        HighlightBuilder.Field contentField = new HighlightBuilder.Field("articleContent");
-        contentField.preTags(PRE_TAG);
-        contentField.postTags(POST_TAG);
-        contentField.fragmentSize(50);
-        nativeSearchQueryBuilder.withHighlightFields(titleField, contentField);
+    private List<ArticleSearchDTO> search(NativeQueryBuilder queryBuilder) {
+        HighlightParameters parameters = HighlightParameters.builder()
+                .withPreTags(PRE_TAG)
+                .withPostTags(POST_TAG)
+                .build();
+
+        List<HighlightField> highlightFields = new ArrayList<>();
+        highlightFields.add(new HighlightField("articleTitle"));
+        highlightFields.add(new HighlightField("articleContent",
+                HighlightFieldParameters.builder().withFragmentSize(50).build()));
+
+        queryBuilder.withHighlightQuery(new HighlightQuery(new Highlight(parameters, highlightFields), ArticleSearchDTO.class));
         try {
-            SearchHits<ArticleSearchDTO> search = elasticsearchRestTemplate.search(nativeSearchQueryBuilder.build(), ArticleSearchDTO.class);
-            return search.getSearchHits().stream().map(hit -> {
+            // 5. 执行查询
+            NativeQuery nativeQuery = queryBuilder.build();
+            SearchHits<ArticleSearchDTO> searchHits = elasticsearchOperations.search(nativeQuery, ArticleSearchDTO.class);
+
+            return searchHits.getSearchHits().stream().map(hit -> {
                 ArticleSearchDTO article = hit.getContent();
-                List<String> titleHighLightList = hit.getHighlightFields().get("articleTitle");
-                if (CollectionUtils.isNotEmpty(titleHighLightList)) {
-                    article.setArticleTitle(titleHighLightList.get(0));
+                // 6. 获取高亮结果 (注意返回的是 List<String>)
+                var highlightFieldsMap = hit.getHighlightFields();
+
+                if (CollectionUtils.isNotEmpty(highlightFieldsMap.get("articleTitle"))) {
+                    article.setArticleTitle(highlightFieldsMap.get("articleTitle").get(0));
                 }
-                List<String> contentHighLightList = hit.getHighlightFields().get("articleContent");
-                if (CollectionUtils.isNotEmpty(contentHighLightList)) {
-                    article.setArticleContent(contentHighLightList.get(contentHighLightList.size() - 1));
+                if (CollectionUtils.isNotEmpty(highlightFieldsMap.get("articleContent"))) {
+                    List<String> contentHighlights = highlightFieldsMap.get("articleContent");
+                    article.setArticleContent(contentHighlights.get(contentHighlights.size() - 1));
                 }
                 return article;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("ES查询异常: ", e);
         }
         return new ArrayList<>();
     }

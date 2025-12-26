@@ -3,6 +3,7 @@ package com.aurora.handler;
 import com.aurora.mapper.RoleMapper;
 import com.aurora.model.dto.ResourceRoleDTO;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
@@ -11,7 +12,6 @@ import org.springframework.security.web.access.intercept.FilterInvocationSecurit
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 

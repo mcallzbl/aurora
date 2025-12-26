@@ -1,5 +1,10 @@
-[![Powered by DartNode]( https://dartnode.com/branding/DN-Open-Source-sm.png)]( https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
 # Aurora---前后端分离博客
+
+## 介绍
+- 这是一个基于 [linhaojun857/aurora](https://github.com/linhaojun857/aurora)的现代化版本。
+- 已完成将博客前端构建工具迁移至vite,后端java版本由1.8升级到17
+
+
 
 ### 轻量版后端: https://github.com/zhouyqxy/aurora_Lite
 
