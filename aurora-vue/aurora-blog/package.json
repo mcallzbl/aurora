@@ -14,7 +14,7 @@
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "@tailwindcss/vite": "^4.1.18",
     "@vue/reactivity": "^3.5.26",
-    "axios": "^0.27.2",
+    "axios": "^1.13.2",
     "cytoscape": "^3.33.1",
     "element-plus": "^2.13.0",
     "fast-glob": "^3.3.3",

@@ -24,8 +24,8 @@ importers:
         specifier: ^3.5.26
         version: 3.5.26
       axios:
-        specifier: ^0.27.2
-        version: 0.27.2
+        specifier: ^1.13.2
+        version: 1.13.2
       cytoscape:
         specifier: ^3.33.1
         version: 3.33.1
@@ -109,7 +109,7 @@ importers:
         version: 6.1.1(vue@3.5.26(typescript@5.9.3))
       vue-axios:
         specifier: ^3.4.1
-        version: 3.5.2(axios@0.27.2)(vue@3.5.26(typescript@5.9.3))
+        version: 3.5.2(axios@1.13.2)(vue@3.5.26(typescript@5.9.3))
       vue-i18n:
         specifier: ^9.14.5
         version: 9.14.5(vue@3.5.26(typescript@5.9.3))
@@ -961,8 +961,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@0.27.2:
-    resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
+  axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
 
   babel-plugin-prismjs@2.1.0:
     resolution: {integrity: sha512-ehzSKYfeAz4U78zi/sfwsjDPlq0LvDKxNefcZTJ/iKBu+plsHsLqZhUeGf1+82LAcA35UZGbU6ksEx2Utphc/g==}
@@ -2408,6 +2408,9 @@ packages:
     resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
 
+  proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+
   punycode.js@2.3.1:
     resolution: {integrity: sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==}
     engines: {node: '>=6'}
@@ -3666,10 +3669,11 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@0.27.2:
+  axios@1.13.2:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
+      proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
@@ -5360,6 +5364,8 @@ snapshots:
 
   prismjs@1.30.0: {}
 
+  proxy-from-env@1.1.0: {}
+
   punycode.js@2.3.1: {}
 
   quansync@0.2.11: {}
@@ -5984,9 +5990,9 @@ snapshots:
       mime: 4.1.0
       vue: 3.5.26(typescript@5.9.3)
 
-  vue-axios@3.5.2(axios@0.27.2)(vue@3.5.26(typescript@5.9.3)):
+  vue-axios@3.5.2(axios@1.13.2)(vue@3.5.26(typescript@5.9.3)):
     dependencies:
-      axios: 0.27.2
+      axios: 1.13.2
       vue: 3.5.26(typescript@5.9.3)
 
   vue-demi@0.14.10(vue@3.5.26(typescript@5.9.3)):
