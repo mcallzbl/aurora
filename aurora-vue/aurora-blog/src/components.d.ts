@@ -28,11 +28,15 @@ declare module 'vue' {
     DropdownMenu: typeof import('./components/Dropdown/src/DropdownMenu.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCard: typeof import('element-plus/es')['ElCard']
+    ElCol: typeof import('element-plus/es')['ElCol']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElImage: typeof import('element-plus/es')['ElImage']
     ElInput: typeof import('element-plus/es')['ElInput']
+    ElRow: typeof import('element-plus/es')['ElRow']
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     Feature: typeof import('./components/Feature/src/Feature.vue')['default']
     FeatureList: typeof import('./components/Feature/src/FeatureList.vue')['default']
@@ -66,5 +70,8 @@ declare module 'vue' {
     Toggle: typeof import('./components/ToggleSwitch/Toggle.vue')['default']
     UserCenter: typeof import('./components/UserCenter.vue')['default']
     WebsiteInfo: typeof import('./components/Sidebar/src/WebsiteInfo.vue')['default']
+  }
+  export interface GlobalDirectives {
+    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
   }
 }
