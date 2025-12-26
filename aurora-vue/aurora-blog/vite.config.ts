@@ -4,10 +4,22 @@ import path, { resolve } from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import prismjs from 'vite-plugin-prismjs'
 import tailwindcss from '@tailwindcss/vite'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
   plugins: [
     vue(),
+    AutoImport({
+      imports: ['vue', 'vue-router', 'pinia'],
+      resolvers: [ElementPlusResolver()],
+      dts: 'src/auto-import.d.ts' // 生成类型定义文件
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+      dts: 'src/components.d.ts' // 生成组件类型定义
+    }),
     createSvgIconsPlugin({
       iconDirs: [resolve(__dirname, 'src/icons/svg')],
       symbolId: 'icon-[name]'

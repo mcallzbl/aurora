@@ -19,7 +19,6 @@ import VueClickAway from 'vue3-click-away'
 import lazyPlugin from 'vue3-lazy'
 import infiniteScroll from 'vue3-infinite-scroll-better'
 import v3ImgPreview from 'v3-img-preview'
-import { components, plugins } from './plugins/element-plus'
 
 import { registerSvgIcon } from '@/icons'
 import { registerObSkeleton } from '@/components/LoadingSkeleton'
@@ -91,12 +90,6 @@ axios.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-components.forEach((component) => {
-  app.component(component.name, component)
-})
-plugins.forEach((plugin) => {
-  app.use(plugin)
-})
 registerSvgIcon(app)
 registerObSkeleton(app)
 app.mount('#app')
