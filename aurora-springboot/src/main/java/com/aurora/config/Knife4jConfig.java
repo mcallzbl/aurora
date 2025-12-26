@@ -24,7 +24,7 @@ public class Knife4jConfig {
                                 .email("contact@mail.mcallzbl.com")))
                 .servers(Collections.singletonList(new Server()
                         .url("https://www.devillusion.asia")
-                        .description("摸鱼的小破站")));
+                        .description("浮生闲栈")));
     }
 
 }
