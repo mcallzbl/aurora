@@ -6,11 +6,8 @@
           <el-form-item label="作者头像">
             <el-upload
               class="avatar-uploader"
-              action="/api/admin/config/images"
-              :headers="headers"
-              :show-file-list="false"
-              :before-upload="beforeUpload"
-              :on-success="handleAuthorAvatarSuccess">
+              :http-request="(req) => cropAndUpload(req, 'authorAvatar', 1)"
+              :show-file-list="false">
               <img v-if="websiteConfigForm.authorAvatar" :src="websiteConfigForm.authorAvatar" class="avatar" />
               <i v-else class="el-icon-plus avatar-uploader-icon" />
             </el-upload>
@@ -18,11 +15,8 @@
           <el-form-item label="网站logo">
             <el-upload
               class="avatar-uploader"
-              action="/api/admin/config/images"
-              :headers="headers"
-              :show-file-list="false"
-              :before-upload="beforeUpload"
-              :on-success="handleLogoSuccess">
+              :http-request="(req) => cropAndUpload(req, 'logo', 1)"
+              :show-file-list="false">
               <img v-if="websiteConfigForm.logo" :src="websiteConfigForm.logo" class="avatar" />
               <i v-else class="el-icon-plus avatar-uploader-icon" />
             </el-upload>
@@ -30,11 +24,8 @@
           <el-form-item label="favicon">
             <el-upload
               class="avatar-uploader"
-              action="/api/admin/config/images"
-              :headers="headers"
-              :show-file-list="false"
-              :before-upload="beforeUpload"
-              :on-success="handleFaviconSuccess">
+              :http-request="(req) => cropAndUpload(req, 'favicon', 1)"
+              :show-file-list="false">
               <img v-if="websiteConfigForm.favicon" :src="websiteConfigForm.favicon" class="avatar" />
               <i v-else class="el-icon-plus avatar-uploader-icon" />
             </el-upload>
@@ -138,11 +129,8 @@
               <el-form-item label="用户头像">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
-                  :headers="headers"
-                  :show-file-list="false"
-                  :before-upload="beforeUpload"
-                  :on-success="handleUserAvatarSuccess">
+                  :http-request="(req) => cropAndUpload(req, 'userAvatar', 1)"
+                  :show-file-list="false">
                   <img v-if="websiteConfigForm.userAvatar" :src="websiteConfigForm.userAvatar" class="avatar" />
                   <i v-else class="el-icon-plus avatar-uploader-icon" />
                 </el-upload>
@@ -152,11 +140,8 @@
               <el-form-item label="游客头像">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
-                  :headers="headers"
-                  :show-file-list="false"
-                  :before-upload="beforeUpload"
-                  :on-success="handleTouristAvatarSuccess">
+                  :http-request="(req) => cropAndUpload(req, 'touristAvatar', 1)"
+                  :show-file-list="false">
                   <img v-if="websiteConfigForm.touristAvatar" :src="websiteConfigForm.touristAvatar" class="avatar" />
                   <i v-else class="el-icon-plus avatar-uploader-icon" />
                 </el-upload>
@@ -217,13 +202,25 @@
         </el-form>
       </el-tab-pane>
     </el-tabs>
+    <!-- 通用裁剪弹窗（1:1） -->
+    <image-cropper-dialog
+      ref="imageCropper"
+      :ratio="cropRatio"
+      :size="cropSize"
+      :fixed-box="true"
+      title="裁剪图片"
+      @confirm="handleCropperConfirm"
+      @cancel="handleCropperCancel"
+    />
   </el-card>
 </template>
 
 <script>
 import * as imageConversion from 'image-conversion'
+import ImageCropperDialog from '@/components/ImageCropperDialog.vue'
 
 export default {
+  components: { ImageCropperDialog },
   created() {
     this.getWebsiteConfig()
   },
@@ -231,10 +228,43 @@ export default {
     return {
       websiteConfigForm: {},
       activeName: 'info',
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') },
+      // 裁剪相关
+      cropField: null,
+      cropRatio: [1, 1],
+      cropSize: 200
     }
   },
   methods: {
+    // 通用：选图 -> 裁剪 -> 压缩 -> 上传 -> 赋值
+    cropAndUpload(req, field, ratio = 1) {
+      const file = req.file
+      if (!file) return
+      this.cropField = field
+      this.cropRatio = Array.isArray(ratio) ? ratio : [ratio, 1]
+      this.$refs.imageCropper.open(file)
+    },
+    async handleCropperConfirm({ blob }) {
+      try {
+        let uploadBlob = blob
+        if (uploadBlob.size / 1024 > this.config.UPLOAD_SIZE) {
+          uploadBlob = await imageConversion.compressAccurately(uploadBlob, this.config.UPLOAD_SIZE)
+        }
+        const form = new FormData()
+        form.append('file', uploadBlob, `${this.cropField || 'image'}.png`)
+        const { data } = await this.axios.post('/api/admin/config/images', form, { headers: this.headers })
+        if (data && data.data) {
+          this.$set(this.websiteConfigForm, this.cropField, data.data)
+        }
+      } catch (e) {
+        this.$message.error('上传失败')
+      } finally {
+        this.cropField = null
+      }
+    },
+    handleCropperCancel() {
+      this.cropField = null
+    },
     getWebsiteConfig() {
       this.axios.get('/api/admin/website/config').then(({ data }) => {
         this.websiteConfigForm = data.data

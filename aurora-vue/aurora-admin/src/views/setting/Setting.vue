@@ -1,14 +1,16 @@
 <template>
-  <el-card class="main-card">
+  <div>
+    <el-card class="main-card">
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="修改信息" name="info">
         <div class="info-container">
           <el-upload
+            ref="avatarUpload"
             class="avatar-uploader"
             action="/api/users/avatar"
             :show-file-list="false"
             :headers="headers"
-            :on-success="updateAvatar">
+            :http-request="interceptAvatarUpload">
             <img v-if="avatar" :src="avatar" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
@@ -53,11 +55,24 @@
         </el-form>
       </el-tab-pane>
     </el-tabs>
-  </el-card>
+    </el-card>
+    <!-- 复用通用裁剪弹窗（1:1） -->
+    <image-cropper-dialog
+      ref="imageCropper"
+      :ratio="[1, 1]"
+      :size="200"
+      :fixed-box="true"
+      title="裁剪头像"
+      @confirm="onAvatarCropped"
+    />
+  </div>
 </template>
 
 <script>
+import * as imageConversion from 'image-conversion'
+import ImageCropperDialog from '@/components/ImageCropperDialog.vue'
 export default {
+  components: { ImageCropperDialog },
   data: function () {
     return {
       infoForm: {
@@ -71,12 +86,37 @@ export default {
         confirmPassword: ''
       },
       activeName: 'info',
-      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') }
+      headers: { Authorization: 'Bearer ' + sessionStorage.getItem('token') },
+      // 裁剪相关
+      currentMime: 'image/jpeg'
     }
   },
   methods: {
+    // 完全接管上传流程：阻止直接上传，打开通用裁剪弹窗
+    interceptAvatarUpload(req) {
+      const file = req.file
+      if (!file) return
+      this.currentMime = file.type || 'image/jpeg'
+      this.$refs.imageCropper.open(file)
+    },
+    // 裁剪完成 -> 压缩 -> 上传 -> 更新头像
+    async onAvatarCropped({ blob, mime }) {
+      try {
+        let uploadBlob = blob
+        if (uploadBlob.size / 1024 > this.config.UPLOAD_SIZE) {
+          uploadBlob = await imageConversion.compressAccurately(uploadBlob, this.config.UPLOAD_SIZE)
+        }
+        const ext = (mime || this.currentMime) === 'image/png' ? 'png' : 'jpg'
+        const form = new FormData()
+        form.append('file', uploadBlob, `avatar.${ext}`)
+        const { data } = await this.axios.post('/api/users/avatar', form, { headers: this.headers })
+        this.updateAvatar(data)
+      } catch (e) {
+        this.$message.error('上传失败')
+      }
+    },
     handleClick(tab) {
-      if (tab.index == 2 && this.notice == '') {
+      if (tab.index === 2 && this.notice === '') {
         this.axios.get('/api/admin/notice').then(({ data }) => {
           this.notice = data.data
         })
@@ -91,7 +131,7 @@ export default {
       }
     },
     updateInfo() {
-      if (this.infoForm.nickname.trim() == '') {
+      if (this.infoForm.nickname.trim() === '') {
         this.$message.error('昵称不能为空')
         return false
       }
@@ -111,11 +151,11 @@ export default {
       })
     },
     updatePassword() {
-      if (this.passwordForm.oldPassword.trim() == '') {
+      if (this.passwordForm.oldPassword.trim() === '') {
         this.$message.error('旧密码不能为空')
         return false
       }
-      if (this.passwordForm.newPassword.trim() == '') {
+      if (this.passwordForm.newPassword.trim() === '') {
         this.$message.error('新密码不能为空')
         return false
       }
@@ -123,7 +163,7 @@ export default {
         this.$message.error('新密码不能少于6位')
         return false
       }
-      if (this.passwordForm.newPassword != this.passwordForm.confirmPassword) {
+      if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
         this.$message.error('两次密码输入不一致')
         return false
       }
