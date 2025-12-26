@@ -3,11 +3,11 @@ package com.aurora.quartz;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.aurora.entity.*;
-import com.aurora.mapper.ElasticsearchMapper;
 import com.aurora.mapper.UniqueViewMapper;
 import com.aurora.mapper.UserAuthMapper;
 import com.aurora.model.dto.ArticleSearchDTO;
 import com.aurora.model.dto.UserAreaDTO;
+import com.aurora.repository.AuroraElasticsearchRepository;
 import com.aurora.service.*;
 import com.aurora.util.BeanCopyUtil;
 import com.aurora.util.IpUtil;
@@ -58,7 +58,7 @@ public class AuroraQuartz {
     private RestTemplate restTemplate;
 
     @Autowired
-    private ElasticsearchMapper elasticsearchMapper;
+    private AuroraElasticsearchRepository auroraElasticsearchRepository;
 
 
     @Value("${website.url}")
@@ -129,10 +129,10 @@ public class AuroraQuartz {
     }
 
     public void importDataIntoES() {
-        elasticsearchMapper.deleteAll();
+        auroraElasticsearchRepository.deleteAll();
         List<Article> articles = articleService.list();
         for (Article article : articles) {
-            elasticsearchMapper.save(BeanCopyUtil.copyObject(article, ArticleSearchDTO.class));
+            auroraElasticsearchRepository.save(BeanCopyUtil.copyObject(article, ArticleSearchDTO.class));
         }
     }
 }

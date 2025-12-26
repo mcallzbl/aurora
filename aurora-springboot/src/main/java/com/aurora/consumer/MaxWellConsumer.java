@@ -2,9 +2,9 @@ package com.aurora.consumer;
 
 import com.alibaba.fastjson.JSON;
 import com.aurora.entity.Article;
-import com.aurora.mapper.ElasticsearchMapper;
 import com.aurora.model.dto.ArticleSearchDTO;
 import com.aurora.model.dto.MaxwellDataDTO;
+import com.aurora.repository.AuroraElasticsearchRepository;
 import com.aurora.util.BeanCopyUtil;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -18,7 +18,7 @@ import static com.aurora.constant.RabbitMQConstant.MAXWELL_QUEUE;
 public class MaxWellConsumer {
 
     @Autowired
-    private ElasticsearchMapper elasticsearchMapper;
+    private AuroraElasticsearchRepository auroraElasticsearchRepository;
 
     @RabbitHandler
     public void process(byte[] data) {
@@ -27,10 +27,10 @@ public class MaxWellConsumer {
         switch (maxwellDataDTO.getType()) {
             case "insert":
             case "update":
-                elasticsearchMapper.save(BeanCopyUtil.copyObject(article, ArticleSearchDTO.class));
+                auroraElasticsearchRepository.save(BeanCopyUtil.copyObject(article, ArticleSearchDTO.class));
                 break;
             case "delete":
-                elasticsearchMapper.deleteById(article.getId());
+                auroraElasticsearchRepository.deleteById(article.getId());
                 break;
             default:
                 break;
