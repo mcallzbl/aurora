@@ -92,7 +92,7 @@ def build_project():
     """执行 npm build"""
     print_step("📦 开始构建项目")
 
-    if not run_command("npm build"):
+    if not run_command("npm run build"):
         print("❌ 构建失败")
         sys.exit(1)
 
