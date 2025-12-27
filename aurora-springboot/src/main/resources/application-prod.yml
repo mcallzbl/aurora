@@ -35,7 +35,7 @@ spring:
       uris: ${AURORA_BLOG_ELASTICSEARCH_URL:localhost}
 
   mail:
-    host: smtp.163.com
+    host: smtp.qcloudmail.com
     username: ${AURORA_BLOG_MAIL_USERNAME:username}
     password: ${AURORA_BLOG_MAIL_PASSWORD:password}
     default-encoding: UTF-8
