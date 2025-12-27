@@ -151,8 +151,8 @@ def upload_to_server(archive_name):
 
     print(f"✅ 上传成功: {DEPLOY_PATH}/{archive_name}")
 
-    # 询问是否在服务器上解压
-    print("\n是否在服务器上自动解压并替换？(y/N): ", end='')
+    # 询问是否在服务器上解压（增量更新）
+    print("\n是否在服务器上自动解压并增量更新？(y/N): ", end='')
     response = input().strip().lower()
 
     if response == 'y':
@@ -163,8 +163,8 @@ def upload_to_server(archive_name):
     os.remove(archive_name)
 
 def extract_on_server(archive_name):
-    """在服务器上解压"""
-    print_step("📂 在服务器上解压")
+    """在服务器上解压（增量更新并清理旧文件）"""
+    print_step("📂 在服务器上解压并增量更新")
 
     ssh_options = [
         f"-p {DEPLOY_PORT}",
@@ -179,14 +179,22 @@ def extract_on_server(archive_name):
     elif DEPLOY_KEY:
         ssh_options.append(f"-i {DEPLOY_KEY}")
 
-    # 备份旧版本，解压新版本
+    # 增量解压：不移除旧版本，仅覆盖同名文件；随后清理 dist 下超过 7 天的文件
     remote_cmd = f"""
-        cd {DEPLOY_PATH} && \
-        [ -d dist_backup ] && rm -rf dist_backup; \
-        [ -d dist ] && mv dist dist_backup; \
-        tar -xzf {archive_name} && \
-        echo '解压完成' && \
-        rm {archive_name}
+        mkdir -p {shlex.quote(DEPLOY_PATH)} && cd {shlex.quote(DEPLOY_PATH)} && \
+        tar -xzf {shlex.quote(archive_name)} && \
+        echo "解压完成（增量更新）" && \
+        if [ -d dist ]; then \
+          echo "检查并清理 dist 目录下超过7天的旧文件..."; \
+          OLD_COUNT=$(find dist -type f -mtime +7 | wc -l); \
+          if [ "$OLD_COUNT" -gt 0 ]; then \
+            echo "将删除 $OLD_COUNT 个旧文件:"; \
+            find dist -type f -mtime +7 -print -delete; \
+          else \
+            echo "没有发现超过7天的旧文件"; \
+          fi; \
+        fi; \
+        rm -f {shlex.quote(archive_name)}
     """
 
     ssh_cmd = f"{ssh_prefix}ssh {' '.join(ssh_options)} {DEPLOY_USER}@{DEPLOY_HOST} '{remote_cmd}'"
