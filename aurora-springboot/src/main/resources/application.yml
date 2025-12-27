@@ -6,3 +6,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+management:
+  server:
+    port: 9616
+  endpoints:
+    web:
+      exposure:
+        include: 'prometheus, health'
+  metrics:
+    tags:
+      application: "aurora-springboot"
