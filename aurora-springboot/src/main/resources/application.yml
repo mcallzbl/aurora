@@ -9,6 +9,17 @@ spring:
   threads:
     virtual:
       enabled: true
+  datasource:
+    hikari:
+      minimum-idle: 10
+      idle-timeout: 180000
+      maximum-pool-size: 100
+      auto-commit: true
+      pool-name: Aurora-HikariPool
+      max-lifetime: 60000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+      register-mbeans: true
 
 management:
   server:
@@ -16,7 +27,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: 'prometheus, health'
+        include: 'prometheus, health, info'
   metrics:
     tags:
       application: "aurora-springboot"

@@ -8,15 +8,6 @@ spring:
     url: jdbc:mysql://${AURORA_BLOG_DATABASE_HOST:localhost}:${AURORA_BLOG_DATABASE_PORT:3306}/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true&createDatabaseIfNotExist=true
     username: ${AURORA_BLOG_DATABASE_USERNAME:root}
     password: ${AURORA_BLOG_DATABASE_PASSWORD:password}
-    hikari:
-      minimum-idle: 10
-      idle-timeout: 180000
-      maximum-pool-size: 100
-      auto-commit: true
-      pool-name: MyHikariCP
-      max-lifetime: 60000
-      connection-timeout: 30000
-      connection-test-query: SELECT 1
 
   rabbitmq:
     host: ${AURORA_BLOG_RABBITMQ_HOST:localhost}
