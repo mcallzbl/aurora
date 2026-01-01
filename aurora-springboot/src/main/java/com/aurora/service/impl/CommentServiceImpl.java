@@ -48,6 +48,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private static final List<Integer> types = new ArrayList<>();
     @Value("${website.url}")
     private String websiteUrl;
+
+    @Value("${website.name}")
+    private String websiteName;
     @Autowired
     private CommentMapper commentMapper;
     @Autowired
@@ -60,6 +63,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private AuroraInfoService auroraInfoService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
 
     @PostConstruct
     public void init() {
@@ -223,6 +227,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 map.put("content", userInfo.getNickname() + "在" + Objects.requireNonNull(getCommentEnum(comment.getType())).getDesc()
                         + "的评论区@了你，"
                         + "<a style=\"text-decoration:none;color:#12addb\" href=\"" + url + "\">点击查看</a>");
+                map.put("websiteName", websiteName);
+                map.put("websiteUrl", websiteUrl);
                 EmailDTO emailDTO = EmailDTO.builder()
                         .email(replyUserinfo.getEmail())
                         .subject(MENTION_REMIND)
@@ -311,6 +317,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             emailDTO.setEmail(adminEmail);
             emailDTO.setSubject(CHECK_REMIND);
             emailDTO.setTemplate("common.html");
+            map.put("websiteName", websiteName);
+            map.put("websiteUrl", websiteUrl);
             map.put("content", "您收到了一条新的回复，请前往后台管理页面审核");
         }
         emailDTO.setCommentMap(map);

@@ -31,6 +31,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +73,12 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Autowired
     private SocialLoginStrategyContext socialLoginStrategyContext;
 
+    @Value("${website.url}")
+    private String websiteUrl;
+
+    @Value("${website.name}")
+    private String websiteName;
+
     @Override
     public void sendCode(String username) {
         if (!checkEmail(username)) {
@@ -80,6 +87,8 @@ public class UserAuthServiceImpl implements UserAuthService {
         String code = getRandomCode();
         Map<String, Object> map = new HashMap<>();
         map.put("content", "您的验证码为 " + code + " 有效期15分钟，请不要告诉他人哦！");
+        map.put("websiteName", websiteName);
+        map.put("websiteUrl", websiteUrl);
         EmailDTO emailDTO = EmailDTO.builder()
                 .email(username)
                 .subject(CommonConstant.CAPTCHA)

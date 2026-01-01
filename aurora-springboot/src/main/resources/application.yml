@@ -21,6 +21,9 @@ spring:
       connection-test-query: SELECT 1
       register-mbeans: true
 
+website:
+  name: 浮生闲栈
+
 management:
   server:
     port: 9616
