@@ -51,7 +51,7 @@ public class SubscribeConsumer {
             map.put("websiteName", websiteName);
             map.put("websiteUrl", websiteUrl);
             emailDTO.setEmail(email);
-            emailDTO.setSubject("文章订阅");
+            emailDTO.setSubject(websiteName + "文章订阅");
             emailDTO.setTemplate("common.html");
             String url = websiteUrl + "/articles/" + articleId;
             if (article.getUpdateTime() == null) {
