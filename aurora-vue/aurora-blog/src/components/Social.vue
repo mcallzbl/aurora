@@ -51,21 +51,12 @@
   </ul>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 
-export default defineComponent({
-  name: 'Social',
-  setup() {
-    const appStore = useAppStore()
-    return {
-      websiteConfig: computed(() => {
-        return appStore.websiteConfig
-      })
-    }
-  }
-})
+const appStore = useAppStore()
+const websiteConfig = computed(() => appStore.websiteConfig)
 </script>
 
 <style scoped>
