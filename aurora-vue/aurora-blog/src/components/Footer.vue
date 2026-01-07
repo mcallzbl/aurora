@@ -7,13 +7,13 @@
           class="flex flex-col lg:flex-row gap-6 lg:gap-12 row-span-1 lg:col-span-5 text-center lg:text-left mx-auto">
           <ul class="flex flex-col gap-2 mx-auto">
             <li class="flex flex-row mx-auto">
-              Copyright © 2022 - {{ currentYear }}
+              Copyright © 2024 - {{ currentYear }}
               <b class="font-extrabold">&nbsp;{{ websiteConfig.author }}</b>
             </li>
             <li v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined"
                 class="flex flex-row mx-auto">
-              <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11011402013558" target="_blank">
-                <img src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float:left;" /> &nbsp;
+              <a href="https://beian.mps.gov.cn/#/query/webSearch" target="_blank">
+                <img alt="" src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float:left;" /> &nbsp;
                 <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.gonganBeianNumber }} </b>
               </a>
             </li>
@@ -30,31 +30,16 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue'
+<script lang="ts" setup>
+import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
-import { useI18n } from 'vue-i18n'
 
-export default defineComponent({
-  name: 'Footer',
-  setup() {
-    const appStore = useAppStore()
-    const { t } = useI18n()
-    return {
-      avatarClass: computed(() => {
-        return {
-          'footer-avatar': true,
-          [appStore.themeConfig.profile_shape]: true
-        }
-      }),
-      gradientText: computed(() => appStore.themeConfig.background_gradient_style),
-      gradientBackground: computed(() => {
-        return { background: appStore.themeConfig.header_gradient_css }
-      }),
-      currentYear: computed(() => new Date().getUTCFullYear()),
-      websiteConfig: computed(() => appStore.websiteConfig),
-      t
-    }
-  }
-})
+const appStore = useAppStore()
+
+const gradientBackground = computed(() => ({
+  background: appStore.themeConfig.header_gradient_css
+}))
+
+const currentYear = computed(() => new Date().getUTCFullYear())
+const websiteConfig = computed(() => appStore.websiteConfig)
 </script>
