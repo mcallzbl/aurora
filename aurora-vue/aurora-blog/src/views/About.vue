@@ -46,8 +46,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, nextTick, onMounted, onUnmounted, provide, reactive, ref, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, nextTick, onMounted, onUnmounted, provide, reactive, ref } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { useI18n } from 'vue-i18n'
 import { Navigator, Profile, Sidebar } from '@/components/Sidebar'
@@ -64,127 +64,127 @@ import emitter from '@/utils/mitt'
 import { v3ImgPreviewFn } from 'v3-img-preview'
 import markdownToHtml from '@/utils/markdown'
 
-export default defineComponent({
-  name: 'About',
-  components: { Breadcrumb, Sidebar, Profile, Navigator, Sticky, SubTitle, Comment },
-  setup() {
-    const commonStore = useCommonStore()
-    const commentStore = useCommentStore()
-    const { t } = useI18n()
-    const postRef = ref()
-    const reactiveData = reactive({
-      about: '' as any,
-      comments: [] as any,
-      haveMore: false as any,
-      isReload: false as any,
-      images: [] as any
-    })
-    const pageInfo = reactive({
-      current: 1,
-      size: 7
-    })
-    commentStore.type = 3
-    onMounted(() => {
-      fetchComments()
-      fetchAbout()
-    })
-    onUnmounted(() => {
-      commonStore.resetHeaderImage()
-      tocbot.destroy()
-    })
-    provide(
-      'comments',
-      computed(() => reactiveData.comments)
-    )
-    provide(
-      'haveMore',
-      computed(() => reactiveData.haveMore)
-    )
-    emitter.on('aboutFetchComment', () => {
-      pageInfo.current = 1
-      reactiveData.isReload = true
-      fetchComments()
-    })
-    emitter.on('aboutFetchReplies', (index) => {
-      fetchReplies(index)
-    })
-    emitter.on('aboutLoadMore', () => {
-      fetchComments()
-    })
-    const handlePreview = (index: any) => {
-      v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
-    }
-    const initTocbot = () => {
-      const nodes = postRef.value.children
-      if (nodes.length) {
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i]
-          const reg = /^H[1-4]{1}$/
-          if (reg.exec(node.tagName)) {
-            node.id = String(i)
-          }
-        }
+defineOptions({ name: 'About' })
+
+const commonStore = useCommonStore()
+const commentStore = useCommentStore()
+const { t } = useI18n()
+
+const postRef = ref<HTMLElement | null>(null)
+const reactiveData = reactive({
+  about: '' as string,
+  comments: [] as any[],
+  haveMore: false,
+  isReload: false,
+  images: [] as string[]
+})
+// expose for template
+const about = computed(() => reactiveData.about)
+const pageInfo = reactive({
+  current: 1,
+  size: 7
+})
+
+commentStore.type = 3
+
+onMounted(() => {
+  fetchComments()
+  fetchAbout()
+})
+
+onUnmounted(() => {
+  commonStore.resetHeaderImage()
+  tocbot.destroy()
+})
+
+provide('comments', computed(() => reactiveData.comments))
+provide('haveMore', computed(() => reactiveData.haveMore))
+
+emitter.on('aboutFetchComment', () => {
+  pageInfo.current = 1
+  reactiveData.isReload = true
+  fetchComments()
+})
+
+emitter.on('aboutFetchReplies', (index) => {
+  fetchReplies(index as number)
+})
+
+emitter.on('aboutLoadMore', () => {
+  fetchComments()
+})
+
+const handlePreview = (index: any) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+}
+
+const initTocbot = () => {
+  const nodes = postRef.value?.children || []
+  if (nodes.length) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i] as HTMLElement
+      const reg = /^H[1-4]{1}$/
+      if (reg.exec(node.tagName)) {
+        node.id = String(i)
       }
-      tocbot.init({
-        tocSelector: '#toc2',
-        contentSelector: '.post-html',
-        headingSelector: 'h1, h2, h3',
-        collapseDepth: 3,
-        disableTocScrollSync: true,
-        onClick: function(e) {
-          e.preventDefault()
-        }
-      })
-      const imgs = postRef.value.getElementsByTagName('img')
-      for (let i = 0; i < imgs.length; i++) {
-        reactiveData.images.push(imgs[i].src)
-        imgs[i].addEventListener('click', function(e: any) {
-          handlePreview(e.target.currentSrc)
-        })
-      }
-    }
-    const fetchAbout = () => {
-      api.getAbout().then(({ data }) => {
-        data.data.content = markdownToHtml(data.data.content)
-        reactiveData.about = data.data.content
-        nextTick(() => {
-          Prism.highlightAll()
-          initTocbot()
-        })
-      })
-    }
-    const fetchComments = () => {
-      const params = {
-        type: 3,
-        topicId: null,
-        current: pageInfo.current,
-        size: pageInfo.size
-      }
-      api.getComments(params).then(({ data }) => {
-        const records = Array.isArray(data?.data?.records) ? data.data.records : []
-        if (reactiveData.isReload) {
-          reactiveData.comments = records
-          reactiveData.isReload = false
-        } else if (records.length > 0) {
-          reactiveData.comments.push(...records)
-        }
-        const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
-        reactiveData.haveMore = total > reactiveData.comments.length
-        pageInfo.current++
-      })
-    }
-    const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
-    }
-    return {
-      postRef,
-      ...toRefs(reactiveData),
-      t
     }
   }
-})
+  tocbot.init({
+    tocSelector: '#toc2',
+    contentSelector: '.post-html',
+    headingSelector: 'h1, h2, h3',
+    collapseDepth: 3,
+    disableTocScrollSync: true,
+    onClick: function(e: Event) {
+      e.preventDefault()
+    }
+  })
+  const imgs = postRef.value?.getElementsByTagName('img') || []
+  for (let i = 0; i < imgs.length; i++) {
+    reactiveData.images.push(imgs[i].src)
+    imgs[i].addEventListener('click', function(e: any) {
+      handlePreview(e.target.currentSrc)
+    })
+  }
+}
+
+const fetchAbout = () => {
+  api.getAbout().then(({ data }) => {
+    data.data.content = markdownToHtml(data.data.content)
+    reactiveData.about = data.data.content
+    nextTick(() => {
+      Prism.highlightAll()
+      initTocbot()
+    })
+  })
+}
+
+const fetchComments = () => {
+  const params = {
+    type: 3,
+    topicId: null,
+    current: pageInfo.current,
+    size: pageInfo.size
+  }
+  api.getComments(params).then(({ data }) => {
+    const records = Array.isArray(data?.data?.records) ? data.data.records : []
+    if (reactiveData.isReload) {
+      reactiveData.comments = records
+      reactiveData.isReload = false
+    } else if (records.length > 0) {
+      reactiveData.comments.push(...records)
+    }
+    const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
+    reactiveData.haveMore = total > reactiveData.comments.length
+    pageInfo.current++
+  })
+}
+
+const fetchReplies = (index: number) => {
+  api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
+    reactiveData.comments[index].replyDTOs = data.data
+  })
+}
 </script>
 
 <style lang="scss">
