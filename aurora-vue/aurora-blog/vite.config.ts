@@ -25,7 +25,23 @@ export default defineConfig({
       symbolId: 'icon-[name]'
     }),
     prismjs({
-      languages: ['javascript', 'css', 'sql', 'java', 'c', 'cpp', 'nginx', 'markup', 'shell', 'json'],
+      languages: [
+        'javascript',
+        'typescript',
+        'python',
+        'kotlin',
+        'go',
+        'yaml',
+        'css',
+        'sql',
+        'java',
+        'c',
+        'cpp',
+        'nginx',
+        'markup',
+        'shell',
+        'json'
+      ],
       plugins: ['line-numbers', 'toolbar', 'copy-to-clipboard'],
       theme: 'okaidia',
       css: true
