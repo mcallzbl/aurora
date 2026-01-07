@@ -26,79 +26,79 @@
         </DropdownMenu>
       </Dropdown>
     </template>
-    <span class="ob-drop-shadow" data-dia="light-switch" no-hover-effect>
+    <span v-if="!isMobile" class="ob-drop-shadow" data-dia="light-switch" no-hover-effect>
       <ThemeToggle />
     </span>
   </div>
   <el-dialog v-model="loginDialogVisible" :fullscreen="isMobile" width="30%">
     <el-form @keyup.enter.native="login">
-      <el-form-item class="mt-5" model="userInfo">
-        <el-input v-model="loginInfo.username" placeholder="邮箱" />
+      <el-form-item class="mt-5">
+        <el-input v-model="loginInfo.username" :placeholder="t('auth.email')" />
       </el-form-item>
-      <el-form-item class="mt-8" model="userInfo" type="password">
-        <el-input v-model="loginInfo.password" placeholder="密码" show-password type="password" />
-      </el-form-item>
-      <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="login">登录</el-button>
+      <el-form-item class="mt-8" type="password">
+        <el-input v-model="loginInfo.password" :placeholder="t('auth.password')" show-password type="password" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto my-el-button" type="default" @click="qqLogin">QQ登录</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="login">{{ t('settings.login') }}</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button class="mx-auto my-el-button" type="default" @click="qqLogin">{{ t('auth.qq_login') }}</el-button>
       </el-form-item>
       <div class="mt-8">
-        <span class="text" @click="openRegisterDialog">立即注册</span>
-        <span class="text float-right" @click="openForgetPasswordDialog">忘记密码?</span>
+        <span class="text" @click="openRegisterDialog">{{ t('auth.register_now') }}</span>
+        <span class="text float-right" @click="openForgetPasswordDialog">{{ t('auth.forgot_password') }}</span>
       </div>
     </el-form>
   </el-dialog>
   <el-dialog v-model="registerDialogVisible" :fullscreen="isMobile" width="30%">
     <el-form>
-      <el-form-item class="mt-5" model="userInfo">
-        <el-input v-model="loginInfo.username" placeholder="邮箱" />
+      <el-form-item class="mt-5">
+        <el-input v-model="loginInfo.username" :placeholder="t('auth.email')" />
       </el-form-item>
-      <el-form-item class="mt-8" model="userInfo">
-        <el-input v-model="loginInfo.code" placeholder="验证码">
+      <el-form-item class="mt-8">
+        <el-input v-model="loginInfo.code" :placeholder="t('auth.code')">
           <template #append>
-            <span class="text" @click="sendCode">发送</span>
+            <span class="text" @click="sendCode">{{ t('auth.send_code') }}</span>
           </template>
         </el-input>
       </el-form-item>
-      <el-form-item class="mt-8" model="userInfo" type="password">
-        <el-input v-model="loginInfo.password" placeholder="密码" show-password type="password" />
+      <el-form-item class="mt-8" type="password">
+        <el-input v-model="loginInfo.password" :placeholder="t('auth.password')" show-password type="password" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="register">注册</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="register">{{ t('auth.register') }}</el-button>
       </el-form-item>
-      <span class="text" @click="returnLoginDialog">已有帐号?登录</span>
+      <span class="text" @click="returnLoginDialog">{{ t('auth.login_existing') }}</span>
     </el-form>
   </el-dialog>
   <el-dialog v-model="forgetPasswordDialogVisible" :fullscreen="isMobile" width="30%">
     <el-form>
-      <el-form-item class="mt-5" model="userInfo">
-        <el-input v-model="loginInfo.username" placeholder="邮箱" />
+      <el-form-item class="mt-5">
+        <el-input v-model="loginInfo.username" :placeholder="t('auth.email')" />
       </el-form-item>
-      <el-form-item class="mt-8" model="userInfo">
-        <el-input v-model="loginInfo.code" placeholder="验证码">
+      <el-form-item class="mt-8">
+        <el-input v-model="loginInfo.code" :placeholder="t('auth.code')">
           <template #append>
-            <span class="text" @click="sendCode">发送</span>
+            <span class="text" @click="sendCode">{{ t('auth.send_code') }}</span>
           </template>
         </el-input>
       </el-form-item>
-      <el-form-item class="mt-8" model="userInfo" type="password">
-        <el-input v-model="loginInfo.password" placeholder="新密码" show-password type="password" />
+      <el-form-item class="mt-8" type="password">
+        <el-input v-model="loginInfo.password" :placeholder="t('auth.new_password')" show-password type="password" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="updatePassword">确定</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="updatePassword">{{ t('common.confirm') }}</el-button>
       </el-form-item>
-      <span class="text" @click="returnLoginDialog">返回登录</span>
+      <span class="text" @click="returnLoginDialog">{{ t('auth.back_to_login') }}</span>
     </el-form>
   </el-dialog>
   <el-dialog v-model="articlePasswordDialogVisible" :fullscreen="isMobile" width="30%">
     <el-form @submit.native.prevent @keyup.enter.native="accessArticle">
-      <el-form-item class="mt-5" model="userInfo">
-        <el-input id="article-password-input" v-model="articlePassword" placeholder="文章受密码保护,请输入密码" />
+      <el-form-item class="mt-5">
+        <el-input id="article-password-input" v-model="articlePassword" :placeholder="t('auth.article_password_placeholder')" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="accessArticle">校验密码</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="accessArticle">{{ t('auth.verify_password') }}</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -107,8 +107,8 @@
   </teleport>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, getCurrentInstance, nextTick, reactive, toRef, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, reactive, ref } from 'vue'
 import { Dropdown, DropdownItem, DropdownMenu } from '@/components/Dropdown'
 import { useAppStore } from '@/stores/app'
 import { useCommonStore } from '@/stores/common'
@@ -122,229 +122,184 @@ import config from '@/config/config'
 import { useI18n } from 'vue-i18n'
 import emitter from '@/utils/mitt'
 
-export default defineComponent({
-  name: 'Controls',
-  components: {
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    ThemeToggle,
-    SearchModel
-  },
-  setup() {
-    const { t, locale } = useI18n()
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const appStore = useAppStore()
-    const commonStore = useCommonStore()
-    const userStore = useUserStore()
-    const searchStore = useSearchStore()
-    const route = useRoute()
-    const router = useRouter()
-    const loginInfo = reactive({
-      username: '' as any,
-      password: '' as any,
-      code: '' as any
-    })
-    const reactiveDate = reactive({
-      loginDialogVisible: false,
-      registerDialogVisible: false,
-      forgetPasswordDialogVisible: false,
-      articlePasswordDialogVisible: false,
-      articlePassword: '',
-      articleId: ''
-    })
-    emitter.on('changeArticlePasswordDialogVisible', (articleId: any) => {
-      reactiveDate.articlePasswordDialogVisible = true
-      reactiveDate.articlePassword = ''
-      reactiveDate.articleId = articleId
-      nextTick(() => {
-        document.getElementById('article-password-input')?.focus()
-      })
-    })
-    const handleClick = (name: string): void => {
-      appStore.changeLocale(name)
-    }
-    const login = () => {
-      if (loginInfo.username.trim().length == 0 || loginInfo.password.trim().length == 0) {
-        proxy.$notify({
-          title: 'Warning',
-          message: '账号或者密码不能为空',
-          type: 'warning'
-        })
-        return
-      }
-      const params = new URLSearchParams()
-      params.append('username', loginInfo.username)
-      params.append('password', loginInfo.password)
-      api.login(params).then(({ data }) => {
-        if (data.flag) {
-          userStore.userInfo = data.data
-          sessionStorage.setItem('token', data.data.token)
-          userStore.token = data.data.token
-          proxy.$notify({
-            title: 'Success',
-            message: '登录成功',
-            type: 'success'
-          })
-          reactiveDate.loginDialogVisible = false
-        }
-      })
-    }
-    const logout = () => {
-      api.logout().then(({ data }) => {
-        if (data.flag) {
-          userStore.userInfo = ''
-          userStore.token = ''
-          userStore.accessArticles = []
-          sessionStorage.removeItem('token')
-          proxy.$notify({
-            title: 'Success',
-            message: '登出成功',
-            type: 'success'
-          })
-        }
-      })
-    }
-    const openUserCenter = () => {
-      userStore.userVisible = true
-    }
-    const openLoginDialog = () => {
-      reactiveDate.loginDialogVisible = true
-    }
-    const openRegisterDialog = () => {
-      loginInfo.code = ''
-      reactiveDate.loginDialogVisible = false
-      reactiveDate.registerDialogVisible = true
-    }
-    const returnLoginDialog = () => {
-      reactiveDate.registerDialogVisible = false
-      reactiveDate.forgetPasswordDialogVisible = false
-      reactiveDate.loginDialogVisible = true
-    }
-    const openForgetPasswordDialog = () => {
-      loginInfo.code = ''
-      reactiveDate.loginDialogVisible = false
-      reactiveDate.forgetPasswordDialogVisible = true
-    }
-    const sendCode = () => {
-      api.sendValidationCode(loginInfo.username).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '验证码已发送',
-            type: 'success'
-          })
-        }
-      })
-    }
-    const register = () => {
-      const params = {
-        code: loginInfo.code,
-        username: loginInfo.username,
-        password: loginInfo.password
-      }
-      api.register(params).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '注册成功',
-            type: 'success'
-          })
-          reactiveDate.registerDialogVisible = false
-          reactiveDate.loginDialogVisible = true
-        }
-      })
-    }
-    const handleOpenModel: any = (status: boolean) => {
-      searchStore.setOpenModal(status)
-    }
-    const openLanguageModal = () => {
-      emitter.emit('openLanguageModal')
-    }
+const { t, locale } = useI18n()
+const proxy = getCurrentInstance()!.appContext.config.globalProperties as any
+const appStore = useAppStore()
+const commonStore = useCommonStore()
+const userStore = useUserStore()
+const searchStore = useSearchStore()
+const route = useRoute()
+const router = useRouter()
 
-    const qqLogin = () => {
-      userStore.currentUrl = route.path
-      reactiveDate.loginDialogVisible = false
-      if (commonStore.isMobile) {
-        //@ts-ignore
-        QC.Login.showPopup({
-          appId: config.qqLogin.QQ_APP_ID,
-          redirectURI: config.qqLogin.QQ_REDIRECT_URI
-        })
-      } else {
-        window.open(
-          'https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=' +
-          +config.qqLogin.QQ_APP_ID +
-          '&response_type=token&scope=all&redirect_uri=' +
-          config.qqLogin.QQ_REDIRECT_URI,
-          '_self'
-        )
-      }
+const loginInfo = reactive({
+  username: '',
+  password: '',
+  code: ''
+})
+
+const loginDialogVisible = ref(false)
+const registerDialogVisible = ref(false)
+const forgetPasswordDialogVisible = ref(false)
+const articlePasswordDialogVisible = ref(false)
+const articlePassword = ref('')
+const articleId = ref('')
+
+const isMobile = computed(() => commonStore.isMobile)
+const userInfo = computed(() => userStore.userInfo)
+const multiLanguage = computed(() => {
+  const websiteConfig: any = appStore.websiteConfig
+  return websiteConfig?.multiLanguage
+})
+
+const handleOpenModel = () => {
+  searchStore.setOpenModal(true)
+}
+
+const openLanguageModal = () => {
+  emitter.emit('openLanguageModal')
+}
+
+const openUserCenter = () => {
+  userStore.userVisible = true
+}
+
+const openLoginDialog = () => {
+  loginDialogVisible.value = true
+}
+
+const openRegisterDialog = () => {
+  loginInfo.code = ''
+  loginDialogVisible.value = false
+  registerDialogVisible.value = true
+}
+
+const returnLoginDialog = () => {
+  registerDialogVisible.value = false
+  forgetPasswordDialogVisible.value = false
+  loginDialogVisible.value = true
+}
+
+const openForgetPasswordDialog = () => {
+  loginInfo.code = ''
+  loginDialogVisible.value = false
+  forgetPasswordDialogVisible.value = true
+}
+
+const sendCode = () => {
+  api.sendValidationCode(loginInfo.username).then(({ data }) => {
+    if (data.flag) {
+      proxy.$notify({ title: t('common.success'), message: t('auth.code_sent'), type: 'success' })
     }
-    const updatePassword = () => {
-      api.updatePassword(loginInfo).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '修改成功',
-            type: 'success'
-          })
-          reactiveDate.forgetPasswordDialogVisible = false
-          reactiveDate.loginDialogVisible = true
-        }
-      })
-    }
-    const accessArticle = () => {
-      if (reactiveDate.articlePassword.trim().length == 0) {
-        proxy.$notify({
-          title: 'Warning',
-          message: '密码不能为空',
-          type: 'warning'
-        })
-        return
-      }
-      api
-        .accessArticle({
-          articleId: reactiveDate.articleId,
-          articlePassword: reactiveDate.articlePassword
-        })
-        .then(({ data }) => {
-          if (data.flag) {
-            reactiveDate.articlePasswordDialogVisible = false
-            userStore.accessArticles.push(reactiveDate.articleId)
-            router.push({ path: '/articles/' + reactiveDate.articleId })
-          }
-        })
-    }
-    return {
-      handleOpenModel,
-      loginInfo,
-      ...toRefs(reactiveDate),
-      userInfo: toRef(userStore.$state, 'userInfo'),
-      isMobile: toRef(commonStore.$state, 'isMobile'),
-      login,
-      qqLogin,
-      logout,
-      handleClick,
-      openLanguageModal,
-      openUserCenter,
-      openLoginDialog,
-      openRegisterDialog,
-      returnLoginDialog,
-      sendCode,
-      register,
-      updatePassword,
-      openForgetPasswordDialog,
-      accessArticle,
-      openLanguageModal,
-      multiLanguage: computed(() => {
-        const websiteConfig: any = appStore.websiteConfig
-        return websiteConfig.multiLanguage
-      }),
-      t,
-      locale
-    }
+  })
+}
+
+const register = () => {
+  const params = {
+    code: loginInfo.code,
+    username: loginInfo.username,
+    password: loginInfo.password
   }
+  api.register(params).then(({ data }) => {
+    if (data.flag) {
+      proxy.$notify({ title: t('common.success'), message: t('auth.register_success'), type: 'success' })
+      registerDialogVisible.value = false
+      loginDialogVisible.value = true
+    }
+  })
+}
+
+const login = () => {
+  if (loginInfo.username.trim().length === 0 || loginInfo.password.trim().length === 0) {
+    proxy.$notify({ title: t('common.warning'), message: t('auth.password_empty'), type: 'warning' })
+    return
+  }
+  const params = new URLSearchParams()
+  params.append('username', loginInfo.username)
+  params.append('password', loginInfo.password)
+  api.login(params).then(({ data }) => {
+    if (data.flag) {
+      userStore.userInfo = data.data
+      sessionStorage.setItem('token', data.data.token)
+      userStore.token = data.data.token
+      proxy.$notify({ title: t('common.success'), message: t('auth.login_success'), type: 'success' })
+      loginDialogVisible.value = false
+    }
+  })
+}
+
+const logout = () => {
+  api.logout().then(({ data }) => {
+    if (data.flag) {
+      userStore.userInfo = ''
+      userStore.token = ''
+      userStore.accessArticles = []
+      sessionStorage.removeItem('token')
+      proxy.$notify({ title: t('common.success'), message: t('auth.logout_success'), type: 'success' })
+    }
+  })
+}
+
+const qqLogin = () => {
+  userStore.currentUrl = route.path
+  loginDialogVisible.value = false
+  if (commonStore.isMobile) {
+    // @ts-ignore QQ SDK global
+    QC.Login.showPopup({
+      appId: config.qqLogin.QQ_APP_ID,
+      redirectURI: config.qqLogin.QQ_REDIRECT_URI
+    })
+  } else {
+    const url =
+      'https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=' +
+      String(config.qqLogin.QQ_APP_ID) +
+      '&response_type=token&scope=all&redirect_uri=' +
+      encodeURIComponent(String(config.qqLogin.QQ_REDIRECT_URI))
+    window.open(url, '_self')
+  }
+}
+
+const updatePassword = () => {
+  api.updatePassword(loginInfo).then(({ data }) => {
+    if (data.flag) {
+      proxy.$notify({ title: t('common.success'), message: t('auth.update_success'), type: 'success' })
+      forgetPasswordDialogVisible.value = false
+      loginDialogVisible.value = true
+    }
+  })
+}
+
+const accessArticle = () => {
+  if (articlePassword.value.trim().length === 0) {
+    proxy.$notify({ title: t('common.warning'), message: t('auth.password_empty'), type: 'warning' })
+    return
+  }
+  api
+    .accessArticle({
+      articleId: articleId.value,
+      articlePassword: articlePassword.value
+    })
+    .then(({ data }) => {
+      if (data.flag) {
+        articlePasswordDialogVisible.value = false
+        userStore.accessArticles.push(articleId.value)
+        router.push({ path: '/articles/' + articleId.value })
+      }
+    })
+}
+
+// open article password dialog from emitter (widen payload type to satisfy mitt Handler<unknown>)
+const onArticlePasswordDialog = (payload: unknown) => {
+  const id = typeof payload === 'string' ? payload : String(payload ?? '')
+  articlePasswordDialogVisible.value = true
+  articlePassword.value = ''
+  articleId.value = id
+  nextTick(() => {
+    document.getElementById('article-password-input')?.focus()
+  })
+}
+emitter.on('changeArticlePasswordDialogVisible', onArticlePasswordDialog)
+onBeforeUnmount(() => {
+  emitter.off('changeArticlePasswordDialogVisible', onArticlePasswordDialog)
 })
 </script>
 <style lang="scss">

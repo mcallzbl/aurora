@@ -225,5 +225,31 @@
   "languages": {
     "en": "English",
     "zh": "Chinese"
+  },
+  "common": {
+    "success": "Success",
+    "warning": "Warning",
+    "confirm": "Confirm"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "new_password": "New Password",
+    "code": "Verification Code",
+    "send_code": "Send",
+    "register": "Register",
+    "register_now": "Register now",
+    "login_existing": "Already have an account? Login",
+    "forgot_password": "Forgot password?",
+    "qq_login": "QQ Login",
+    "back_to_login": "Back to login",
+    "article_password_placeholder": "Article is protected, please enter password",
+    "verify_password": "Verify Password",
+    "login_success": "Logged in successfully",
+    "logout_success": "Logged out successfully",
+    "register_success": "Registered successfully",
+    "code_sent": "Verification code sent",
+    "update_success": "Updated successfully",
+    "password_empty": "Password cannot be empty"
   }
 }
