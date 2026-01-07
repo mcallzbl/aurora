@@ -4,7 +4,7 @@
       <Breadcrumb :current="t('menu.tags')" />
       <h1 class="post-title text-white uppercase">{{ t('menu.tags') }}</h1>
     </div>
-    <div class="bg-ob-deep-800 px-14 py-16 rounded-2xl shadow-xl block">
+    <div class="ob-card">
       <TagList>
         <template v-if="tags != '' && tags.length > 0">
           <TagItem v-for="tag in tags" :id="tag.id" :key="tag.id" :count="tag.count" :name="tag.tagName" size="xl" />

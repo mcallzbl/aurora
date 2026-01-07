@@ -15,7 +15,7 @@
       <div class="main-grid">
         <div class="relative">
           <div v-if="about" ref="postRef" class="post-html" v-html="about" />
-          <div v-else class="bg-ob-deep-800 px-14 py-16 rounded-2xl shadow-xl block min-h-screen">
+          <div v-else class="ob-card min-h-screen">
             <ob-skeleton :count="1" class="mb-6" height="36px" tag="div" width="150px" />
             <br />
             <ob-skeleton :count="35" class="mr-2" height="16px" tag="div" width="100px" />

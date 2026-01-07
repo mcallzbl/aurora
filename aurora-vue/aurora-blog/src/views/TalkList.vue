@@ -10,7 +10,7 @@
           <div
             v-for="item in talks"
             :key="item.id"
-            class="bg-ob-deep-800 flex p-4 lg:p-8 rounded-2xl shadow-xl mb-0 talk-item"
+            class="bg-ob-deep-800 flex p-3 md:p-4 lg:p-8 rounded-2xl shadow-xl mb-0 talk-item"
             @click="toTalk(item.id)">
             <Avatar :url="item.avatar" />
             <div class="talk-info">

@@ -5,6 +5,13 @@
     --theme-transition: all 250ms ease;
 }
 
+/* Shrink grid gaps on small screens to avoid cramped content */
+@media (max-width: 768px) {
+    :root {
+        --gap: 1rem;
+    }
+}
+
 .theme-light {
     --background-primary: #f1f3f9;
     --background-primary-alt: #fafafa;

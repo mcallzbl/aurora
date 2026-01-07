@@ -55,6 +55,27 @@ div::-webkit-scrollbar-track {
     background: transparent !important;
 }
 
+/* Responsive card container: reduce padding on small screens to avoid narrow content */
+.ob-card {
+    @apply bg-ob-deep-800 rounded-2xl shadow-xl block;
+    padding: 1rem; /* ~16px on mobile */
+}
+
+@media (min-width: 768px) {
+    .ob-card {
+        padding: 2rem; /* md and up */
+    }
+}
+
+@media (min-width: 1024px) {
+    .ob-card {
+        padding-left: 3.5rem; /* ≈ px-14 */
+        padding-right: 3.5rem;
+        padding-top: 4rem;    /* ≈ py-16 */
+        padding-bottom: 4rem;
+    }
+}
+
 .is-collapsible {
     max-height: 1000px;
     overflow: hidden;

@@ -1,5 +1,5 @@
 <template>
-  <div id="App-Wrapper" :class="[appWrapperClass, theme]" :style="wrapperStyle">
+  <div id="App-Wrapper" :class="[appWrapperClass, theme, pageClass]" :style="wrapperStyle">
     <div
       id="App-Container"
       :style="cssVariables"
@@ -39,6 +39,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useCommonStore } from '@/stores/common'
 import { useMetaStore } from '@/stores/meta'
+import { useRoute } from 'vue-router'
 import HeaderMain from '@/components/Header/src/Header.vue'
 import Footer from '@/components/Footer.vue'
 import MobileMenu from '@/components/MobileMenu.vue'
@@ -52,6 +53,7 @@ import defaultCover from '@/assets/default-cover.jpg'
 const appStore = useAppStore()
 const commonStore = useCommonStore()
 const metaStore = useMetaStore()
+const route = useRoute()
 const MOBILE_WIDTH = 996
 const appWrapperClass = 'app-wrapper'
 const loadingBarClass = ref({
@@ -175,6 +177,9 @@ const cssVariables = computed(() => {
     --main-gradient: ${header_gradient_css};
   `
 })
+
+// route-based class for page-level styling (e.g., mobile article full-bleed background)
+const pageClass = computed(() => (route.path.startsWith('/articles/') ? 'page-article' : ''))
 </script>
 
 <style>
@@ -366,5 +371,25 @@ body {
   transition: ease-in-out opacity 300ms;
   z-index: 2;
   opacity: 0.91;
+}
+
+/* Article page (mobile only): hide banner to avoid background mismatch */
+@media (max-width: 768px) {
+  .page-article .app-banner {
+    display: none !important;
+  }
+  /* Header colors adapt to light background on article pages (mobile) */
+  .page-article .site-header,
+  .page-article .site-header * {
+    color: var(--text-normal) !important;
+    text-shadow: none !important;
+  }
+  .page-article .header-controls span {
+    color: var(--text-normal) !important;
+  }
+  .page-article .header-controls .svg-icon {
+    stroke: currentColor !important;
+    fill: currentColor !important;
+  }
 }
 </style>

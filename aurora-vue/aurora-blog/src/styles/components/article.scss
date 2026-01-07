@@ -173,6 +173,10 @@
   }
 }
 
+.article-block {
+  background: transparent;
+}
+
 .post-html {
   @apply bg-ob-deep-800 p-4 lg:p-14 rounded-2xl shadow-xl mb-8 lg:mb-0;
   h1,
@@ -606,6 +610,61 @@
     padding: 0.1rem 0.3rem;
     border-radius: 0.3rem;
     color: var(--text-accent) !important;
+  }
+}
+
+/* Mobile: keep card, but reduce outer gap and inner padding */
+@media (max-width: 768px) {
+  .article-block {
+    /* Full-bleed background */
+    width: 100vw;
+    max-width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    background: var(--background-secondary) !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .post-header {
+    padding: 0.75rem; /* align with content padding inside the block */
+    background: transparent; /* header itself stays transparent, article-block provides bg */
+    box-shadow: none;
+    border-radius: 0;
+    margin-bottom: 0;        /* eliminate gap between header and content */
+  }
+  /* Keep content inner spacing minimal while header/content share one background */
+  .post-html {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.75rem;
+    background: transparent !important; /* background comes from article-block */
+    box-shadow: none !important;
+  }
+  .post-skeleton {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* On article pages, header texts/icons adapt to light background on mobile */
+  .page-article .post-header .post-title,
+  .page-article .post-header .post-labels > b,
+  .page-article .post-header .post-labels ul li {
+    color: var(--text-normal) !important;
+    text-shadow: none !important;
+  }
+  .page-article .post-footer span,
+  .page-article .post-footer strong,
+  .page-article .post-stats > span {
+    color: var(--text-normal) !important;
+    text-shadow: none !important;
+  }
+  .page-article .post-header .svg-icon,
+  .page-article .post-stats .svg-icon {
+    stroke: currentColor !important;
   }
 }
 

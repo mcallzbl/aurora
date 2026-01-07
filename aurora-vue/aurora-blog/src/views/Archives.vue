@@ -4,7 +4,7 @@
       <Breadcrumb :current="t('menu.archives')" />
       <h1 class="post-title text-white uppercase">{{ t('menu.archives') }}</h1>
     </div>
-    <div class="bg-ob-deep-800 px-14 py-16 rounded-2xl shadow-xl block min-h-screen">
+    <div class="ob-card min-h-screen">
       <ul class="timeline timeline-centered">
         <template
           v-for="archive in archives"
