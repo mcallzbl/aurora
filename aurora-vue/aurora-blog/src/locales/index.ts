@@ -47,7 +47,8 @@ function loadLocaleMessages(): LocaleMessages {
   return messages
 }
 
-const cookieLocale = cookies.get('locale') ? String(cookies.get('locale')) : 'en'
+const isClient = typeof window !== 'undefined'
+const cookieLocale = isClient && cookies.get('locale') ? String(cookies.get('locale')) : 'en'
 // normalize legacy 'cn' to 'zh'
 const normalizedLocale = cookieLocale === 'cn' ? 'zh' : cookieLocale
 

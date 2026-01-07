@@ -141,9 +141,10 @@
 
 <script lang="ts" setup>
 import { Navigator, Profile, Sidebar } from '@/components/Sidebar'
-import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, provide, reactive, ref, toRefs } from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, onServerPrefetch, provide, reactive, ref, toRefs } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useHead } from '@vueuse/head'
 import { Comment } from '@/components/Comment'
 import { SubTitle } from '@/components/Title'
 import { ArticleCard } from '@/components/ArticleCard'
@@ -154,7 +155,8 @@ import Sticky from '@/components/Sticky.vue'
 import Prism from 'prismjs'
 import tocbot from 'tocbot'
 import emitter from '@/utils/mitt'
-import { v3ImgPreviewFn } from 'v3-img-preview'
+import v3ImgPreviewPkg from 'v3-img-preview'
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
@@ -165,7 +167,8 @@ const route = useRoute()
 const router = useRouter()
 const { t, d } = useI18n()
 
-const loading = ref(true)
+// Avoid skeletons in SSR HTML: default loading=false when SSR renders
+const loading = ref(import.meta.env.SSR ? false : true)
 const articleRef = ref<HTMLElement | null>(null)
 interface ReactiveData {
   articleId: string | number | undefined
@@ -197,10 +200,63 @@ const pageInfo = reactive({
 })
 commentStore.type = 1
 
+// SSR: prefetch and render article HTML (no top-level await -> no async setup)
+onServerPrefetch(async () => {
+  try {
+    reactiveData.articleId = route.params.articleId as any
+    const API_BASE = import.meta.env.VITE_API_BASE as string
+    const resp = await fetch(`${API_BASE}/articles/${reactiveData.articleId}`, {
+      headers: { accept: 'application/json' }
+    })
+    const raw = await resp.text()
+    const j = JSON.parse(raw)
+    if (j && j.data) {
+      const a = j.data
+      const { default: MarkdownIt } = await import('markdown-it')
+      const mdSSR = new MarkdownIt({ html: true })
+      a.articleContent = mdSSR.render(a.articleContent || '')
+      reactiveData.article = a
+      const plain = String(a.articleContent)
+        .replace(/<\/?[^>]*>/g, '')
+        .replace(/[|]*\n/, '')
+        .replace(/&npsp;/gi, '')
+      reactiveData.wordNum = Math.round(plain.length / 100) / 10 + 'k'
+      reactiveData.readTime = Math.round(plain.length / 400) + 'mins'
+      if (a.articleCover) commonStore.setHeaderImage(a.articleCover)
+      if (a.preArticleCard) {
+        const txt = mdSSR.render(a.preArticleCard.articleContent || '')
+          .replace(/<\/?[^>]*>/g, '')
+          .replace(/[|]*\n/, '')
+          .replace(/&npsp;/gi, '')
+        reactiveData.preArticleCard = { ...a.preArticleCard, articleContent: txt }
+      }
+      if (a.nextArticleCard) {
+        const txt = mdSSR.render(a.nextArticleCard.articleContent || '')
+          .replace(/<\/?[^>]*>/g, '')
+          .replace(/[|]*\n/, '')
+          .replace(/&npsp;/gi, '')
+        reactiveData.nextArticleCard = { ...a.nextArticleCard, articleContent: txt }
+      }
+      loading.value = false
+    }
+  } catch (_) {
+    // ignore SSR failure; client will refetch on mounted
+  }
+})
+
 onMounted(() => {
   reactiveData.articleId = route.params.articleId as any
   toPageTop()
-  fetchArticle()
+  // If SSR already populated the article, avoid refetch (prevents flicker)
+  if (!reactiveData.article || !(reactiveData.article as any).id) {
+    fetchArticle()
+  } else {
+    loading.value = false
+    nextTick(() => {
+      Prism.highlightAll()
+      initTocbot()
+    })
+  }
   fetchComments()
 })
 
@@ -293,18 +349,15 @@ const fetchArticle = () => {
       return
     }
     commonStore.setHeaderImage(data.data.articleCover)
-    new Promise((resolve) => {
-      data.data.articleContent = markdownToHtml(data.data.articleContent)
-      resolve(data.data)
-    }).then((article: any) => {
-      reactiveData.article = article
-      reactiveData.wordNum = Math.round(deleteHTMLTag(article.articleContent).length / 100) / 10 + 'k'
-      reactiveData.readTime = Math.round(deleteHTMLTag(article.articleContent).length / 400) + 'mins'
-      loading.value = false
-      nextTick(() => {
-        Prism.highlightAll()
-        initTocbot()
-      })
+    const a = data.data
+    a.articleContent = markdownToHtml(a.articleContent)
+    reactiveData.article = a
+    reactiveData.wordNum = Math.round(deleteHTMLTag(a.articleContent).length / 100) / 10 + 'k'
+    reactiveData.readTime = Math.round(deleteHTMLTag(a.articleContent).length / 400) + 'mins'
+    loading.value = false
+    nextTick(() => {
+      Prism.highlightAll()
+      initTocbot()
     })
     if (data.data.preArticleCard) {
       new Promise((resolve) => {
@@ -378,6 +431,57 @@ const deleteHTMLTag = (content: any) => {
 
 const { article, wordNum, readTime, comments, images, preArticleCard, nextArticleCard, haveMore, isReload } = toRefs(reactiveData)
 const isMobile = computed(() => commonStore.isMobile)
+
+// SEO head tags
+const ORIGIN = typeof window !== 'undefined' ? window.location.origin : 'https://www.devillusion.asia'
+const canonicalUrl = computed(() => `${ORIGIN}/articles/${reactiveData.articleId ?? ''}`)
+const plainText = computed(() => {
+  const raw = (reactiveData.article as any)?.articleContent || ''
+  return String(raw)
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/[#>*_`~\-\[\]\(\)!]/g, '')
+    .replace(/<\/?[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+})
+const headTitle = computed(() => (reactiveData.article as any)?.articleTitle || 'Article')
+const headDesc = computed(() => (plainText.value || headTitle.value).slice(0, 160))
+const headImage = computed(() => (reactiveData.article as any)?.articleCover || `${ORIGIN}/favicon.ico`)
+
+useHead(() => ({
+  title: headTitle.value,
+  meta: [
+    { name: 'description', content: headDesc.value },
+    { property: 'og:title', content: headTitle.value },
+    { property: 'og:description', content: headDesc.value },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: canonicalUrl.value },
+    { property: 'og:image', content: headImage.value },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: headTitle.value },
+    { name: 'twitter:description', content: headDesc.value },
+    { name: 'twitter:image', content: headImage.value }
+  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: headTitle.value,
+        datePublished: (reactiveData.article as any)?.createTime || undefined,
+        dateModified:
+          (reactiveData.article as any)?.updateTime || (reactiveData.article as any)?.createTime || undefined,
+        author: (reactiveData.article as any)?.author?.nickname
+          ? { '@type': 'Person', name: (reactiveData.article as any).author.nickname }
+          : undefined,
+        image: headImage.value,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl.value }
+      })
+    }
+  ]
+}))
 
 </script>
 <style lang="scss">

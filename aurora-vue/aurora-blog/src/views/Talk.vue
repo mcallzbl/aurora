@@ -58,7 +58,8 @@ import { Profile, Sidebar } from '../components/Sidebar'
 import { Comment } from '../components/Comment'
 import Avatar from '../components/Avatar.vue'
 import { useCommentStore } from '@/stores/comment'
-import { v3ImgPreviewFn } from 'v3-img-preview'
+import v3ImgPreviewPkg from 'v3-img-preview'
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import emitter from '@/utils/mitt'
 import api from '@/api/api'
 

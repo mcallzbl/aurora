@@ -1,13 +1,17 @@
-import router from '@/router'
+import type { Router } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
-router.beforeEach(() => {
-  const appStore = useAppStore()
-  appStore.startLoading()
-})
+export function installRouterGuards(router: Router) {
+  if (typeof window === 'undefined') return
 
-router.afterEach(() => {
-  const appStore = useAppStore()
-  appStore.endLoading()
-  document.getElementById('App-Container')?.focus()
-})
+  router.beforeEach(() => {
+    const appStore = useAppStore()
+    appStore.startLoading()
+  })
+
+  router.afterEach(() => {
+    const appStore = useAppStore()
+    appStore.endLoading()
+    document.getElementById('App-Container')?.focus()
+  })
+}

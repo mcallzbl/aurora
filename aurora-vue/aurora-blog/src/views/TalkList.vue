@@ -67,7 +67,8 @@ import Breadcrumb from '@/components/Breadcrumb.vue'
 import { Profile, Sidebar } from '../components/Sidebar'
 import Paginator from '@/components/Paginator.vue'
 import Avatar from '../components/Avatar.vue'
-import { v3ImgPreviewFn } from 'v3-img-preview'
+import v3ImgPreviewPkg from 'v3-img-preview'
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import { useRouter } from 'vue-router'
 import api from '@/api/api'
 

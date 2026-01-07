@@ -1,6 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter as _createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 
-const routes = [
+export const routes = [
   {
     path: '/',
     name: 'Home',
@@ -73,9 +73,11 @@ const routes = [
   }
 ]
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
-
-export default router
+// Factory for CSR usage (not used by SSG entry). Avoids creating history during SSR.
+// Factory used by ViteSSG (expects a named export `createRouter`)
+export function createRouter() {
+  const history = import.meta.env.SSR
+    ? createMemoryHistory(import.meta.env.BASE_URL)
+    : createWebHistory(import.meta.env.BASE_URL)
+  return _createRouter({ history, routes })
+}

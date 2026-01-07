@@ -11,6 +11,8 @@ import markdownItMark from 'markdown-it-mark'
 import markdownItKatex from '@iktakahiro/markdown-it-katex'
 import mermaidPlugin from '@agoose77/markdown-it-mermaid'
 
+const isServer = typeof window === 'undefined'
+
 export default function markdownToHtml(content: any) {
   const md = new MarkdownIt({
     html: true
@@ -27,6 +29,9 @@ export default function markdownToHtml(content: any) {
     .use(markdownItIns)
     .use(markdownItMark)
     .use(markdownItKatex)
-    .use(mermaidPlugin)
+  // Mermaid requires DOM; skip on SSR to avoid empty content
+  if (!isServer) {
+    md.use(mermaidPlugin)
+  }
   return md.render(content)
 }

@@ -7,7 +7,9 @@
         <button id="pick-avatar" @click="showCropper = true">
           <el-avatar :size="110" :src="userInfo.avatar" class="ml-40" />
         </button>
-        <avatar-cropper
+        <component
+          v-if="isClient"
+          :is="AvatarCropper"
           v-model="showCropper"
           :request-options="options"
           trigger="#pick-avatar"
@@ -78,10 +80,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, reactive, ref, toRef, toRefs } from 'vue'
+import { computed, defineAsyncComponent, defineComponent, getCurrentInstance, reactive, ref, toRef, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
-import AvatarCropper from 'vue-avatar-cropper'
 import api from '@/api/api'
 
 defineOptions({ name: 'UserCenter' })
@@ -103,6 +104,10 @@ const { message, emailDialogVisible, email, VerificationCode, loading, switchSta
 const showCropper = ref(false)
 const userInfo = toRef(userStore.$state, 'userInfo')
 const visible = toRef(userStore.$state, 'userVisible')
+const isClient = typeof window !== 'undefined'
+const AvatarCropper = isClient
+  ? defineAsyncComponent(() => import('vue-avatar-cropper'))
+  : defineComponent({ name: 'AvatarCropperStub', setup: () => () => null })
 
 const handleClose = () => {
   userStore.userVisible = false

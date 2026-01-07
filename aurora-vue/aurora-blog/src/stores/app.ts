@@ -4,10 +4,10 @@ import cookies from 'js-cookie'
 import nProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
+// Base config; parent is set dynamically at runtime
 nProgress.configure({
   showSpinner: false,
-  trickleSpeed: 100,
-  parent: '#loading-bar-wrapper'
+  trickleSpeed: 100
 })
 
 const setTheme = (theme: string) => {
@@ -79,9 +79,13 @@ export const useAppStore = defineStore('appStore', {
       setTheme(this.themeConfig.theme)
     },
     startLoading() {
+      if (typeof document === 'undefined') return
       if (this.appLoading === true) return
       if (this.NPTimeout !== -1) clearTimeout(this.NPTimeout)
       if (this.loadingTimeout !== -1) clearTimeout(this.loadingTimeout)
+      const parentEl = document.getElementById('loading-bar-wrapper')
+      if (parentEl) nProgress.configure({ parent: '#loading-bar-wrapper' })
+      else nProgress.configure({ parent: 'body' })
       nProgress.start()
       this.appLoading = true
     },

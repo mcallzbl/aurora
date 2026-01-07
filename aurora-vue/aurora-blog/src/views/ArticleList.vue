@@ -25,7 +25,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs } from 'vue'
+import { defineComponent, onMounted, onServerPrefetch, reactive, toRefs } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { ArticleCard } from '@/components/ArticleCard'
 import Paginator from '@/components/Paginator.vue'
@@ -52,25 +52,48 @@ export default defineComponent({
       reactiveData.tagName = route.query.tagName
       fetchArticles()
     })
-    const fetchArticles = () => {
+    // SSR prefetch so tag list pages render with content during SSG
+    onServerPrefetch(async () => {
+      try {
+        reactiveData.tagName = route.query.tagName as any
+        const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api'
+        const params = new URLSearchParams({
+          tagId: String(route.params.tagId ?? ''),
+          current: String(pagination.current),
+          size: String(pagination.size)
+        })
+        const resp = await fetch(`${API_BASE}/articles/tagId?${params.toString()}`)
+        const j = await resp.json()
+        const records = Array.isArray(j?.data?.records) ? j.data.records : []
+        records.forEach((item: any) => {
+          item.articleContent = markdownToHtml(item.articleContent)
+            .replace(/<\/?[^>]*>/g, '')
+            .replace(/[|]*\n/, '')
+            .replace(/&npsp;/gi, '')
+        })
+        reactiveData.articles = records
+        pagination.total = typeof j?.data?.count === 'number' ? j.data.count : records.length
+        reactiveData.haveArticles = true
+      } catch (_) {
+        // ignore SSR failure; client will refetch
+      }
+    })
+    const fetchArticles = async () => {
       reactiveData.haveArticles = false
-      api
-        .getArticlesByTagId({
-          tagId: route.params.tagId,
-          current: pagination.current,
-          size: pagination.size
-        })
-        .then(({ data }) => {
-          data.data.records.forEach((item: any) => {
-            item.articleContent = markdownToHtml(item.articleContent)
-              .replace(/<\/?[^>]*>/g, '')
-              .replace(/[|]*\n/, '')
-              .replace(/&npsp;/gi, '')
-          })
-          reactiveData.articles = data.data.records
-          pagination.total = data.data.count
-          reactiveData.haveArticles = true
-        })
+      const { data } = await api.getArticlesByTagId({
+        tagId: route.params.tagId,
+        current: pagination.current,
+        size: pagination.size
+      })
+      data.data.records.forEach((item: any) => {
+        item.articleContent = markdownToHtml(item.articleContent)
+          .replace(/<\/?[^>]*>/g, '')
+          .replace(/[|]*\n/, '')
+          .replace(/&npsp;/gi, '')
+      })
+      reactiveData.articles = data.data.records
+      pagination.total = data.data.count
+      reactiveData.haveArticles = true
     }
     const backToPageTop = () => {
       window.scrollTo({

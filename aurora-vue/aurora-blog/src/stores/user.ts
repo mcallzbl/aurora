@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+const ssrSafeSessionStorage: Storage | undefined =
+  typeof window !== 'undefined' ? window.sessionStorage : undefined
 
 export const useUserStore = defineStore('userStore', {
   state: () => {
@@ -13,7 +15,5 @@ export const useUserStore = defineStore('userStore', {
     }
   },
   actions: {},
-  persist: {
-    storage: window.sessionStorage
-  }
+  persist: ssrSafeSessionStorage ? { storage: ssrSafeSessionStorage } : false as any
 })

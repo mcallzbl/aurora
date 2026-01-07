@@ -47,7 +47,8 @@ import { useCommonStore } from '@/stores/common'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
 import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
-import { v3ImgPreviewFn } from 'v3-img-preview'
+import v3ImgPreviewPkg from 'v3-img-preview'
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import api from '@/api/api'
 
 export default defineComponent({

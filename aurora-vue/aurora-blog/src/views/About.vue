@@ -61,7 +61,8 @@ import Prism from 'prismjs'
 import '@/styles/prism-aurora-future.css'
 import api from '@/api/api'
 import emitter from '@/utils/mitt'
-import { v3ImgPreviewFn } from 'v3-img-preview'
+import v3ImgPreviewPkg from 'v3-img-preview'
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import markdownToHtml from '@/utils/markdown'
 
 defineOptions({ name: 'About' })
