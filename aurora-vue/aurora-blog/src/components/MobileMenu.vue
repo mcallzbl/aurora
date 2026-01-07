@@ -73,6 +73,18 @@
       </Dropdown>
     </li>
   </ul>
+  <div class="mt-6 w-full px-4">
+    <div class="flex items-center justify-center gap-6">
+      <!-- Mobile search trigger -->
+      <button class="diamond-icon" type="button" @click="openSearch">
+        <svg-icon icon-class="search" />
+      </button>
+      <!-- Mobile theme toggle placed here -->
+      <span class="ob-drop-shadow" no-hover-effect>
+        <ThemeToggle />
+      </span>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -82,6 +94,8 @@ import { useI18n } from 'vue-i18n'
 import { Dropdown, DropdownItem, DropdownMenu } from '@/components/Dropdown'
 import { useRouter } from 'vue-router'
 import { useNavigatorStore } from '@/stores/navigator'
+import { useSearchStore } from '@/stores/search'
+import ThemeToggle from '@/components/ToggleSwitch/ThemeToggle.vue'
 import Social from '@/components/Social.vue'
 import config from '@/config/config'
 import api from '@/api/api'
@@ -93,6 +107,7 @@ export default defineComponent({
     const appStore = useAppStore()
     const router = useRouter()
     const navigatorStore = useNavigatorStore()
+    const searchStore = useSearchStore()
     const { t } = useI18n()
     const reactiveData = reactive({
       routes: '' as any,
@@ -119,6 +134,10 @@ export default defineComponent({
         })
       }
     }
+    const openSearch = () => {
+      navigatorStore.setOpenNavigator(false)
+      searchStore.setOpenModal(true)
+    }
     const getMenuLabel = (name: string): string => {
       const key = `menu.${String(name).toLowerCase()}`
       return t(key)
@@ -137,8 +156,10 @@ export default defineComponent({
       categoryCount: computed(() => appStore.categoryCount),
       tagCount: computed(() => appStore.tagCount),
       t,
+      openSearch,
       getMenuLabel
     }
   }
 })
 </script>
+<style lang="scss" scoped></style>

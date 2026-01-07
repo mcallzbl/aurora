@@ -28,6 +28,7 @@
   <AuroraNavigator />
   <Dia v-if="!isMobile" />
   <UserCenter />
+  <LanguageModal />
   <teleport to="head">
     <title>{{ title }}</title>
   </teleport>
@@ -44,6 +45,7 @@ import MobileMenu from '@/components/MobileMenu.vue'
 import Dia from '@/components/Dia.vue'
 import AuroraNavigator from '@/components/AuroraNavigator.vue'
 import UserCenter from '@/components/UserCenter.vue'
+import LanguageModal from '@/components/LanguageModal.vue'
 import api from './api/api'
 import defaultCover from '@/assets/default-cover.jpg'
 

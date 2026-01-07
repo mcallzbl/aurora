@@ -71,6 +71,7 @@
     "personal-center":"Personal Center",
     "running-time":"Running Time",
     "view-count":"View Count",
+    "tips-open-language": "Choose language",
     "minutes_suffix": "mins",
     "words_suffix_k": "k"
   },
@@ -220,5 +221,9 @@
     "empty": "Comment cannot be empty",
     "pending_review": "Comment submitted, pending review",
     "success": "Comment added successfully"
+  },
+  "languages": {
+    "en": "English",
+    "zh": "Chinese"
   }
 }

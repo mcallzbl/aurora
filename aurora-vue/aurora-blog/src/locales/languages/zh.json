@@ -71,6 +71,7 @@
     "personal-center":"个人中心",
     "running-time":"运行时间",
     "view-count":"总访问量",
+    "tips-open-language": "选择语言",
     "minutes_suffix": "分钟",
     "words_suffix_k": "k字"
   },
@@ -84,6 +85,10 @@
     "empty": "评论不能为空",
     "pending_review": "评论成功，正在审核中",
     "success": "评论成功"
+  },
+  "languages": {
+    "en": "英语",
+    "zh": "中文"
   },
   "dia": {
     "messages": [

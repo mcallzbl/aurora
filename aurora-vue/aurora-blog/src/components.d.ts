@@ -43,6 +43,7 @@ declare module 'vue' {
     Footer: typeof import('./components/Footer.vue')['default']
     Header: typeof import('./components/Header/src/Header.vue')['default']
     HorizontalArticle: typeof import('./components/ArticleCard/src/HorizontalArticle.vue')['default']
+    LanguageModal: typeof import('./components/LanguageModal.vue')['default']
     Logo: typeof import('./components/Header/src/Logo.vue')['default']
     MobileMenu: typeof import('./components/MobileMenu.vue')['default']
     Navigation: typeof import('./components/Header/src/Navigation.vue')['default']

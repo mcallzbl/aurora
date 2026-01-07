@@ -1,19 +1,11 @@
 <template>
   <div class="header-controls absolute top-10 right-0 flex flex-row" tabindex="0" @keydown.k="handleOpenModel">
-    <span class="ob-drop-shadow" data-dia="search" @click="handleOpenModel">
+    <span v-if="!isMobile" class="ob-drop-shadow" data-dia="search" @click="handleOpenModel">
       <svg-icon icon-class="search" />
     </span>
-    <Dropdown v-if="multiLanguage === 1" @command="handleClick">
-      <span class="ob-drop-shadow" data-dia="language">
-        <svg-icon icon-class="globe" />
-        <span v-if="locale === 'zh'">中文</span>
-        <span v-else>EN</span>
-      </span>
-      <DropdownMenu>
-        <DropdownItem name="en">English</DropdownItem>
-        <DropdownItem name="zh">中文</DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+    <span v-if="multiLanguage === 1" class="ob-drop-shadow" data-dia="language" @click="openLanguageModal">
+      <svg-icon icon-class="globe" />
+    </span>
     <template v-if="userInfo === ''">
       <span class="mr-3" @click="openLoginDialog">{{ t('settings.login') }}</span>
     </template>
@@ -266,6 +258,9 @@ export default defineComponent({
     const handleOpenModel: any = (status: boolean) => {
       searchStore.setOpenModal(status)
     }
+    const openLanguageModal = () => {
+      emitter.emit('openLanguageModal')
+    }
 
     const qqLogin = () => {
       userStore.currentUrl = route.path
@@ -331,6 +326,7 @@ export default defineComponent({
       qqLogin,
       logout,
       handleClick,
+      openLanguageModal,
       openUserCenter,
       openLoginDialog,
       openRegisterDialog,
@@ -340,6 +336,7 @@ export default defineComponent({
       updatePassword,
       openForgetPasswordDialog,
       accessArticle,
+      openLanguageModal,
       multiLanguage: computed(() => {
         const websiteConfig: any = appStore.websiteConfig
         return websiteConfig.multiLanguage
