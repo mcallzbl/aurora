@@ -79,60 +79,56 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, getCurrentInstance, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, getCurrentInstance, toRef } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import emitter from '@/utils/mitt'
 
-export default defineComponent({
-  name: 'ArticleCard',
-  props: ['data'],
-  setup(props) {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const appStore = useAppStore()
-    const userStore = useUserStore()
-    const router = useRouter()
-    const { t, d } = useI18n()
-    const handleAuthorClick = (link: string) => {
-      if (link === '') link = window.location.href
-      window.open(link)
+defineOptions({ name: 'ArticleCard' })
+
+const props = defineProps<{ data: any }>()
+
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const appStore = useAppStore()
+const userStore = useUserStore()
+const router = useRouter()
+const { t, d } = useI18n()
+
+const article = toRef(props, 'data')
+
+const handleAuthorClick = (link: string) => {
+  if (link === '') link = window.location.href
+  window.open(link)
+}
+
+const toArticle = () => {
+  let isAccess = false
+  userStore.accessArticles.forEach((item: any) => {
+    if (item == props.data.id) {
+      isAccess = true
     }
-    const toArticle = () => {
-      let isAccess = false
-      userStore.accessArticles.forEach((item: any) => {
-        if (item == props.data.id) {
-          isAccess = true
-        }
+  })
+  if (props.data.status === 2 && isAccess == false) {
+    if (userStore.userInfo === '') {
+      proxy.$notify({
+        title: t('common.warning'),
+        message: t('article.protected_login_required'),
+        type: 'warning'
       })
-      if (props.data.status === 2 && isAccess == false) {
-        if (userStore.userInfo === '') {
-          proxy.$notify({
-            title: 'Warning',
-            message: '该文章受密码保护,请登录后访问',
-            type: 'warning'
-          })
-        } else {
-          emitter.emit('changeArticlePasswordDialogVisible', props.data.id)
-        }
-      } else {
-        router.push({ path: '/articles/' + props.data.id })
-      }
+    } else {
+      emitter.emit('changeArticlePasswordDialogVisible', props.data.id)
     }
-    return {
-      gradientBackground: computed(() => {
-        return { background: appStore.themeConfig.header_gradient_css }
-      }),
-      article: toRefs(props).data,
-      handleAuthorClick,
-      toArticle,
-      t,
-      d
-    }
+  } else {
+    router.push({ path: '/articles/' + props.data.id })
   }
-})
+}
+
+const gradientBackground = computed(() => ({
+  background: appStore.themeConfig.header_gradient_css
+}))
 </script>
 
 <style lang="scss" scoped>

@@ -214,6 +214,9 @@
   "errors": {
     "article_password_failed": "Article password verification failed"
   },
+  "article": {
+    "protected_login_required": "This article is password-protected. Please login to access."
+  },
   "comments": {
     "placeholder": "Add comment...",
     "submit": "Add Comment",
