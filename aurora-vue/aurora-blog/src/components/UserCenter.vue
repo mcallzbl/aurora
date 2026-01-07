@@ -1,8 +1,8 @@
 <template>
   <el-drawer v-model="visible" :before-close="handleClose" :with-header="false" direction="rtl">
-    <span class="text font-semibold text-2xl">用户中心</span>
+    <span class="text font-semibold text-2xl">{{ t('settings.personal-center') }}</span>
     <template v-if="userInfo !== ''">
-      <span class="text font-medium">(该页面的信息,本网站将严格保密)</span>
+      <span class="text font-medium">{{ t('user.info_privacy_hint') }}</span>
       <div class="max-w-full mt-10">
         <button id="pick-avatar" @click="showCropper = true">
           <el-avatar :size="110" :src="userInfo.avatar" class="ml-40" />
@@ -14,26 +14,26 @@
           upload-url="/api/users/avatar"
           @uploaded="handleSuccess" />
         <el-form>
-          <el-form-item class="mt-5" label="昵称:" model="userInfo">
+          <el-form-item class="mt-5" :label="t('user.nickname') + ':'" model="userInfo">
             <el-input v-model="userInfo.nickname" />
           </el-form-item>
-          <el-form-item class="mt-5" label="网址:" model="userInfo">
-            <el-input v-model="userInfo.website" placeholder="Please add https:// or http://" />
+          <el-form-item class="mt-5" :label="t('user.website') + ':'" model="userInfo">
+            <el-input v-model="userInfo.website" :placeholder="t('user.website_placeholder')" />
           </el-form-item>
-          <el-form-item class="mt-5" label="描述:" model="userInfo">
-            <el-input v-model="userInfo.intro" placeholder="Introduce youself" />
+          <el-form-item class="mt-5" :label="t('user.intro') + ':'" model="userInfo">
+            <el-input v-model="userInfo.intro" :placeholder="t('user.intro_placeholder')" />
           </el-form-item>
-          <el-form-item class="mt-5" label="邮箱:" model="userInfo">
+          <el-form-item class="mt-5" :label="t('auth.email') + ':'" model="userInfo">
             <el-input :placeholder="userInfo.email" disabled>
               <template v-if="userInfo.email === null" #append>
-                <span class="text" @click="changeEmailDialogVisible">绑定</span>
+                <span class="text" @click="changeEmailDialogVisible">{{ t('auth.bind') }}</span>
               </template>
               <template v-else #append>
-                <span class="text" @click="changeEmailDialogVisible">修改</span>
+                <span class="text" @click="changeEmailDialogVisible">{{ t('auth.change') }}</span>
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item label="订阅:">
+          <el-form-item :label="t('user.subscribe') + ':'">
             <el-switch
               v-model="userInfo.isSubscribe"
               :active-value="1"
@@ -48,7 +48,7 @@
             class="mt-5 w-20 text-white p-2 rounded-lg transition transform hover:scale-105 flex float-right"
             type="button"
             @click="commit">
-            <span class="text-center flex-grow commit">提交</span>
+            <span class="text-center flex-grow commit">{{ t('common.submit') }}</span>
           </button>
         </el-form>
       </div>
@@ -59,10 +59,10 @@
   <el-dialog v-model="emailDialogVisible" width="30%">
     <el-form>
       <el-form-item class="mt-5" model="userInfo">
-        <el-input v-model="email" placeholder="邮箱号" />
+        <el-input v-model="email" :placeholder="t('auth.email')" />
       </el-form-item>
       <el-form-item class="mt-8" model="userInfo" type="password">
-        <el-input v-model="VerificationCode" placeholder="验证码" type="password">
+        <el-input v-model="VerificationCode" :placeholder="t('auth.code')" type="password">
           <template #append>
             <button style="outline: none" type="button">
               <span class="text" @click="sendCode">{{ message }}</span>
@@ -71,154 +71,143 @@
         </el-input>
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="bingingEmail">绑定</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="bingingEmail">{{ t('auth.bind') }}</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, getCurrentInstance, reactive, ref, toRef, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, getCurrentInstance, reactive, ref, toRef, toRefs } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import AvatarCropper from 'vue-avatar-cropper'
 import api from '@/api/api'
 
-export default defineComponent({
-  name: 'UserCenter',
-  components: { AvatarCropper },
-  setup() {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const userStore = useUserStore()
-    const reactiveData = reactive({
-      message: '发送',
-      emailDialogVisible: false,
-      email: '' as any,
-      VerificationCode: '' as any,
-      loading: false,
-      switchState: false
-    })
-    const showCropper = ref(false)
-    const handleClose = () => {
-      userStore.userVisible = false
+defineOptions({ name: 'UserCenter' })
+
+const { t } = useI18n()
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const userStore = useUserStore()
+
+const reactiveData = reactive({
+  message: t('auth.send_code'),
+  emailDialogVisible: false,
+  email: '' as string,
+  VerificationCode: '' as string,
+  loading: false,
+  switchState: false
+})
+const { message, emailDialogVisible, email, VerificationCode, loading, switchState } = toRefs(reactiveData)
+
+const showCropper = ref(false)
+const userInfo = toRef(userStore.$state, 'userInfo')
+const visible = toRef(userStore.$state, 'userVisible')
+
+const handleClose = () => {
+  userStore.userVisible = false
+}
+const changeEmailDialogVisible = () => {
+  reactiveData.emailDialogVisible = true
+}
+const bingingEmail = () => {
+  const params = {
+    email: reactiveData.email,
+    code: reactiveData.VerificationCode
+  }
+  api.bindingEmail(params).then(({ data }) => {
+    if (data.flag) {
+      proxy.$notify({
+        title: t('common.success'),
+        message: t('auth.bind_success'),
+        type: 'success'
+      })
+      userStore.userInfo.email = reactiveData.email
+      reactiveData.emailDialogVisible = false
     }
-    const changeEmailDialogVisible = () => {
-      reactiveData.emailDialogVisible = true
-    }
-    const bingingEmail = () => {
-      const params = {
-        email: reactiveData.email,
-        code: reactiveData.VerificationCode
-      }
-      api.bindingEmail(params).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '绑定成功',
-            type: 'success'
-          })
-          userStore.userInfo.email = reactiveData.email
-          reactiveData.emailDialogVisible = false
-        }
+  })
+}
+const handleSuccess = (data: any) => {
+  data.response.json().then((data: any) => {
+    if (data.flag) {
+      userStore.userInfo.avatar = data.data
+      proxy.$notify({
+        title: t('common.success'),
+        message: t('common.upload_success'),
+        type: 'success'
       })
     }
-    const handleSuccess = (data: any) => {
-      data.response.json().then((data: any) => {
-        if (data.flag) {
-          userStore.userInfo.avatar = data.data
-          proxy.$notify({
-            title: 'Success',
-            message: '上传成功',
-            type: 'success'
-          })
-        }
-      })
+  })
+}
+const changeSubscribe = () => {
+  if (reactiveData.switchState) {
+    const params = {
+      userId: userStore.userInfo.userInfoId,
+      isSubscribe: userStore.userInfo.isSubscribe
     }
-    const changeSubscribe = () => {
-      if (reactiveData.switchState) {
-        const params = {
-          userId: userStore.userInfo.userInfoId,
-          isSubscribe: userStore.userInfo.isSubscribe
-        }
-        api.updateUserSubscribe(params).then(({ data }) => {
-          if (data.flag) {
-            proxy.$notify({
-              title: 'Success',
-              message: '修改成功',
-              type: 'success'
-            })
-          }
+    api.updateUserSubscribe(params).then(({ data }) => {
+      if (data.flag) {
+        proxy.$notify({
+          title: t('common.success'),
+          message: t('auth.update_success'),
+          type: 'success'
         })
       }
-    }
-    const commit = () => {
-      const params = {
-        nickname: userStore.userInfo.nickname,
-        website: userStore.userInfo.website,
-        intro: userStore.userInfo.intro
-      }
-      api.submitUserInfo(params).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '修改成功',
-            type: 'success'
-          })
-        }
-      })
-    }
-    const sendCode = () => {
-      api.sendValidationCode(reactiveData.email).then(({ data }) => {
-        if (data.flag) {
-          proxy.$notify({
-            title: 'Success',
-            message: '验证码已发送',
-            type: 'success'
-          })
-        }
-      })
-    }
-    const beforeChange = (): boolean | Promise<boolean> => {
-      reactiveData.switchState = true
-      reactiveData.loading = true
-      return new Promise<boolean>((resolve) => {
-        if (userStore.userInfo.email === '' || userStore.userInfo.email === null) {
-          reactiveData.loading = false
-          proxy.$notify({
-            title: 'Warning',
-            message: '邮箱未绑定,尽快绑定哦',
-            type: 'warning'
-          })
-          resolve(false)
-        } else {
-          reactiveData.loading = false
-          resolve(true)
-        }
-      })
-    }
-    return {
-      userInfo: toRef(userStore.$state, 'userInfo'),
-      ...toRefs(reactiveData),
-      visible: toRef(userStore.$state, 'userVisible'),
-      showCropper,
-      handleClose,
-      bingingEmail,
-      changeEmailDialogVisible,
-      changeSubscribe,
-      handleSuccess,
-      sendCode,
-      commit,
-      beforeChange,
-      options: computed(() => {
-        return {
-          method: 'POST',
-          headers: {
-            Authorization: 'Bearer ' + userStore.token
-          }
-        }
-      })
-    }
+    })
   }
-})
+}
+const commit = () => {
+  const params = {
+    nickname: userStore.userInfo.nickname,
+    website: userStore.userInfo.website,
+    intro: userStore.userInfo.intro
+  }
+  api.submitUserInfo(params).then(({ data }) => {
+    if (data.flag) {
+      proxy.$notify({
+        title: t('common.success'),
+        message: t('auth.update_success'),
+        type: 'success'
+      })
+    }
+  })
+}
+const sendCode = () => {
+  api.sendValidationCode(reactiveData.email).then(({ data }) => {
+    if (data.flag) {
+      proxy.$notify({
+        title: t('common.success'),
+        message: t('auth.code_sent'),
+        type: 'success'
+      })
+    }
+  })
+}
+const beforeChange = (): boolean | Promise<boolean> => {
+  reactiveData.switchState = true
+  reactiveData.loading = true
+  return new Promise<boolean>((resolve) => {
+    if (userStore.userInfo.email === '' || userStore.userInfo.email === null) {
+      reactiveData.loading = false
+      proxy.$notify({
+        title: t('common.warning'),
+        message: t('user.email_unbound_warning'),
+        type: 'warning'
+      })
+      resolve(false)
+    } else {
+      reactiveData.loading = false
+      resolve(true)
+    }
+  })
+}
+
+const options = computed(() => ({
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer ' + userStore.token
+  }
+}))
 </script>
 <style lang="scss" scoped>
 #submit-button {

@@ -229,7 +229,9 @@
   "common": {
     "success": "Success",
     "warning": "Warning",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "upload_success": "Uploaded successfully"
   },
   "auth": {
     "email": "Email",
@@ -250,6 +252,19 @@
     "register_success": "Registered successfully",
     "code_sent": "Verification code sent",
     "update_success": "Updated successfully",
-    "password_empty": "Password cannot be empty"
+    "password_empty": "Password cannot be empty",
+    "bind": "Bind",
+    "change": "Change",
+    "bind_success": "Bound successfully"
+  },
+  "user": {
+    "info_privacy_hint": "(Information on this page will be kept strictly confidential)",
+    "nickname": "Nickname",
+    "website": "Website",
+    "website_placeholder": "Please include https:// or http://",
+    "intro": "Intro",
+    "intro_placeholder": "Introduce yourself",
+    "subscribe": "Subscribe",
+    "email_unbound_warning": "Email not bound, please bind it first"
   }
 }
