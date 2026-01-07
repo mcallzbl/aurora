@@ -86,14 +86,46 @@
     "copy": "What have you copied? Remember to add the source when using it!",
     "visibility_change": "Welcome back my friend!~",
     "welcome": {
-      "5_7": "Good morning! The plan for a day lies in the morning, and a beautiful day is about to begin.",
-      "7_11": "Good morning! How is your day doing? don't sit for too long!",
-      "11_13": "It's noon, Must have being working all morning, and it's lunch time!",
-      "13_17": "It's easy to get sleepy in the afternoon. Have a cup of coffee maybe?",
-      "17_19": "It's evening! The sunset outside the window is beautiful.",
-      "19_21": "Good evening, how are you doing today?",
-      "21_23": ["It's getting late, rest early, good night~", "Take good care of your eyes!"],
-      "24": "Are you a night owl? Will you able get up tomorrow?"
+      "5_7": [
+        "Good morning! A beautiful new day is beginning.",
+        "Early-bird hours — set a tiny goal for today!",
+        "Fresh air, fresh mind — have a great start."
+      ],
+      "7_11": [
+        "Good morning! How's your day going? Don't sit too long — stretch a bit.",
+        "Keep the momentum and sip some water.",
+        "A short walk can spark ideas."
+      ],
+      "11_13": [
+        "It's noon — you've been working all morning.",
+        "Lunch time! Refuel and relax your eyes.",
+        "A power nap can work wonders."
+      ],
+      "13_17": [
+        "Afternoon slump? A gentle stretch might help.",
+        "Tea or coffee — then keep going!",
+        "Remember to blink and rest your eyes."
+      ],
+      "17_19": [
+        "It's evening! The sunset outside the window is beautiful.",
+        "Evening breeze feels nice — wrap up gently.",
+        "Give yourself a small pat on the back."
+      ],
+      "19_21": [
+        "Good evening — how are you doing today?",
+        "Time to unwind and review today's wins.",
+        "Maybe a book or a playlist?"
+      ],
+      "21_23": [
+        "It's getting late — rest early, good night~",
+        "Take good care of your eyes!",
+        "Save and back up your work — tomorrow you will thank you."
+      ],
+      "24": [
+        "Night-owl mode? Remember to rest soon.",
+        "Late hours can be quiet and magical — be kind to your eyes.",
+        "Make sure tomorrow-you will thank you."
+      ]
     },
     "referrer": {
       "self": "Welcome to <span>「[PLACEHOLDER]」</span>",
@@ -170,6 +202,9 @@
       { "date": "09/10", "text": "It's <span>Teacher's Day</span> in China — time to say thanks!" },
       { "date": "10/01", "text": "China's <span>National Day</span> — flags are flying!" },
       { "date": "10/31", "text": ["<span>Happy Halloween</span>!", "Trick or treat?"] },
+      { "date": "10/24", "text": ["It's the <span>Programmers' Day (1024)</span> in China — salute to all coders!", "Keep coding, keep improving. Happy 1024!"] },
+      { "rule": { "type": "nth-weekday", "month": 5, "weekday": 0, "nth": 2 }, "text": ["It's <span>Mother's Day</span> — don't forget to call mom!", "Happy Mother's Day!"] },
+      { "rule": { "type": "nth-weekday", "month": 6, "weekday": 0, "nth": 3 }, "text": ["It's <span>Father's Day</span> — send dad a warm hug!", "Happy Father's Day!"] },
       { "date": "11/05-11/12", "text": "It's China's <span>Double 11</span> shopping season — ready for deals?" },
       { "date": "12/20-12/30", "text": "It's <span>Christmas</span> time — my master might be shopping like crazy!" },
       { "date": "12/31", "text": "<span>New Year's Eve</span> — goodbye {year}, hello tomorrow!" }

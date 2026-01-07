@@ -38,8 +38,15 @@ export interface BotTip {
   text: string | string[]
 }
 
+export interface NthWeekdayRule {
+  type: 'nth-weekday'
+  month: number // 1-12
+  weekday: number // 0=Sun..6=Sat
+  nth: number // 1..5
+}
 export interface DiaEvent {
-  date: string
+  date?: string
+  rule?: NthWeekdayRule
   text: string | string[]
 }
 
@@ -333,28 +340,50 @@ class AuroraBotSoftware {
         const now = new Date()
         const curM = now.getMonth() + 1
         const curD = now.getDate()
-        const [after, beforeRaw] = event.date.split('-')
-        const before = beforeRaw || after
-        const [aMStr, aDStr] = after.split('/')
-        const [bMStr, bDStr] = before.split('/')
-        const aM = parseInt(aMStr, 10)
-        const aD = parseInt(aDStr, 10)
-        const bM = parseInt(bMStr, 10)
-        const bD = parseInt(bDStr, 10)
-        if (
-          Number.isFinite(aM) &&
-          Number.isFinite(aD) &&
-          Number.isFinite(bM) &&
-          Number.isFinite(bD) &&
-          aM <= curM && curM <= bM &&
-          aD <= curD && curD <= bD
-        ) {
+
+        let matched = false
+        // Computed rule: nth weekday of month (e.g., Mother's Day, Father's Day)
+        if (event.rule && event.rule.type === 'nth-weekday') {
+          const { month, weekday, nth } = event.rule
+          const day = this.nthWeekdayOfMonth(now.getFullYear(), month, weekday, nth)
+          if (day && curM === month && curD === day) matched = true
+        } else if (event.date) {
+          // Fixed date or range (MM/DD or MM/DD-MM/DD)
+          const [after, beforeRaw] = event.date.split('-')
+          const before = beforeRaw || after
+          const [aMStr, aDStr] = after.split('/')
+          const [bMStr, bDStr] = before.split('/')
+          const aM = parseInt(aMStr, 10)
+          const aD = parseInt(aDStr, 10)
+          const bM = parseInt(bMStr, 10)
+          const bD = parseInt(bDStr, 10)
+          if (
+            Number.isFinite(aM) &&
+            Number.isFinite(aD) &&
+            Number.isFinite(bM) &&
+            Number.isFinite(bD) &&
+            aM <= curM && curM <= bM &&
+            aD <= curD && curD <= bD
+          ) matched = true
+        }
+
+        if (matched) {
           const text = this.randomSelection(event.text)
           const msg = text.replace('{year}', String(now.getFullYear()))
           this.messages.push(msg)
         }
       })
     }
+  }
+
+  private nthWeekdayOfMonth(year: number, month: number, weekday: number, nth: number): number | null {
+    // month: 1-12, weekday: 0=Sunday..6=Saturday
+    const first = new Date(year, month - 1, 1)
+    const firstWeekday = first.getDay()
+    let day = 1 + ((7 + weekday - firstWeekday) % 7) + (nth - 1) * 7
+    const daysInMonth = new Date(year, month, 0).getDate()
+    if (day > daysInMonth) return null
+    return day
   }
 
   showWelcomeMessage() {
