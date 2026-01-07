@@ -70,7 +70,12 @@
     "logout":"Logout",
     "personal-center":"Personal Center",
     "running-time":"Running Time",
-    "view-count":"View Count"
+    "view-count":"View Count",
+    "minutes_suffix": "mins",
+    "words_suffix_k": "k"
+  },
+  "errors": {
+    "article_password_failed": "Article password verification failed"
   },
   "comments": {
     "placeholder": "Add comment...",

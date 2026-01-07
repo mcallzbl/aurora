@@ -192,7 +192,7 @@ export default defineComponent({
 }
 
 .user-nickname {
-  font-weight: 530;
+  font-weight: 500;
 }
 
 .time {

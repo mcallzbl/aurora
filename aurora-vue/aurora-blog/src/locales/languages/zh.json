@@ -70,7 +70,12 @@
     "logout":"登出",
     "personal-center":"个人中心",
     "running-time":"运行时间",
-    "view-count":"总访问量"
+    "view-count":"总访问量",
+    "minutes_suffix": "分钟",
+    "words_suffix_k": "k字"
+  },
+  "errors": {
+    "article_password_failed": "文章密码认证未通过"
   },
   "comments": {
     "placeholder": "发表评论...",

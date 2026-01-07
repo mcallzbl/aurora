@@ -121,7 +121,7 @@ export default defineComponent({
           const node = nodes[i]
           const reg = /^H[1-4]{1}$/
           if (reg.exec(node.tagName)) {
-            node.id = i
+            node.id = String(i)
           }
         }
       }
@@ -269,7 +269,7 @@ export default defineComponent({
     width: 1em;
     margin-left: -1.15em;
     padding: 0;
-    font-weight: medium;
+    font-weight: 500;
     text-shadow: 0 0 0.5em var(--accent-2);
   }
 

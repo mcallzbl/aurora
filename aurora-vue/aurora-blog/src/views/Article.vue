@@ -139,20 +139,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Navigator, Profile, Sidebar } from '@/components/Sidebar'
-import {
-  computed,
-  defineComponent,
-  getCurrentInstance,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  provide,
-  reactive,
-  ref,
-  toRefs
-} from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, provide, reactive, ref, toRefs } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Comment } from '@/components/Comment'
@@ -169,218 +158,227 @@ import { v3ImgPreviewFn } from 'v3-img-preview'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
-export default defineComponent({
-  name: 'Article',
-  components: { Sidebar, Comment, SubTitle, ArticleCard, Profile, Sticky, Navigator },
-  setup() {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const commonStore = useCommonStore()
-    const commentStore = useCommentStore()
-    const route = useRoute()
-    const router = useRouter()
-    const { t, d } = useI18n()
-    const loading = ref(true)
-    const articleRef = ref()
-    const reactiveData = reactive({
-      articleId: '' as any,
-      article: '' as any,
-      wordNum: '' as any,
-      readTime: '' as any,
-      comments: [] as any,
-      images: [] as any,
-      preArticleCard: '' as any,
-      nextArticleCard: '' as any,
-      haveMore: false as any,
-      isReload: false as any
-    })
-    const pageInfo = reactive({
-      current: 1,
-      size: 7
-    })
-    commentStore.type = 1
-    onMounted(() => {
-      reactiveData.articleId = route.params.articleId
-      toPageTop()
-      fetchArticle()
-      fetchComments()
-    })
-    onUnmounted(() => {
-      commonStore.resetHeaderImage()
-      reactiveData.article = ''
-      tocbot.destroy()
-    })
-    onBeforeRouteUpdate((to: any) => {
-      reactiveData.article = ''
-      reactiveData.readTime = ''
-      reactiveData.wordNum = ''
-      reactiveData.comments = []
-      reactiveData.images = []
-      reactiveData.preArticleCard = ''
-      reactiveData.nextArticleCard = ''
-      reactiveData.articleId = to.params.articleId
-      pageInfo.current = 1
-      reactiveData.isReload = true
-      toPageTop()
-      fetchArticle()
-      fetchComments()
-    })
-    provide(
-      'comments',
-      computed(() => reactiveData.comments)
-    )
-    provide(
-      'haveMore',
-      computed(() => reactiveData.haveMore)
-    )
-    emitter.on('articleFetchComment', () => {
-      pageInfo.current = 1
-      reactiveData.isReload = true
-      fetchComments()
-    })
-    emitter.on('articleFetchReplies', (index) => {
-      fetchReplies(index)
-    })
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const commonStore = useCommonStore()
+const commentStore = useCommentStore()
+const route = useRoute()
+const router = useRouter()
+const { t, d } = useI18n()
 
-    emitter.on('articleLoadMore', () => {
-      fetchComments()
-    })
-    const handlePreview = (index: any) => {
-      v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
-    }
-    const initTocbot = () => {
-      const nodes = articleRef.value.children
-      if (nodes.length) {
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i]
-          const reg = /^H[1-4]{1}$/
-          if (reg.exec(node.tagName)) {
-            node.id = i
-          }
-        }
+const loading = ref(true)
+const articleRef = ref<HTMLElement | null>(null)
+interface ReactiveData {
+  articleId: string | number | undefined
+  article: any
+  wordNum: string
+  readTime: string
+  comments: any[]
+  images: string[]
+  preArticleCard: any | null
+  nextArticleCard: any | null
+  haveMore: boolean
+  isReload: boolean
+}
+const reactiveData = reactive<ReactiveData>({
+  articleId: undefined,
+  article: {},
+  wordNum: '',
+  readTime: '',
+  comments: [],
+  images: [],
+  preArticleCard: null,
+  nextArticleCard: null,
+  haveMore: false,
+  isReload: false
+})
+const pageInfo = reactive({
+  current: 1,
+  size: 7
+})
+commentStore.type = 1
+
+onMounted(() => {
+  reactiveData.articleId = route.params.articleId as any
+  toPageTop()
+  fetchArticle()
+  fetchComments()
+})
+
+onUnmounted(() => {
+  commonStore.resetHeaderImage()
+  reactiveData.article = ''
+  tocbot.destroy()
+})
+
+onBeforeRouteUpdate((to: any) => {
+  reactiveData.article = ''
+  reactiveData.readTime = ''
+  reactiveData.wordNum = ''
+  reactiveData.comments = []
+  reactiveData.images = []
+  reactiveData.preArticleCard = null
+  reactiveData.nextArticleCard = null
+  reactiveData.articleId = to.params.articleId as any
+  pageInfo.current = 1
+  reactiveData.isReload = true
+  toPageTop()
+  fetchArticle()
+  fetchComments()
+})
+
+provide('comments', computed(() => reactiveData.comments))
+provide('haveMore', computed(() => reactiveData.haveMore))
+
+emitter.on('articleFetchComment', () => {
+  pageInfo.current = 1
+  reactiveData.isReload = true
+  fetchComments()
+})
+emitter.on('articleFetchReplies', (index) => {
+  fetchReplies(index)
+})
+emitter.on('articleLoadMore', () => {
+  fetchComments()
+})
+
+const handlePreview = (index: any) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+}
+
+const initTocbot = () => {
+  if (!articleRef.value) return
+  const nodes = articleRef.value.children
+  if (nodes.length) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i]
+      const reg = /^H[1-4]{1}$/
+      if (reg.exec(node.tagName)) {
+        node.id = String(i)
       }
-      tocbot.init({
-        tocSelector: '#toc1',
-        contentSelector: '.post-html',
-        headingSelector: 'h1, h2, h3',
-        collapseDepth: 3,
-        disableTocScrollSync: true,
-        onClick: function(e) {
-          e.preventDefault()
-        }
-      })
-      const imgs = articleRef.value.getElementsByTagName('img')
-      for (let i = 0; i < imgs.length; i++) {
-        reactiveData.images.push(imgs[i].src)
-        imgs[i].addEventListener('click', function(e: any) {
-          handlePreview(e.target.currentSrc)
-        })
-      }
-    }
-    const fetchArticle = () => {
-      loading.value = true
-      api.getArticeById(reactiveData.articleId).then(({ data }) => {
-        if (data.code === 52003) {
-          proxy.$notify({
-            title: 'Error',
-            message: '文章密码认证未通过',
-            type: 'error'
-          })
-          router.push({ path: '/出错啦' })
-          return
-        }
-        if (data.data === null) {
-          router.push({ path: '/出错啦' })
-          return
-        }
-        commonStore.setHeaderImage(data.data.articleCover)
-        new Promise((resolve) => {
-          data.data.articleContent = markdownToHtml(data.data.articleContent)
-          resolve(data.data)
-        }).then((article: any) => {
-          reactiveData.article = article
-          reactiveData.wordNum = Math.round(deleteHTMLTag(article.articleContent).length / 100) / 10 + 'k'
-          reactiveData.readTime = Math.round(deleteHTMLTag(article.articleContent).length / 400) + 'mins'
-          loading.value = false
-          nextTick(() => {
-            Prism.highlightAll()
-            initTocbot()
-          })
-        })
-        if (data.data.preArticleCard) {
-          new Promise((resolve) => {
-            data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
-              .replace(/<\/?[^>]*>/g, '')
-              .replace(/[|]*\n/, '')
-              .replace(/&npsp;/gi, '')
-            resolve(data.data.preArticleCard)
-          }).then((preArticleCard: any) => {
-            reactiveData.preArticleCard = preArticleCard
-          })
-        }
-        if (data.data.nextArticleCard) {
-          new Promise((resolve) => {
-            data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
-              .replace(/<\/?[^>]*>/g, '')
-              .replace(/[|]*\n/, '')
-              .replace(/&npsp;/gi, '')
-            resolve(data.data.nextArticleCard)
-          }).then((nextArticleCard) => {
-            reactiveData.nextArticleCard = nextArticleCard
-          })
-        }
-      })
-    }
-    const fetchComments = () => {
-      const params = {
-        type: 1,
-        topicId: reactiveData.articleId,
-        current: pageInfo.current,
-        size: pageInfo.size
-      }
-      api.getComments(params).then(({ data }) => {
-        const records = Array.isArray(data?.data?.records) ? data.data.records : []
-        if (reactiveData.isReload) {
-          reactiveData.comments = records
-          reactiveData.isReload = false
-        } else if (records.length > 0) {
-          reactiveData.comments.push(...records)
-        }
-        const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
-        reactiveData.haveMore = total > reactiveData.comments.length
-        pageInfo.current++
-      })
-    }
-    const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
-    }
-    const handleAuthorClick = (link: string) => {
-      if (link === '') link = window.location.href
-      window.location.href = link
-    }
-    const toPageTop = () => {
-      window.scrollTo({
-        top: 0
-      })
-    }
-    const deleteHTMLTag = (content: any) => {
-      return content
-        .replace(/<\/?[^>]*>/g, '')
-        .replace(/[|]*\n/, '')
-        .replace(/&npsp;/gi, '')
-    }
-    return {
-      articleRef,
-      ...toRefs(reactiveData),
-      isMobile: computed(() => commonStore.isMobile),
-      handleAuthorClick,
-      loading,
-      t,
-      d
     }
   }
-})
+  tocbot.init({
+    tocSelector: '#toc1',
+    contentSelector: '.post-html',
+    headingSelector: 'h1, h2, h3',
+    collapseDepth: 3,
+    disableTocScrollSync: true,
+    onClick: function(e) {
+      e.preventDefault()
+    }
+  })
+  const imgs = articleRef.value.getElementsByTagName('img')
+  for (let i = 0; i < imgs.length; i++) {
+    reactiveData.images.push(imgs[i].src)
+    imgs[i].addEventListener('click', function(e: any) {
+      handlePreview(e.target.currentSrc)
+    })
+  }
+}
+
+const fetchArticle = () => {
+  loading.value = true
+  api.getArticeById(reactiveData.articleId).then(({ data }) => {
+    if (data.code === 52003) {
+      proxy.$notify({
+        title: 'Error',
+        message: t('errors.article_password_failed'),
+        type: 'error'
+      })
+      router.push({ path: '/404' })
+      return
+    }
+    if (data.data === null) {
+      router.push({ path: '/404' })
+      return
+    }
+    commonStore.setHeaderImage(data.data.articleCover)
+    new Promise((resolve) => {
+      data.data.articleContent = markdownToHtml(data.data.articleContent)
+      resolve(data.data)
+    }).then((article: any) => {
+      reactiveData.article = article
+      reactiveData.wordNum = Math.round(deleteHTMLTag(article.articleContent).length / 100) / 10 + 'k'
+      reactiveData.readTime = Math.round(deleteHTMLTag(article.articleContent).length / 400) + 'mins'
+      loading.value = false
+      nextTick(() => {
+        Prism.highlightAll()
+        initTocbot()
+      })
+    })
+    if (data.data.preArticleCard) {
+      new Promise((resolve) => {
+        data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
+          .replace(/<\/?[^>]*>/g, '')
+          .replace(/[|]*\n/, '')
+          .replace(/&npsp;/gi, '')
+        resolve(data.data.preArticleCard)
+      }).then((preArticleCard: any) => {
+        reactiveData.preArticleCard = preArticleCard
+      })
+    }
+    if (data.data.nextArticleCard) {
+      new Promise((resolve) => {
+        data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
+          .replace(/<\/?[^>]*>/g, '')
+          .replace(/[|]*\n/, '')
+          .replace(/&npsp;/gi, '')
+        resolve(data.data.nextArticleCard)
+      }).then((nextArticleCard) => {
+        reactiveData.nextArticleCard = nextArticleCard
+      })
+    }
+  })
+}
+
+const fetchComments = () => {
+  const params = {
+    type: 1,
+    topicId: reactiveData.articleId,
+    current: pageInfo.current,
+    size: pageInfo.size
+  }
+  api.getComments(params).then(({ data }) => {
+    const records = Array.isArray(data?.data?.records) ? data.data.records : []
+    if (reactiveData.isReload) {
+      reactiveData.comments = records
+      reactiveData.isReload = false
+    } else if (records.length > 0) {
+      reactiveData.comments.push(...records)
+    }
+    const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
+    reactiveData.haveMore = total > reactiveData.comments.length
+    pageInfo.current++
+  })
+}
+
+const fetchReplies = (index: any) => {
+  api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
+    reactiveData.comments[index].replyDTOs = data.data
+  })
+}
+
+const handleAuthorClick = (link: string) => {
+  if (link === '') link = window.location.href
+  window.location.href = link
+}
+
+const toPageTop = () => {
+  window.scrollTo({
+    top: 0
+  })
+}
+
+const deleteHTMLTag = (content: any) => {
+  return content
+    .replace(/<\/?[^>]*>/g, '')
+    .replace(/[|]*\n/, '')
+    .replace(/&npsp;/gi, '')
+}
+
+const { article, wordNum, readTime, comments, images, preArticleCard, nextArticleCard, haveMore, isReload } = toRefs(reactiveData)
+const isMobile = computed(() => commonStore.isMobile)
+
 </script>
 <style lang="scss">
 .post-html {
@@ -451,7 +449,7 @@ export default defineComponent({
     width: 1em;
     margin-left: -1.15em;
     padding: 0;
-    font-weight: medium;
+    font-weight: 500;
     text-shadow: 0 0 0.5em var(--accent-2);
   }
 
