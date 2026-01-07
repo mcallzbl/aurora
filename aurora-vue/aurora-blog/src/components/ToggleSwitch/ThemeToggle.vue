@@ -21,7 +21,7 @@ export default defineComponent({
   },
   setup() {
     const appStore = useAppStore()
-    let defaultStatus = appStore.themeConfig.theme === 'theme-dark'
+    const defaultStatus = appStore.themeConfig.theme === 'theme-dark'
     const svgStyle = reactive({
       fill: 'yellow',
       margin: '5.5px 3px 2px 5.5px'

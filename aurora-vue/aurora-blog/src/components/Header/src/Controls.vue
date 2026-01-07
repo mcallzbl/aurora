@@ -6,8 +6,8 @@
     <Dropdown v-if="multiLanguage === 1" @command="handleClick">
       <span class="ob-drop-shadow" data-dia="language">
         <svg-icon icon-class="globe" />
-        <span v-if="$i18n.locale == 'zh'">中文</span>
-        <span v-if="$i18n.locale == 'en'">EN</span>
+        <span v-if="locale === 'zh'">中文</span>
+        <span v-else>EN</span>
       </span>
       <DropdownMenu>
         <DropdownItem name="en">English</DropdownItem>
@@ -50,7 +50,7 @@
         <el-button class="mx-auto mt-3" size="large" type="primary" @click="login">登录</el-button>
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto my-el-button" type="button" @click="qqLogin">QQ登录</el-button>
+        <el-button class="mx-auto my-el-button" type="default" @click="qqLogin">QQ登录</el-button>
       </el-form-item>
       <div class="mt-8">
         <span class="text" @click="openRegisterDialog">立即注册</span>
@@ -140,7 +140,7 @@ export default defineComponent({
     SearchModel
   },
   setup() {
-    const { t } = useI18n()
+    const { t, locale } = useI18n()
     const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
     const appStore = useAppStore()
     const commonStore = useCommonStore()
@@ -181,7 +181,7 @@ export default defineComponent({
         })
         return
       }
-      let params = new URLSearchParams()
+      const params = new URLSearchParams()
       params.append('username', loginInfo.username)
       params.append('password', loginInfo.password)
       api.login(params).then(({ data }) => {
@@ -246,7 +246,7 @@ export default defineComponent({
       })
     }
     const register = () => {
-      let params = {
+      const params = {
         code: loginInfo.code,
         username: loginInfo.username,
         password: loginInfo.password
@@ -341,10 +341,11 @@ export default defineComponent({
       openForgetPasswordDialog,
       accessArticle,
       multiLanguage: computed(() => {
-        let websiteConfig: any = appStore.websiteConfig
+        const websiteConfig: any = appStore.websiteConfig
         return websiteConfig.multiLanguage
       }),
-      t
+      t,
+      locale
     }
   }
 })

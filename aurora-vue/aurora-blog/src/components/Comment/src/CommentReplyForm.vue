@@ -82,7 +82,7 @@ export default defineComponent({
         if (data.flag) {
           emit('changeShow')
           fetchReplies()
-          let isCommentReview = appStore.websiteConfig.isCommentReview
+          const isCommentReview = appStore.websiteConfig.isCommentReview
           if (isCommentReview) {
             proxy.$notify({
               title: 'Warning',

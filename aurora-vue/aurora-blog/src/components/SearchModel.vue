@@ -302,7 +302,7 @@ export default defineComponent({
       searchStore.setOpenModal(false)
     }
     const saveRecentSearch = async (result: any) => {
-      let temp = localStore.weight
+      const temp = localStore.weight
       result.weight = localStore.weight
       localStore.weight++
       localStore.recentSearch.forEach((item: any) => {
@@ -368,9 +368,9 @@ export default defineComponent({
     }
     let index = 0
     const searchKeywords = (e: any) => {
-      let curIndex = ++index
+      const curIndex = ++index
       if (e.target.value !== '') {
-        let params = {
+        const params = {
           keywords: e.target.value
         }
         api.searchArticles(params).then(({ data }) => {

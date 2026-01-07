@@ -149,9 +149,9 @@ export default defineComponent({
       })
     }
     const formatTime = (data: any): string => {
-      let hours = new Date(data).getHours()
-      let minutes = new Date(data).getMinutes()
-      let seconds = new Date(data).getSeconds()
+      const hours = new Date(data).getHours()
+      const minutes = new Date(data).getMinutes()
+      const seconds = new Date(data).getSeconds()
       return hours + ':' + minutes + ':' + seconds
     }
     const toPageTop = () => {

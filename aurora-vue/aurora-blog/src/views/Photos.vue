@@ -65,7 +65,7 @@ export default defineComponent({
       size: 10,
       albumId: route.params.albumId
     })
-    onBeforeRouteUpdate((to) => {
+    onBeforeRouteUpdate((to: any) => {
       reactiveData.photoAlbumName = ''
       reactiveData.photos = []
       reactiveData.noResult = false
@@ -77,7 +77,7 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.photos, index })
     }
     const loadDataFromServer = () => {
-      let params = {
+      const params = {
         current: reactiveData.current,
         size: reactiveData.size
       }

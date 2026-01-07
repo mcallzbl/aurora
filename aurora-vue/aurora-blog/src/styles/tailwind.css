@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @theme {
     /* --- Spacing 迁移 --- */
     --spacing-97: 26rem;

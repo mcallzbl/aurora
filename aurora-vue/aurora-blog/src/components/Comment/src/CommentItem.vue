@@ -47,10 +47,10 @@ export default defineComponent({
     provide('parentId', comment.id)
     provide('index', props.index)
     const formatTime = (time: any): any => {
-      let date = new Date(time)
-      let year = date.getFullYear()
-      let month = date.getMonth() + 1
-      let day = date.getDate()
+      const date = new Date(time)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
       return year + '-' + month + '-' + day
     }
     const reactiveData = reactive({

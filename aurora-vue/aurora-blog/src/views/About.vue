@@ -115,11 +115,11 @@ export default defineComponent({
       v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
     }
     const initTocbot = () => {
-      let nodes = postRef.value.children
+      const nodes = postRef.value.children
       if (nodes.length) {
         for (let i = 0; i < nodes.length; i++) {
-          let node = nodes[i]
-          let reg = /^H[1-4]{1}$/
+          const node = nodes[i]
+          const reg = /^H[1-4]{1}$/
           if (reg.exec(node.tagName)) {
             node.id = i
           }
@@ -136,7 +136,7 @@ export default defineComponent({
         }
       })
       const imgs = postRef.value.getElementsByTagName('img')
-      for (var i = 0; i < imgs.length; i++) {
+      for (let i = 0; i < imgs.length; i++) {
         reactiveData.images.push(imgs[i].src)
         imgs[i].addEventListener('click', function(e: any) {
           handlePreview(e.target.currentSrc)

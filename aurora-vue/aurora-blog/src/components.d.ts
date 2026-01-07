@@ -71,6 +71,7 @@ declare module 'vue' {
     UserCenter: typeof import('./components/UserCenter.vue')['default']
     WebsiteInfo: typeof import('./components/Sidebar/src/WebsiteInfo.vue')['default']
   }
+
   export interface GlobalDirectives {
     vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
   }

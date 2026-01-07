@@ -47,17 +47,17 @@
         @click="pushPage(route.path)">
         <span class="relative z-50">{{ getMenuLabel(route.name) }}</span>
       </div>
-        <Dropdown
-          v-else
-          class="flex flex-col justify-center items-center nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase"
-          @command="pushPage">
-          <span class="relative z-50">{{ getMenuLabel(route.name) }}</span>
-          <DropdownMenu expand>
-            <DropdownItem v-for="sub in route.children" :key="sub.path" :name="sub.path">
-              <span class="relative z-50">{{ getMenuLabel(sub.name) }}</span>
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+      <Dropdown
+        v-else
+        class="flex flex-col justify-center items-center nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase"
+        @command="pushPage">
+        <span class="relative z-50">{{ getMenuLabel(route.name) }}</span>
+        <DropdownMenu expand>
+          <DropdownItem v-for="sub in route.children" :key="sub.path" :name="sub.path">
+            <span class="relative z-50">{{ getMenuLabel(sub.name) }}</span>
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
     </li>
     <li>
       <Dropdown

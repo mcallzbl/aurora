@@ -28,7 +28,7 @@ export default defineComponent({
       if (QC.Login.check()) {
         //@ts-ignore
         QC.Login.getMe(function(openId, accessToken) {
-          let params = {
+          const params = {
             openId: openId,
             accessToken: accessToken
           }

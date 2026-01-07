@@ -82,10 +82,10 @@ export default defineComponent({
     const router = useRouter()
     const progress = ref(0)
     const scrolling = ref(false)
-    let time = ref(0)
+    const time = ref(0)
     let scrollingHandler: any
     let menuReopenHandler: any
-    let needReopen = ref(false)
+    const needReopen = ref(false)
     onMounted(() => {
       document.addEventListener('scroll', scrollHandler)
     })

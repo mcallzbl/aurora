@@ -97,7 +97,7 @@ export default defineComponent({
       loading: false,
       switchState: false
     })
-    let showCropper = ref(false)
+    const showCropper = ref(false)
     const handleClose = () => {
       userStore.userVisible = false
     }
@@ -105,7 +105,7 @@ export default defineComponent({
       reactiveData.emailDialogVisible = true
     }
     const bingingEmail = () => {
-      let params = {
+      const params = {
         email: reactiveData.email,
         code: reactiveData.VerificationCode
       }
@@ -135,7 +135,7 @@ export default defineComponent({
     }
     const changeSubscribe = () => {
       if (reactiveData.switchState) {
-        let params = {
+        const params = {
           userId: userStore.userInfo.userInfoId,
           isSubscribe: userStore.userInfo.isSubscribe
         }
@@ -151,7 +151,7 @@ export default defineComponent({
       }
     }
     const commit = () => {
-      let params = {
+      const params = {
         nickname: userStore.userInfo.nickname,
         website: userStore.userInfo.website,
         intro: userStore.userInfo.intro
@@ -177,10 +177,10 @@ export default defineComponent({
         }
       })
     }
-    const beforeChange = () => {
+    const beforeChange = (): boolean | Promise<boolean> => {
       reactiveData.switchState = true
       reactiveData.loading = true
-      return new Promise((resolve, reject) => {
+      return new Promise<boolean>((resolve) => {
         if (userStore.userInfo.email === '' || userStore.userInfo.email === null) {
           reactiveData.loading = false
           proxy.$notify({
@@ -188,10 +188,10 @@ export default defineComponent({
             message: '邮箱未绑定,尽快绑定哦',
             type: 'warning'
           })
-          return reject(new Error('Error'))
+          resolve(false)
         } else {
           reactiveData.loading = false
-          return resolve(true)
+          resolve(true)
         }
       })
     }

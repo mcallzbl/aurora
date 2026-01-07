@@ -58,7 +58,7 @@ import { useAppStore } from '@/stores/app'
 export default defineComponent({
   name: 'Social',
   setup() {
-    let appStore = useAppStore()
+    const appStore = useAppStore()
     return {
       websiteConfig: computed(() => {
         return appStore.websiteConfig

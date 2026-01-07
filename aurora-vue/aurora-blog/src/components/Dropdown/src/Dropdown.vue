@@ -28,7 +28,7 @@ export default defineComponent({
     const mouseHover = toRefs(props).hover
     const dropdownStore = useDropdownStore()
     const eventId = ref(0)
-    let sharedState: { active: boolean } = reactive({
+    const sharedState: { active: boolean } = reactive({
       active: false
     })
     provide('sharedState', sharedState)

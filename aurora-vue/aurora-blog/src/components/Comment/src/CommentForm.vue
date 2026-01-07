@@ -4,9 +4,9 @@
     <div class="comment flex flex-col flex-wrap-reverse w-full max-w-full-calc">
       <textarea
         v-model="commentContent"
+        :placeholder="t('comments.placeholder')"
         class="w-full shadow-md rounded-md p-4 focus:outline-none input"
         cols="30"
-        :placeholder="t('comments.placeholder')"
         rows="5" />
       <div class="justify-between" style="text-align: right">
         <button

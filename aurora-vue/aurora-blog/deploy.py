@@ -5,10 +5,10 @@
 """
 
 import os
-import sys
-import subprocess
-import tarfile
 import shlex
+import subprocess
+import sys
+import tarfile
 from datetime import datetime
 from pathlib import Path
 
@@ -19,11 +19,14 @@ DEPLOY_USER = os.getenv('AURORA_BLOG_SERVER_USER')
 DEPLOY_PATH = os.getenv('AURORA_BLOG_SERVER_PATH')
 DEPLOY_KEY = os.getenv('DEPLOY_KEY')  # SSH私钥路径（可选）
 DEPLOY_PASS = os.getenv('AURORA_BLOG_SERVER_PASSWORD')  # SSH密码（用户名/密码登录）
+
+
 def print_step(message):
     """打印步骤信息"""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {message}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
+
 
 def check_env():
     """检查必需的环境变量"""
@@ -53,6 +56,7 @@ def check_env():
     print("✅ 环境变量检查通过")
     print(f"   服务器: {DEPLOY_USER}@{DEPLOY_HOST}:{DEPLOY_PORT}")
     print(f"   路径: {DEPLOY_PATH}")
+
 
 def run_command(command, cwd=None):
     """执行命令并实时输出（更健壮的输出处理）"""
@@ -88,6 +92,7 @@ def run_command(command, cwd=None):
         print(f"   错误码: {e.returncode}")
         return False
 
+
 def build_project():
     """执行 pnpm build"""
     print_step("📦 开始构建项目")
@@ -97,6 +102,7 @@ def build_project():
         sys.exit(1)
 
     print("✅ 构建成功")
+
 
 def compress_dist():
     """压缩 dist 目录"""
@@ -122,6 +128,7 @@ def compress_dist():
     except Exception as e:
         print(f"❌ 压缩失败: {e}")
         sys.exit(1)
+
 
 def upload_to_server(archive_name):
     """上传到服务器"""
@@ -161,6 +168,7 @@ def upload_to_server(archive_name):
     # 清理本地压缩包
     print(f"\n🧹 清理本地文件: {archive_name}")
     os.remove(archive_name)
+
 
 def extract_on_server(archive_name):
     """在服务器上解压（增量更新并清理旧文件）"""
@@ -205,6 +213,7 @@ def extract_on_server(archive_name):
 
     print("✅ 远程解压成功")
 
+
 def main():
     """主函数"""
     print_step("🌙 小月的部署脚本启动")
@@ -222,6 +231,7 @@ def main():
     upload_to_server(archive_name)
 
     print_step("✨ 部署完成")
+
 
 if __name__ == "__main__":
     try:

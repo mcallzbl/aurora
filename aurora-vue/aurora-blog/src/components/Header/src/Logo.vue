@@ -15,8 +15,7 @@
 
 <script lang="ts">
 import { useAppStore } from '@/stores/app'
-import { computed } from '@vue/reactivity'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCommonStore } from '@/stores/common'
 import { useNavigatorStore } from '@/stores/navigator'
