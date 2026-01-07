@@ -10,35 +10,17 @@
           :data-menu="route.name"
           class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase cursor-pointer"
           @click="pushPage(route.path)">
-          <span v-if="$i18n.locale === 'cn' && route.i18n.cn" class="relative z-50">
-            {{ route.i18n.cn }}
-          </span>
-          <span v-else-if="$i18n.locale === 'en' && route.i18n.en" class="relative z-50">
-            {{ route.i18n.en }}
-          </span>
-          <span v-else class="relative z-50">{{ route.name }}</span>
+          <span class="relative z-50">{{ getMenuLabel(route.name) }}</span>
         </div>
         <Dropdown
           v-else
           class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase"
           hover
           @command="pushPage">
-          <span v-if="$i18n.locale === 'cn' && route.i18n.cn" class="relative z-50">
-            {{ route.i18n.cn }}
-          </span>
-          <span v-else-if="$i18n.locale === 'en' && route.i18n.en" class="relative z-50">
-            {{ route.i18n.en }}
-          </span>
-          <span v-else class="relative z-50">{{ route.name }}</span>
+          <span class="relative z-50">{{ getMenuLabel(route.name) }}</span>
           <DropdownMenu>
             <DropdownItem v-for="sub in route.children" :key="sub.path" :name="sub.path">
-              <span v-if="$i18n.locale === 'cn' && sub.i18n.cn" class="relative z-50">
-                {{ sub.i18n.cn }}
-              </span>
-              <span v-else-if="$i18n.locale === 'en' && sub.i18n.en" class="relative z-50">
-                {{ sub.i18n.en }}
-              </span>
-              <span v-else class="relative z-50">{{ sub.name }}</span>
+              <span class="relative z-50">{{ getMenuLabel(sub.name) }}</span>
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
@@ -47,8 +29,7 @@
         class="not-italic font-medium text-xs h-full relative flex flex-col items-center justify-center cursor-pointer text-center py-4 px-2"
         data-menu="PhotoAlbums">
         <Dropdown class="nav-link text-sm block px-1.5 py-0.5 rounded-md relative uppercase" hover>
-          <span v-if="$i18n.locale === 'cn'" class="relative z-50"> 相册 </span>
-          <span v-else-if="$i18n.locale === 'en'" class="relative z-50"> PhotoAlbums </span>
+          <span class="relative z-50">{{ t('menu.album') }}</span>
           <DropdownMenu>
             <template v-for="item in albums" :key="item.id">
               <DropdownItem :name="item.albumName" @click="pushPage(`/photos/${item.id}`)">
@@ -99,13 +80,19 @@ export default defineComponent({
     const openPhotoAlbum = (id: any): void => {
       router.push('/photos/' + id)
     }
+    const getMenuLabel = (name: string): string => {
+      const key = `menu.${String(name).toLowerCase()}`
+      return te(key) ? t(key) : String(name)
+    }
+
     return {
       ...toRefs(reactiveData),
       routes: config.routes,
       pushPage,
       openPhotoAlbum,
       te,
-      t
+      t,
+      getMenuLabel
     }
   }
 })

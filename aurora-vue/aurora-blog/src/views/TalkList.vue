@@ -19,9 +19,9 @@
               </div>
               <div class="time">
                 {{ t('settings.shared-on') }}
-                {{ formatTime(item.createTime) }},
-                {{ t(`settings.months[${new Date(item.createTime).getMonth()}]`) }}
-                {{ new Date(item.createTime).getDate() }}, {{ new Date(item.createTime).getFullYear() }}
+                <time :datetime="new Date(item.createTime).toISOString()">
+                  {{ d(new Date(item.createTime), 'short') }}
+                </time>
                 <template v-if="item.isTop === 1">
                   <svg-icon class="top-svg" icon-class="top" />
                   <span style="color: #f21835">置顶</span>
@@ -75,7 +75,7 @@ export default defineComponent({
   name: 'talkList',
   components: { Breadcrumb, Sidebar, Profile, Paginator, Avatar },
   setup() {
-    const { t } = useI18n()
+    const { t, d } = useI18n()
     const router = useRouter()
     const pagination = reactive({
       size: 7,
@@ -108,10 +108,11 @@ export default defineComponent({
       })
     }
     const formatTime = (data: any): string => {
-      let hours = new Date(data).getHours()
-      let minutes = new Date(data).getMinutes()
-      let seconds = new Date(data).getSeconds()
-      return hours + ':' + minutes + ':' + seconds
+      const date = new Date(data)
+      const h = String(date.getHours()).padStart(2, '0')
+      const m = String(date.getMinutes()).padStart(2, '0')
+      const s = String(date.getSeconds()).padStart(2, '0')
+      return `${h}:${m}:${s}`
     }
     const toPageTop = () => {
       window.scrollTo({
@@ -131,6 +132,7 @@ export default defineComponent({
       pagination,
       ...toRefs(reactiveData),
       formatTime,
+      d,
       pageChangeHanlder,
       handlePreview,
       toTalk,

@@ -161,17 +161,15 @@ export default defineComponent({
         size: pageInfo.size
       }
       api.getComments(params).then(({ data }) => {
+        const records = Array.isArray(data?.data?.records) ? data.data.records : []
         if (reactiveData.isReload) {
-          reactiveData.comments = data.data.records
+          reactiveData.comments = records
           reactiveData.isReload = false
-        } else {
-          reactiveData.comments.push(...data.data.records)
+        } else if (records.length > 0) {
+          reactiveData.comments.push(...records)
         }
-        if (data.data.count <= reactiveData.comments.length) {
-          reactiveData.haveMore = false
-        } else {
-          reactiveData.haveMore = true
-        }
+        const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
+        reactiveData.haveMore = total > reactiveData.comments.length
         pageInfo.current++
       })
     }

@@ -8,21 +8,24 @@
       <ul class="timeline timeline-centered">
         <template
           v-for="archive in archives"
-          :key="t(`settings.months[${archive.time.split('-')[1]}]`) + '-' + archive.time.split('-')[0]">
+          :key="archive.time">
           <li class="timeline-item period">
             <div class="timeline-info"></div>
             <div class="timeline-marker"></div>
             <div class="timeline-content">
               <h2 class="timeline-title">
-                {{ t(`settings.months[${archive.time.split('-')[1] - 1}]`) }}&nbsp{{ archive.time.split('-')[0] }}
+                <time :datetime="archive.time + '-01'">
+                  {{ d(new Date(archive.time + '-01'), 'monthYear') }}
+                </time>
               </h2>
             </div>
           </li>
           <li v-for="article in archive.articles" :key="article.id" class="timeline-item">
             <div class="timeline-info">
               <span>
-                {{ t(`settings.months[${new Date(article.createTime).getMonth()}]`) }}
-                {{ new Date(article.createTime).getDate() }}, {{ new Date(article.createTime).getFullYear() }}
+                <time :datetime="new Date(article.createTime).toISOString()">
+                  {{ d(new Date(article.createTime), 'short') }}
+                </time>
               </span>
             </div>
             <div class="timeline-marker"></div>
@@ -69,7 +72,7 @@ export default defineComponent({
     const commonStore = useCommonStore()
     const userStore = useUserStore()
     const router = useRouter()
-    const { t } = useI18n()
+    const { t, d } = useI18n()
     const pagination = reactive({
       current: 1,
       total: 0,
@@ -138,7 +141,8 @@ export default defineComponent({
       toArticle,
       pagination,
       archives: toRef(articleStore.$state, 'archives'),
-      t
+      t,
+      d
     }
   }
 })

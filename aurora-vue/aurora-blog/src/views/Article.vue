@@ -45,10 +45,12 @@
                 @click="handleAuthorClick(article.author.website)">
                 {{ article.author.nickname }}
               </strong>
-              <span class="opacity-70">
-                {{ t('settings.shared-on') }} {{ t(`settings.months[${new Date(article.createTime).getMonth()}]`) }}
-                {{ new Date(article.createTime).getDate() }}, {{ new Date(article.createTime).getFullYear() }}
-              </span>
+              <time
+                :datetime="new Date(article.createTime).toISOString()"
+                class="opacity-70"
+              >
+              {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
+            </time>
             </span>
           </div>
           <div v-else class="post-footer">
@@ -176,7 +178,7 @@ export default defineComponent({
     const commentStore = useCommentStore()
     const route = useRoute()
     const router = useRouter()
-    const { t } = useI18n()
+    const { t, d } = useI18n()
     const loading = ref(true)
     const articleRef = ref()
     const reactiveData = reactive({
@@ -304,24 +306,28 @@ export default defineComponent({
             initTocbot()
           })
         })
-        new Promise((resolve) => {
-          data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
-            .replace(/<\/?[^>]*>/g, '')
-            .replace(/[|]*\n/, '')
-            .replace(/&npsp;/gi, '')
-          resolve(data.data.preArticleCard)
-        }).then((preArticleCard: any) => {
-          reactiveData.preArticleCard = preArticleCard
-        })
-        new Promise((resolve) => {
-          data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
-            .replace(/<\/?[^>]*>/g, '')
-            .replace(/[|]*\n/, '')
-            .replace(/&npsp;/gi, '')
-          resolve(data.data.nextArticleCard)
-        }).then((nextArticleCard) => {
-          reactiveData.nextArticleCard = nextArticleCard
-        })
+        if (data.data.preArticleCard) {
+          new Promise((resolve) => {
+            data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
+              .replace(/<\/?[^>]*>/g, '')
+              .replace(/[|]*\n/, '')
+              .replace(/&npsp;/gi, '')
+            resolve(data.data.preArticleCard)
+          }).then((preArticleCard: any) => {
+            reactiveData.preArticleCard = preArticleCard
+          })
+        }
+        if (data.data.nextArticleCard) {
+          new Promise((resolve) => {
+            data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
+              .replace(/<\/?[^>]*>/g, '')
+              .replace(/[|]*\n/, '')
+              .replace(/&npsp;/gi, '')
+            resolve(data.data.nextArticleCard)
+          }).then((nextArticleCard) => {
+            reactiveData.nextArticleCard = nextArticleCard
+          })
+        }
       })
     }
     const fetchComments = () => {
@@ -332,17 +338,15 @@ export default defineComponent({
         size: pageInfo.size
       }
       api.getComments(params).then(({ data }) => {
+        const records = Array.isArray(data?.data?.records) ? data.data.records : []
         if (reactiveData.isReload) {
-          reactiveData.comments = data.data.records
+          reactiveData.comments = records
           reactiveData.isReload = false
-        } else {
-          reactiveData.comments.push(...data.data.records)
+        } else if (records.length > 0) {
+          reactiveData.comments.push(...records)
         }
-        if (data.data.count <= reactiveData.comments.length) {
-          reactiveData.haveMore = false
-        } else {
-          reactiveData.haveMore = true
-        }
+        const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
+        reactiveData.haveMore = total > reactiveData.comments.length
         pageInfo.current++
       })
     }
@@ -372,7 +376,8 @@ export default defineComponent({
       isMobile: computed(() => commonStore.isMobile),
       handleAuthorClick,
       loading,
-      t
+      t,
+      d
     }
   }
 })

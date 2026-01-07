@@ -6,12 +6,12 @@
     <Dropdown v-if="multiLanguage === 1" @command="handleClick">
       <span class="ob-drop-shadow" data-dia="language">
         <svg-icon icon-class="globe" />
-        <span v-if="$i18n.locale == 'cn'">中文</span>
+        <span v-if="$i18n.locale == 'zh'">中文</span>
         <span v-if="$i18n.locale == 'en'">EN</span>
       </span>
       <DropdownMenu>
         <DropdownItem name="en">English</DropdownItem>
-        <DropdownItem name="cn">中文</DropdownItem>
+        <DropdownItem name="zh">中文</DropdownItem>
       </DropdownMenu>
     </Dropdown>
     <template v-if="userInfo === ''">

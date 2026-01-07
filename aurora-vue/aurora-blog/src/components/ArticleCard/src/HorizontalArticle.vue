@@ -60,8 +60,9 @@
                 @click="handleAuthorClick(article.author.website)">
                 {{ article.author.nickname }}
               </strong>
-              {{ t('settings.shared-on') }} {{ t(`settings.months[${new Date(article.createTime).getMonth()}]`) }}
-              {{ new Date(article.createTime).getDate() }}, {{ new Date(article.createTime).getFullYear() }}
+              <time :datetime="new Date(article.createTime).toISOString()" class="opacity-70">
+                {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
+              </time>
             </span>
           </div>
         </div>
@@ -95,7 +96,7 @@ export default defineComponent({
     const articleStore = useArticleStore()
     const userStore = useUserStore()
     const router = useRouter()
-    const { t } = useI18n()
+    const { t, d } = useI18n()
     const handleAuthorClick = (link: string) => {
       if (link === '') link = window.location.href
       window.open(link)
@@ -128,7 +129,8 @@ export default defineComponent({
       article: toRef(articleStore.$state, 'topArticle'),
       handleAuthorClick,
       toArticle,
-      t
+      t,
+      d
     }
   }
 })

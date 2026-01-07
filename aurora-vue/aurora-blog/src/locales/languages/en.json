@@ -10,7 +10,7 @@
     "search": "Search results",
     "message": "Message",
     "friends": "Friends",
-    "album": "Ablum",
+    "album": "Album",
     "not-found": "Page not found"
   },
   "home": {
@@ -71,5 +71,13 @@
     "personal-center":"Personal Center",
     "running-time":"Running Time",
     "view-count":"View Count"
+  },
+  "comments": {
+    "placeholder": "Add comment...",
+    "submit": "Add Comment",
+    "login_required": "Please login to comment",
+    "empty": "Comment cannot be empty",
+    "pending_review": "Comment submitted, pending review",
+    "success": "Comment added successfully"
   }
 }

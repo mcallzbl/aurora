@@ -20,7 +20,7 @@
         :page="pagination.current"
         :pageSize="pagination.size"
         :pageTotal="pagination.total"
-        @pageChange="pageChangeHanlder" />
+        @pageChange="pageChangeHandler" />
     </div>
   </div>
 </template>
@@ -77,7 +77,7 @@ export default defineComponent({
         top: 0
       })
     }
-    const pageChangeHanlder = (current: number) => {
+    const pageChangeHandler = (current: number) => {
       reactiveData.articles = []
       pagination.current = current
       backToPageTop()
@@ -85,7 +85,7 @@ export default defineComponent({
     }
     return {
       pagination,
-      pageChangeHanlder,
+      pageChangeHandler: pageChangeHandler,
       ...toRefs(reactiveData)
     }
   }

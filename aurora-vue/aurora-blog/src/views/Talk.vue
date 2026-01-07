@@ -15,9 +15,9 @@
                 </div>
                 <div v-if="talk.createTime" class="time">
                   {{ t('settings.shared-on') }}
-                  {{ formatTime(talk.createTime) }},
-                  {{ t(`settings.months[${new Date(talk.createTime).getMonth()}]`) }}
-                  {{ new Date(talk.createTime).getDate() }}, {{ new Date(talk.createTime).getFullYear() }}
+                  <time :datetime="new Date(talk.createTime).toISOString()">
+                    {{ d(new Date(talk.createTime), 'short') }}
+                  </time>
                   <svg-icon class="message-svg" icon-class="message" />
                   {{
                     talk.commentCount == null ? 0 : talk.commentCount
@@ -66,7 +66,7 @@ export default defineComponent({
   name: 'talks',
   components: { Breadcrumb, Sidebar, Profile, Comment, Avatar },
   setup() {
-    const { t } = useI18n()
+    const { t, d } = useI18n()
     const commentStore = useCommentStore()
     const route = useRoute()
     const router = useRouter()
@@ -163,7 +163,8 @@ export default defineComponent({
       ...toRefs(reactiveData),
       handlePreview,
       formatTime,
-      t
+      t,
+      d
     }
   }
 })

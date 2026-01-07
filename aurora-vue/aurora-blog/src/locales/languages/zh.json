@@ -8,7 +8,7 @@
     "post": "文章",
     "talks":"说说",
     "message": "留言",
-    "friends": "朋友们",
+    "friends": "友链",
     "album": "相册",
     "search": "搜索结果",
     "not-found": "无法找到页面"
@@ -71,5 +71,13 @@
     "personal-center":"个人中心",
     "running-time":"运行时间",
     "view-count":"总访问量"
+  },
+  "comments": {
+    "placeholder": "发表评论...",
+    "submit": "发表评论",
+    "login_required": "请登录后评论",
+    "empty": "评论不能为空",
+    "pending_review": "评论成功，正在审核中",
+    "success": "评论成功"
   }
 }
