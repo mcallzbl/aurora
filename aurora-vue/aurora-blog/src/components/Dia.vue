@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDiaStore } from '@/stores/dia'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
@@ -38,7 +38,6 @@ const initializeBot = (): void => {
     locale: botLocale,
     tips: (diaStore as any).aurora_bot?.tips
   })
-  diaStore.dia.software.load()
   // ensure visible
   showDia.value = true
 }
@@ -50,6 +49,10 @@ onMounted(() => {
 watch(locale, () => {
   // Reinitialize bot when site locale changes
   initializeBot()
+})
+
+onUnmounted(() => {
+  diaStore.dia.destroy()
 })
 
 const cssVariables = computed(() => {

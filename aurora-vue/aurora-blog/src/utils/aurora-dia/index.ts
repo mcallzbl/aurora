@@ -1,34 +1,58 @@
-interface AWFConfig {
-  resourcePath: string
+import { i18n } from '@/locales'
+
+// interface AWFConfig {
+//   resourcePath: string
+// }
+
+// export class AuroraWaifu {
+//   configs: AWFConfig = {
+//     resourcePath: '/'
+//   }
+//
+//   constructor(options?: AWFConfig) {
+//     if (options?.resourcePath) this.configs.resourcePath = options.resourcePath
+//     Promise.all([this.injectResources('live2d.min.js')]).then(() => {
+//       new AuroraBotSoftware({
+//         apiPath: 'https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/',
+//         locale: 'en',
+//         containerId: 'waifu-tips',
+//         messageId: 'waifu-tips'
+//       })
+//     })
+//   }
+//
+//   async injectResources(url: string): Promise<string> {
+//     return new Promise((resolve, reject) => {
+//       const tag = document.createElement('script')
+//       tag.src = this.configs.resourcePath + url
+//       tag.onload = () => resolve(url)
+//       tag.onerror = () => reject(url)
+//       document.head.appendChild(tag)
+//     })
+//   }
+// }
+
+// Typed structures for Dia i18n
+export interface BotTip {
+  selector: string
+  text: string | string[]
 }
 
-export class AuroraWaifu {
-  configs: AWFConfig = {
-    resourcePath: '/'
-  }
+export interface DiaEvent {
+  date: string
+  text: string | string[]
+}
 
-  constructor(options?: AWFConfig) {
-    if (options?.resourcePath) this.configs.resourcePath = options.resourcePath
-    Promise.all([this.injectResources('live2d.min.js')]).then(() => {
-      new AuroraBotSoftware({
-        apiPath: 'https://cdn.jsdelivr.net/gh/fghrsh/live2d_api/',
-        locale: 'en',
-        containerId: 'waifu-tips',
-        messageId: 'waifu-tips'
-      })
-    })
-  }
-
-  async injectResources(url: string): Promise<any> {
-    let tag = null
-    return new Promise((resolve, reject) => {
-      tag = document.createElement('script')
-      tag.src = this.configs.resourcePath + url
-      tag.onload = () => resolve(url)
-      tag.onerror = () => reject(url)
-      document.head.appendChild(tag)
-    })
-  }
+export interface DiaI18n {
+  messages: string[]
+  console: string
+  copy: string
+  visibility_change: string
+  welcome: { [key: string]: string | string[] }
+  referrer: Record<string, string>
+  mouseover: BotTip[]
+  click: BotTip[]
+  events: DiaEvent[]
 }
 
 export interface DiaConfig {
@@ -43,18 +67,21 @@ export class AuroraDia {
   }
   software = new AuroraBotSoftware()
   eyesAnimationTimer: number | undefined = undefined
+  eyesController: AbortController | undefined = undefined
 
   installSoftware(configs: DiaConfig): void {
     if (configs) {
       this.configs.locale = configs.locale
       this.configs.tips = configs.tips
     }
-    this.software = new AuroraBotSoftware({
+    // Reuse existing software instance to avoid duplicate listeners/timers
+    this.software.config = {
+      ...this.software.config,
       locale: this.configs.locale,
       botScript: this.configs.tips,
       containerId: 'Aurora-Dia--tips-wrapper',
       messageId: 'Aurora-Dia--tips'
-    })
+    }
   }
 
   on(): void {
@@ -62,25 +89,51 @@ export class AuroraDia {
     this.activateMotion()
   }
 
+  destroy(): void {
+    // cleanup software timers and listeners
+    this.software.cleanup()
+    // abort eyes listeners and timers
+    if (this.eyesController) {
+      this.eyesController.abort()
+      this.eyesController = undefined
+    }
+    if (this.eyesAnimationTimer) {
+      clearTimeout(this.eyesAnimationTimer)
+      this.eyesAnimationTimer = undefined
+    }
+  }
+
   activateMotion(): void {
     const leftEye = document.getElementById('Aurora-Dia--left-eye')
     const rightEye = document.getElementById('Aurora-Dia--right-eye')
     const eyesEl = document.getElementById('Aurora-Dia--eyes')
-    if (leftEye instanceof HTMLElement && rightEye instanceof HTMLElement && eyesEl instanceof HTMLElement) {
-      document.addEventListener('mousemove', (evt) => {
+    if (!(leftEye instanceof HTMLElement && rightEye instanceof HTMLElement && eyesEl instanceof HTMLElement)) return
+
+    // Abort previous listeners if any
+    if (this.eyesController) this.eyesController.abort()
+    this.eyesController = new AbortController()
+    const signal = this.eyesController.signal
+
+    let rafId: number | null = null
+    const handleMove = (evt: MouseEvent) => {
+      if (rafId !== null) return
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null
         clearTimeout(this.eyesAnimationTimer)
         eyesEl.classList.add('moving')
-        const x = -(eyesEl.getBoundingClientRect().left - evt.clientX) / 100
-        const y = -(eyesEl.getBoundingClientRect().top - evt.clientY) / 120
+        const rect = eyesEl.getBoundingClientRect()
+        const x = -(rect.left - evt.clientX) / 100
+        const y = -(rect.top - evt.clientY) / 120
         leftEye.style.transform = `translateY(${y}px) translateX(${x}px)`
         rightEye.style.transform = `translateY(${y}px) translateX(${x}px)`
-        this.eyesAnimationTimer = <any>setTimeout(() => {
+        this.eyesAnimationTimer = window.setTimeout(() => {
           leftEye.style.transform = `translateY(0) translateX(0)`
           rightEye.style.transform = `translateY(0) translateX(0)`
           eyesEl.classList.remove('moving')
         }, 2000)
       })
     }
+    document.addEventListener('mousemove', handleMove, { signal })
   }
 }
 
@@ -93,8 +146,20 @@ interface ABConfig {
   locale: string
 }
 
-type BotLocales = {
-  [locale: string]: any
+type BotLocales = Record<string, DiaI18n>
+
+function defaultDia(): DiaI18n {
+  return {
+    messages: [],
+    console: '',
+    copy: '',
+    visibility_change: '',
+    welcome: {},
+    referrer: {},
+    mouseover: [],
+    click: [],
+    events: []
+  }
 }
 
 class AuroraBotSoftware {
@@ -110,9 +175,11 @@ class AuroraBotSoftware {
   userAction = false
   userActionTimer: number | undefined = undefined
   messageTimer: number | undefined = undefined
+  activityIntervalId: number | undefined = undefined
+  controller: AbortController | undefined = undefined
   messages: string[] = []
   locales: BotLocales = {}
-  botTips: { [key: string]: any } = {}
+  botTips: DiaI18n & Record<string, any> = defaultDia()
 
   constructor(configs?: ABConfig) {
     if (configs) {
@@ -127,64 +194,102 @@ class AuroraBotSoftware {
   }
 
   load() {
+    this.cleanup()
+
     this.loadLocaleMessages()
     this.injectBotScripts()
-    this.messages = this.botTips.messages
-    window.addEventListener('mousemove', () => (this.userAction = true))
-    window.addEventListener('keydown', () => (this.userAction = true))
+    this.messages = Array.isArray(this.botTips?.messages) ? this.botTips.messages : []
+    // manage listeners via AbortController to avoid leaks
+    this.controller = new AbortController()
+    const signal = this.controller.signal
+    window.addEventListener('mousemove', () => (this.userAction = true), { signal })
+    window.addEventListener('keydown', () => (this.userAction = true), { signal })
     sessionStorage.removeItem(this.messageCacheKey)
+    sessionStorage.removeItem(this.mouseoverEventCacheKey)
 
-    setInterval(() => {
+    this.activityIntervalId = window.setInterval(() => {
       if (this.userAction) {
         this.userAction = false
-        clearInterval(this.userActionTimer)
+        if (this.userActionTimer) clearInterval(this.userActionTimer)
         this.userActionTimer = undefined
       } else if (!this.userActionTimer) {
-        this.userActionTimer = <any>setInterval(() => {
+        this.userActionTimer = window.setInterval(() => {
           this.showMessage(this.randomSelection(this.messages), 6000, 9)
         }, 20000)
       }
     }, 1000)
 
-    this.registerEventListener()
+    this.registerEventListener(signal)
     setTimeout(() => {
       this.showWelcomeMessage()
     }, 3000)
   }
 
+  cleanup() {
+    if (this.messageTimer) {
+      clearTimeout(this.messageTimer)
+      this.messageTimer = undefined
+    }
+    if (this.userActionTimer) {
+      clearInterval(this.userActionTimer)
+      this.userActionTimer = undefined
+    }
+    if (this.activityIntervalId) {
+      clearInterval(this.activityIntervalId)
+      this.activityIntervalId = undefined
+    }
+    if (this.controller) {
+      this.controller.abort()
+      this.controller = undefined
+    }
+  }
+
   injectBotScripts() {
     let botScriptKeys: string[] = []
     const botScript = this.config.botScript
-    this.botTips = this.locales[this.config.locale]
+    // Prefer project i18n's `dia` namespace; fallback to bundled JSON
+    const siteLocale = this.config.locale === 'zh' ? 'zh' : 'en'
+    const siteMsg = i18n.global.getLocaleMessage(siteLocale) as unknown as { dia?: DiaI18n }
+    const i18nDia = siteMsg?.dia
+    const base = defaultDia()
+    if (i18nDia) {
+      try {
+        const clone = JSON.parse(JSON.stringify(i18nDia))
+        Object.assign(base, clone)
+      } catch {
+        // Fallback to shallow assign if deep-clone fails (e.g., proxies)
+        Object.assign(base, i18nDia as any)
+      }
+    }
+    this.botTips = base
 
     if (botScript !== undefined) {
       botScriptKeys = Object.keys(botScript)
 
       if (botScriptKeys.length > 0) {
         botScriptKeys.forEach((key) => {
-          this.botTips[key] = botScript[key]
+          ;(this.botTips as unknown as Record<string, unknown>)[key] = botScript[key]
         })
       }
     }
   }
 
-  registerEventListener() {
-    document.onkeydown = (event) => {
-      if (event.key === 'F12') {
-        this.showMessage(this.botTips.console, 6000, 9)
-      }
+  registerEventListener(signal?: AbortSignal) {
+    const onKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'F12') this.showMessage(this.botTips.console, 6000, 9)
     }
+    document.addEventListener('keydown', onKeydown, { signal })
     document.addEventListener('copy', () => {
       this.showMessage(this.botTips.copy, 6000, 9)
-    })
+    }, { signal })
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) this.showMessage(this.botTips.visibility_change, 6000, 9)
-    })
+    }, { signal })
     if (this.botTips.mouseover && this.botTips.mouseover.length > 0) {
       document.addEventListener('mouseover', (event) => {
         for (const mouseoverEvents of this.botTips.mouseover) {
           const selector = mouseoverEvents.selector
-          let text = mouseoverEvents.text
+          const raw = mouseoverEvents.text
           event.preventDefault()
           if (event.target && event.target instanceof HTMLElement) {
             if (!event.target.matches(selector)) continue
@@ -195,65 +300,77 @@ class AuroraBotSoftware {
             )
               return
 
-            text = this.randomSelection(text)
-            text = text.replace('{text}', event.target.innerText)
-            this.showMessage(text, 4000, 8)
+            let sel = this.randomSelection(raw)
+            sel = sel.replace('{text}', event.target.innerText)
+            this.showMessage(sel, 4000, 8)
             sessionStorage.setItem(this.mouseoverEventCacheKey, selector)
-            setTimeout(() => {
+            window.setTimeout(() => {
               sessionStorage.removeItem(this.mouseoverEventCacheKey)
             }, 4000)
             return
           }
         }
-      })
+      }, { signal })
     }
     if (this.botTips.click && this.botTips.click.length > 0) {
       document.addEventListener('click', (event) => {
         if (event.target && event.target instanceof HTMLElement)
           for (const mouseoverEvents of this.botTips.click) {
             const selector = mouseoverEvents.selector
-            let text = mouseoverEvents.text
+            const raw = mouseoverEvents.text
             if (event.target && event.target instanceof HTMLElement) {
               if (!event.target.matches(selector)) continue
-              text = this.randomSelection(text)
-              text = text.replace('{text}', event.target.innerText)
-              this.showMessage(text, 4000, 8)
+              let sel = this.randomSelection(raw)
+              sel = sel.replace('{text}', event.target.innerText)
+              this.showMessage(sel, 4000, 8)
               return
             }
           }
-      })
+      }, { signal })
     }
     if (this.botTips.events && this.botTips.events.length > 0) {
-      this.botTips.events.forEach((event: any) => {
-        const now = new Date(),
-          after = event.date.split('-')[0],
-          before = event.date.split('-')[1] || after
+      this.botTips.events.forEach((event: DiaEvent) => {
+        const now = new Date()
+        const curM = now.getMonth() + 1
+        const curD = now.getDate()
+        const [after, beforeRaw] = event.date.split('-')
+        const before = beforeRaw || after
+        const [aMStr, aDStr] = after.split('/')
+        const [bMStr, bDStr] = before.split('/')
+        const aM = parseInt(aMStr, 10)
+        const aD = parseInt(aDStr, 10)
+        const bM = parseInt(bMStr, 10)
+        const bD = parseInt(bDStr, 10)
         if (
-          after.split('/')[0] <= now.getMonth() + 1 &&
-          now.getMonth() + 1 <= before.split('/')[0] &&
-          after.split('/')[1] <= now.getDate() &&
-          now.getDate() <= before.split('/')[1]
+          Number.isFinite(aM) &&
+          Number.isFinite(aD) &&
+          Number.isFinite(bM) &&
+          Number.isFinite(bD) &&
+          aM <= curM && curM <= bM &&
+          aD <= curD && curD <= bD
         ) {
-          event.text = this.randomSelection(event.text)
-          event.text = event.text.replace('{year}', now.getFullYear())
-          this.messages.push(event.text)
+          const text = this.randomSelection(event.text)
+          const msg = text.replace('{year}', String(now.getFullYear()))
+          this.messages.push(msg)
         }
       })
     }
   }
 
   showWelcomeMessage() {
-    let text
+    let text: string
     if (location.pathname === '/') {
       const now = new Date().getHours()
-      if (now > 5 && now <= 7) text = this.botTips['5_7']
-      else if (now > 7 && now <= 11) text = this.botTips['welcome']['7_11']
-      else if (now > 11 && now <= 13) text = this.botTips['welcome']['11_13']
-      else if (now > 13 && now <= 17) text = this.botTips['welcome']['13_17']
-      else if (now > 17 && now <= 19) text = this.botTips['welcome']['17_19']
-      else if (now > 19 && now <= 21) text = this.botTips['welcome']['19_21']
-      else if (now > 21 && now <= 23) text = this.botTips['welcome']['21_23']
-      else text = this.botTips['welcome']['24']
+      let candidate: string | string[]
+      if (now > 5 && now <= 7) candidate = this.botTips['welcome']['5_7']
+      else if (now > 7 && now <= 11) candidate = this.botTips['welcome']['7_11']
+      else if (now > 11 && now <= 13) candidate = this.botTips['welcome']['11_13']
+      else if (now > 13 && now <= 17) candidate = this.botTips['welcome']['13_17']
+      else if (now > 17 && now <= 19) candidate = this.botTips['welcome']['17_19']
+      else if (now > 19 && now <= 21) candidate = this.botTips['welcome']['19_21']
+      else if (now > 21 && now <= 23) candidate = this.botTips['welcome']['21_23']
+      else candidate = this.botTips['welcome']['24']
+      text = this.randomSelection(candidate)
     } else if (document.referrer !== '') {
       const referrer = new URL(document.referrer),
         domain = referrer.hostname.split('.')[1]
@@ -276,25 +393,14 @@ class AuroraBotSoftware {
   }
 
   loadLocaleMessages() {
-    const locales = import.meta.glob<{ default: { [key: string]: { [key: string]: string } } }>(
-      './messages/*.json',
-      { eager: true }
-    )
-    const messages: {
-      [key: string]: { [key: string]: { [key: string]: string } }
-    } = {}
-    Object.keys(locales).forEach((key) => {
-      const matched = key.match(/([A-Za-z0-9-_]+)\.json$/i)
-      if (matched && matched[1]) {
-        messages[matched[1]] = locales[key].default
-      }
-    })
-    this.locales = messages
+    // Deprecated: We now use project i18n's `dia` namespace.
+    this.locales = {}
   }
 
   showMessage(text: string, timeout: number, priority: number) {
     const cacheMessage = sessionStorage.getItem(this.messageCacheKey) ?? ''
-    if (!text || (cacheMessage !== '' && parseInt(cacheMessage) > priority)) return
+    const currentPriority = cacheMessage ? parseInt(cacheMessage, 10) : -1
+    if (!text || currentPriority > priority) return
     if (this.messageTimer) {
       clearTimeout(this.messageTimer)
       this.messageTimer = undefined
@@ -307,45 +413,51 @@ class AuroraBotSoftware {
     }
     const tipsContainerEl = document.getElementById(this.config.containerId)
     const tipsEl = document.getElementById(this.config.messageId)
-    let diaEl = document.createElement('null')
-    if (this.config.botId) diaEl = document.getElementById(this.config.botId) ?? document.createElement('null')
-    if (tipsEl instanceof Element && tipsContainerEl instanceof Element) {
+    const diaEl = this.config.botId ? document.getElementById(this.config.botId) : null
+    if (tipsEl && tipsContainerEl) {
       tipsEl.innerHTML = text
       tipsContainerEl.classList.add('active')
-      if (diaEl instanceof Element) diaEl.classList.add('active')
-      this.messageTimer = <any>setTimeout(() => {
+      diaEl?.classList.add('active')
+      this.messageTimer = window.setTimeout(() => {
         sessionStorage.removeItem(this.messageCacheKey)
         tipsContainerEl.classList.remove('active')
-        if (diaEl instanceof Element) diaEl.classList.remove('active')
+        diaEl?.classList.remove('active')
       }, timeout)
     }
   }
 
-  randomSelection(obj: string[] | string) {
-    return Array.isArray(obj) ? obj[Math.floor(Math.random() * obj.length)] : obj
+  randomSelection(obj: string[] | string): string {
+    return Array.isArray(obj) ? obj[Math.floor(Math.random() * obj.length)] : (obj as string)
   }
 
   showQuote() {
-    if (this.config.locale === 'cn') {
+    if (this.config.locale === 'zh' || this.config.locale === 'cn') {
       this.getHitokoto()
     } else {
       this.getTheySaidSo()
     }
   }
 
-  getHitokoto() {
-    fetch('https://v1.hitokoto.cn')
-      .then((response) => response.json())
-      .then((result) => {
-        this.showMessage(result.hitokoto, 6000, 9)
-      })
+  async getHitokoto() {
+    try {
+      const response = await fetch('https://v1.hitokoto.cn')
+      if (!response.ok) throw new Error('Failed to fetch hitokoto')
+      const result = await response.json()
+      this.showMessage(result.hitokoto, 6000, 9)
+    } catch (e) {
+      console.error('hitokoto error', e)
+    }
   }
 
-  getTheySaidSo() {
-    fetch('https://quotes.rest/qod?language=en')
-      .then((response) => response.json())
-      .then((result) => {
-        this.showMessage(result.contents.quotes[0].quote, 6000, 9)
-      })
+  async getTheySaidSo() {
+    try {
+      const response = await fetch('https://quotes.rest/qod?language=en')
+      if (!response.ok) throw new Error('Failed to fetch quotes')
+      const result = await response.json()
+      const quote = result?.contents?.quotes?.[0]?.quote
+      if (quote) this.showMessage(quote, 6000, 9)
+    } catch (e) {
+      console.error('quotes error', e)
+    }
   }
 }

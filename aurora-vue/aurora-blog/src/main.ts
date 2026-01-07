@@ -9,6 +9,7 @@ import 'mavon-editor/dist/css/index.css'
 import 'katex/dist/katex.min.css'
 
 import { createPinia } from 'pinia'
+import { ElNotification } from 'element-plus'
 import router from './router'
 import './router/guard'
 import { i18n } from './locales'
@@ -41,6 +42,8 @@ export const app = createApp(App)
     loading: defaultCover, // 使用默认封面作为加载图
     error: defaultCover
   })
+// expose Element Plus notification as $notify
+app.config.globalProperties.$notify = ElNotification
 const userStore = useUserStore()
 axios.interceptors.request.use((config: any) => {
   config.headers['Authorization'] = 'Bearer ' + sessionStorage.getItem('token')
