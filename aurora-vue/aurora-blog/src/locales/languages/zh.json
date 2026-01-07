@@ -84,10 +84,13 @@
   "comments": {
     "placeholder": "发表评论...",
     "submit": "发表评论",
+    "load_more": "加载更多",
     "login_required": "请登录后评论",
     "empty": "评论不能为空",
     "pending_review": "评论成功，正在审核中",
-    "success": "评论成功"
+    "success": "评论成功",
+    "reply": "回复",
+    "reply_placeholder": "添加回复..."
   },
   "message": {
     "notice_line1": "这是一个留言版",

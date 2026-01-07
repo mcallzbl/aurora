@@ -220,10 +220,13 @@
   "comments": {
     "placeholder": "Add comment...",
     "submit": "Add Comment",
+    "load_more": "Load More",
     "login_required": "Please login to comment",
     "empty": "Comment cannot be empty",
     "pending_review": "Comment submitted, pending review",
-    "success": "Comment added successfully"
+    "success": "Comment added successfully",
+    "reply": "Reply",
+    "reply_placeholder": "Add reply..."
   },
   "message": {
     "notice_line1": "This is a message board",

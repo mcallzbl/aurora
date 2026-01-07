@@ -3,11 +3,17 @@
     <div class="flex space-x-3 xl:space-x-5">
       <Avatar :url="reply.avatar" />
       <div class="reply bg-white flex flex-col p-3 rounded-md relative shadow-md">
-        <p class="commentContent" v-html="commentContent.replaceAll('\n', '<br>')" />
+        <p class="commentContent">
+          <template v-if="reply.replyUserId !== commentUserId">
+            <a :href="reply.replyWebsite" target="_blank" class="reply-link">@{{ reply.replyNickname }}</a>
+            <span>&nbsp;</span>
+          </template>
+          <span>{{ reply.commentContent }}</span>
+        </p>
         <div class="flex justify-between mt-2 text-xs text-gray-400 space-x-3 md:space-x-16">
           <span> {{ reply.nickname }} | {{ time }}</span>
           <div>
-            <span class="cursor-pointer reply-button" @click="clickOnSonReply">Reply</span>
+            <span class="cursor-pointer reply-button" @click="clickOnSonReply">{{ t('comments.reply') }}</span>
           </div>
         </div>
       </div>
@@ -22,55 +28,41 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Avatar from '@/components/Avatar.vue'
 import CommentReplyForm from './CommentReplyForm.vue'
 
-export default defineComponent({
-  components: {
-    Avatar,
-    CommentReplyForm
-  },
-  props: ['reply', 'commentUserId'],
-  setup(props) {
-    const formatTime = (time: any): any => {
-      const date = new Date(time)
-      const year = date.getFullYear()
-      const month = date.getMonth() + 1
-      const day = date.getDate()
-      return year + '-' + month + '-' + day
-    }
-    const reactiveData = reactive({
-      replyContent: '' as any,
-      time: formatTime(props.reply.createTime) as any,
-      show: false as any
-    })
-    const clickOnSonReply = () => {
-      reactiveData.replyContent = '@' + props.reply.nickname
-      reactiveData.show = true
-    }
-    const changeShow = () => {
-      reactiveData.show = false
-    }
-    const commentContent = computed(() => {
-      if (props.reply.replyUserId !== props.commentUserId) {
-        return (
-          `<a href="${props.reply.replyWebsite}" target="_blank" class="reply-link">@${props.reply.replyNickname}&nbsp</a>` +
-          props.reply.commentContent
-        )
-      } else {
-        return props.reply.commentContent
-      }
-    })
-    return {
-      ...toRefs(reactiveData),
-      commentContent,
-      clickOnSonReply,
-      changeShow
-    }
-  }
-})
+defineOptions({ name: 'CommentReplyItem' })
+
+const { t } = useI18n()
+
+const props = defineProps<{
+  reply: any
+  commentUserId: any
+}>()
+
+const formatTime = (time: any): string => {
+  const date = new Date(time)
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  return `${year}-${month}-${day}`
+}
+
+const show = ref(false)
+const replyContent = ref('')
+const time = computed(() => formatTime(props.reply.createTime))
+
+const clickOnSonReply = () => {
+  replyContent.value = '@' + props.reply.nickname
+  show.value = true
+}
+
+const changeShow = () => {
+  show.value = false
+}
 </script>
 <style lang="scss" scoped>
 .reply::before {

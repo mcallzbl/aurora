@@ -1,77 +1,85 @@
 <template>
   <div class="mt-5 max-w-full">
     <div class="flex space-x-3 xl:space-x-5">
-      <Avatar :url="comment.avatar" />
+      <Avatar :url="props.comment.avatar" />
       <div class="max-w-full-calc space-y-5">
         <div class="bg-white text-primary p-4 rounded-md relative shadow-md reply" style="width: fit-content">
-          <p class="commentContent" v-html="comment.commentContent.replaceAll('\n', '<br>')" />
+          <p class="commentContent" v-html="props.comment.commentContent.replaceAll('\n', '<br>')" />
           <div class="flex justify-between mt-3 text-xs text-gray-400 space-x-3 md:space-x-16">
-            <span>{{ comment.nickname }} | {{ time }}</span>
+            <span>{{ props.comment.nickname }} | {{ createdAt }}</span>
             <div>
-              <span class="cursor-pointer reply-button" @click="clickOnReply">Reply</span>
+              <span class="cursor-pointer reply-button" @click="clickOnReply">{{ t('comments.reply') }}</span>
             </div>
           </div>
         </div>
         <CommentReplyForm
           v-show="show"
-          :initialContent="replyContent"
-          :replyUserId="comment.userId"
+          :initialContent="replyPlaceholder"
+          :replyUserId="props.comment.userId"
           @changeShow="changeShow" />
         <transition-group name="fade">
           <CommentReplyItem
-            v-for="reply in comment.replyDTOs"
+            v-for="reply in props.comment.replyDTOs"
             :key="reply.id"
-            :commentUserId="comment.userId"
+            :commentUserId="props.comment.userId"
             :reply="reply" />
         </transition-group>
       </div>
     </div>
   </div>
+  
 </template>
 
-<script lang="ts">
-import { defineComponent, provide, reactive, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, provide, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Avatar from '@/components/Avatar.vue'
 import CommentReplyItem from './CommentReplyItem.vue'
 import CommentReplyForm from './CommentReplyForm.vue'
 
-export default defineComponent({
-  components: {
-    Avatar,
-    CommentReplyItem,
-    CommentReplyForm
-  },
-  props: ['comment', 'index'],
-  setup(props) {
-    const comment: any = props.comment
-    provide('parentId', comment.id)
-    provide('index', props.index)
-    const formatTime = (time: any): any => {
-      const date = new Date(time)
-      const year = date.getFullYear()
-      const month = date.getMonth() + 1
-      const day = date.getDate()
-      return year + '-' + month + '-' + day
-    }
-    const reactiveData = reactive({
-      replyContent: '' as any,
-      time: formatTime(props.comment.createTime) as any,
-      show: false as any
-    })
-    const changeShow = () => {
-      reactiveData.show = false
-    }
-    const clickOnReply = () => {
-      reactiveData.replyContent = 'add reply...'
-      reactiveData.show = true
-    }
-    return {
-      ...toRefs(reactiveData),
-      clickOnReply,
-      changeShow
-    }
+defineOptions({ name: 'CommentItem' })
+
+interface ReplyDTO {
+  id: number | string
+  [key: string]: any
+}
+
+interface CommentItemProps {
+  comment: {
+    id: number | string
+    userId: number | string
+    avatar: string
+    nickname: string
+    commentContent: string
+    createTime: string | number | Date
+    replyDTOs: ReplyDTO[]
   }
+  index: number
+}
+
+const props = defineProps<CommentItemProps>()
+const { t, d } = useI18n()
+
+// provide for children
+provide('parentId', props.comment.id)
+provide('index', props.index)
+
+const show = ref(false)
+
+const createdAt = computed(() => {
+  const date = new Date(props.comment.createTime)
+  return d(date, 'short')
 })
+
+const replyPlaceholder = computed(() => t('comments.reply_placeholder'))
+
+const changeShow = () => {
+  show.value = false
+}
+
+const clickOnReply = () => {
+  show.value = true
+}
 </script>
 <style lang="scss" scoped>
 .reply::before {

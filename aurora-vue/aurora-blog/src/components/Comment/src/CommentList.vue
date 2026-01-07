@@ -5,49 +5,46 @@
   </transition-group>
   <button
     v-if="haveMore"
-    class="load-more-button mt-7 w-32 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex mx-auto">
-    <span class="text-center flex-grow" @click="loadMore">Load More</span>
+    class="load-more-button mt-7 w-32 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex mx-auto"
+    type="button"
+    @click="loadMore">
+    <span class="text-center flex-grow">{{ t('comments.load_more') }}</span>
   </button>
 </template>
 
-<script lang="ts">
-// @ts-nocheck
-import { defineComponent, inject } from 'vue'
+<script setup lang="ts">
+import { inject } from 'vue'
 import CommentItem from './CommentItem.vue'
+import { useI18n } from 'vue-i18n'
 import { useCommentStore } from '@/stores/comment'
 import emitter from '@/utils/mitt'
 
-export default defineComponent({
-  components: {
-    CommentItem
-  },
-  setup() {
-    const commentStore = useCommentStore()
-    const loadMore = async () => {
-      switch (commentStore.type) {
-        case 1:
-          emitter.emit('articleLoadMore')
-          break
-        case 2:
-          emitter.emit('messageLoadMore')
-          break
-        case 3:
-          emitter.emit('aboutLoadMore')
-          break
-        case 4:
-          emitter.emit('friendLinkLoadMore')
-          break
-        case 5:
-          emitter.emit('talkLoadMore')
-      }
-    }
-    return {
-      comments: inject('comments'),
-      haveMore: inject('haveMore'),
-      loadMore
-    }
+defineOptions({ name: 'CommentList' })
+
+const { t } = useI18n()
+const commentStore = useCommentStore()
+
+const comments = inject('comments')
+const haveMore = inject('haveMore')
+
+const loadMore = () => {
+  switch (commentStore.type) {
+    case 1:
+      emitter.emit('articleLoadMore')
+      break
+    case 2:
+      emitter.emit('messageLoadMore')
+      break
+    case 3:
+      emitter.emit('aboutLoadMore')
+      break
+    case 4:
+      emitter.emit('friendLinkLoadMore')
+      break
+    case 5:
+      emitter.emit('talkLoadMore')
   }
-})
+}
 </script>
 <style lang="scss" scoped>
 .load-more-button {

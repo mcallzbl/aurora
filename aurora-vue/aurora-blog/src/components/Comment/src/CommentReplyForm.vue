@@ -13,21 +13,22 @@
           id="submit-button"
           class="mt-5 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
           @click="saveReply">
-          <span class="text-center flex-grow commit">Reply</span>
+          <span class="text-center flex-grow commit">{{ t('comments.reply') }}</span>
         </button>
         <button
           id="submit-button"
           class="mt-5 mr-3 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
-          @click="CancelReply">
-          <span class="text-center flex-grow commit">Cancel</span>
+          @click="cancelReply">
+          <span class="text-center flex-grow commit">{{ t('common.cancel') }}</span>
         </button>
       </div>
     </div>
   </div>
-</template>
+ </template>
 
-<script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, reactive, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, getCurrentInstance, inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Avatar from '@/components/Avatar.vue'
 import emitter from '@/utils/mitt'
 import { useUserStore } from '@/stores/user'
@@ -36,99 +37,95 @@ import { useAppStore } from '@/stores/app'
 import { useRoute } from 'vue-router'
 import api from '@/api/api'
 
-export default defineComponent({
-  components: {
-    Avatar
-  },
-  props: ['replyUserId', 'initialContent'],
-  setup(props, { emit }) {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const userStore = useUserStore()
-    const commentStore = useCommentStore()
-    const appStore = useAppStore()
-    const route = useRoute()
-    const reactiveData = reactive({
-      commentContent: '' as any
+defineOptions({ name: 'CommentReplyForm' })
+
+const props = defineProps<{ replyUserId: number | string; initialContent: string }>()
+const emit = defineEmits<{ (e: 'changeShow'): void }>()
+
+const { t } = useI18n()
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const userStore = useUserStore()
+const commentStore = useCommentStore()
+const appStore = useAppStore()
+const route = useRoute()
+
+const commentContent = ref<string>('')
+const parentId = inject('parentId') as any
+const index = inject('index') as any
+
+const saveReply = () => {
+  if (userStore.userInfo === '') {
+    proxy.$notify({
+      title: t('common.warning'),
+      message: t('comments.login_required'),
+      type: 'warning'
     })
-    const parentId = inject('parentId')
-    const index = inject('index')
-    const saveReply = () => {
-      if (userStore.userInfo === '') {
-        proxy.$notify({
-          title: 'Warning',
-          message: '请登录后回复',
-          type: 'warning'
-        })
-        return
-      }
-      if (reactiveData.commentContent.trim() == '') {
-        proxy.$notify({
-          title: 'Warning',
-          message: '回复不能为空',
-          type: 'warning'
-        })
-        return
-      }
-      const path = route.path
-      const arr = path.split('/')
-      const params: any = {
-        type: commentStore.type,
-        replyUserId: props.replyUserId,
-        parentId: parentId,
-        commentContent: reactiveData.commentContent
-      }
-      params.topicId = arr[2]
-      api.saveComment(params).then(({ data }) => {
-        if (data.flag) {
-          emit('changeShow')
-          fetchReplies()
-          const isCommentReview = appStore.websiteConfig.isCommentReview
-          if (isCommentReview) {
-            proxy.$notify({
-              title: 'Warning',
-              message: '评论成功,正在审核中',
-              type: 'warning'
-            })
-          } else {
-            proxy.$notify({
-              title: 'Success',
-              message: '回复成功',
-              type: 'success'
-            })
-          }
-          reactiveData.commentContent = ''
-        }
-      })
-    }
-    const fetchReplies = async () => {
-      switch (commentStore.type) {
-        case 1:
-          emitter.emit('articleFetchReplies', index)
-          break
-        case 2:
-          emitter.emit('messageFetchReplies', index)
-          break
-        case 3:
-          emitter.emit('aboutFetchReplies', index)
-          break
-        case 4:
-          emitter.emit('friendLinkFetchReplies', index)
-          break
-        case 5:
-          emitter.emit('talkFetchReplies', index)
-      }
-    }
-    const CancelReply = () => {
-      emit('changeShow')
-    }
-    return {
-      ...toRefs(reactiveData),
-      avatar: computed(() => userStore.userInfo.avatar),
-      saveReply,
-      CancelReply
-    }
+    return
   }
-})
+  if (commentContent.value.trim() === '') {
+    proxy.$notify({
+      title: t('common.warning'),
+      message: t('comments.empty'),
+      type: 'warning'
+    })
+    return
+  }
+  const path = route.path
+  const arr = path.split('/')
+  const params: any = {
+    type: commentStore.type,
+    replyUserId: props.replyUserId,
+    parentId: parentId,
+    commentContent: commentContent.value
+  }
+  params.topicId = arr[2]
+  api.saveComment(params).then(({ data }) => {
+    if (data.flag) {
+      emit('changeShow')
+      fetchReplies()
+      const isCommentReview = appStore.websiteConfig.isCommentReview
+      if (isCommentReview) {
+        proxy.$notify({
+          title: t('common.warning'),
+          message: t('comments.pending_review'),
+          type: 'warning'
+        })
+      } else {
+        proxy.$notify({
+          title: t('common.success'),
+          message: t('comments.reply_success'),
+          type: 'success'
+        })
+      }
+      commentContent.value = ''
+    }
+  })
+}
+
+const fetchReplies = async () => {
+  switch (commentStore.type) {
+    case 1:
+      emitter.emit('articleFetchReplies', index)
+      break
+    case 2:
+      emitter.emit('messageFetchReplies', index)
+      break
+    case 3:
+      emitter.emit('aboutFetchReplies', index)
+      break
+    case 4:
+      emitter.emit('friendLinkFetchReplies', index)
+      break
+    case 5:
+      emitter.emit('talkFetchReplies', index)
+  }
+}
+
+const cancelReply = () => {
+  emit('changeShow')
+}
+
+const avatar = computed(() => userStore.userInfo.avatar)
 </script>
 <style lang="scss" scoped>
 .reply::before {

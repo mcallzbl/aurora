@@ -8,21 +8,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
 import { Controls, Logo, Navigation } from '../index'
 
-export default defineComponent({
-  name: 'Header',
-  components: {
-    Logo,
-    Navigation,
-    Controls
-  },
-  props: {
-    msg: String
-  }
-})
+defineProps<{
+  msg?: string
+}>()
 </script>
 
 <style lang="scss" scoped>
