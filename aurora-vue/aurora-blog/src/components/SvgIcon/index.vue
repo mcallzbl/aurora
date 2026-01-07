@@ -1,7 +1,7 @@
 <template>
   <div v-if="isExternalClass" :style="styleExternalIcon" class="svg-external-icon svg-icon" v-bind="$attrs" />
   <svg v-else :class="svgClass" aria-hidden="true" v-bind="$attrs">
-    <use :href="iconName" />
+    <use :href="iconName" :xlink:href="iconName" />
   </svg>
 </template>
 
@@ -53,7 +53,7 @@ export default defineComponent({
   height: 1em;
   vertical-align: -0.15em;
   fill: currentColor;
-  stroke: var(--background-primary);
+  stroke: currentColor;
   overflow: hidden;
   display: inline;
   position: relative;

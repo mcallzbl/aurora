@@ -61,105 +61,96 @@
   </div>
 </template>
 
-<script lang="ts">
-// @ts-nocheck
+<script lang="ts" setup>
 import { useAppStore } from '@/stores/app'
-import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNavigatorStore } from '@/stores/navigator'
 import { useRouter } from 'vue-router'
 import { useSearchStore } from '@/stores/search'
 import { useCommonStore } from '@/stores/common'
 
-export default defineComponent({
-  name: 'AuroraNavigator',
-  setup() {
-    const appStore = useAppStore()
-    const commonStore = useCommonStore()
-    const { t } = useI18n()
-    const navigatorStore = useNavigatorStore()
-    const searchStore = useSearchStore()
-    const router = useRouter()
-    const progress = ref(0)
-    const scrolling = ref(false)
-    const time = ref(0)
-    let scrollingHandler: any
-    let menuReopenHandler: any
-    const needReopen = ref(false)
-    onMounted(() => {
-      document.addEventListener('scroll', scrollHandler)
-    })
-    onUnmounted(() => {
-      document.removeEventListener('scroll', scrollHandler)
-    })
-    const scrollHandler = () => {
-      clearTimeout(scrollingHandler)
-      clearTimeout(menuReopenHandler)
-      scrolling.value = true
-      scrollingHandler = setTimeout(() => {
-        scrolling.value = false
-      }, 700)
-      if (needReopen.value || navigatorStore.openNavigator === true) {
-        if (navigatorStore.openNavigator === true) navigatorStore.setOpenNavigator(false)
-        needReopen.value = true
-        menuReopenHandler = setTimeout(() => {
-          navigatorStore.openNavigator = true
-          needReopen.value = false
-        }, 700)
-      }
-      setTimeout(() => {
-        progress.value = Number(
-          ((window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100).toFixed(0)
-        )
-      }, 0)
-    }
-    const handleNavigatorToggle = () => {
-      const timeNow = new Date().getTime()
-      if (timeNow - time.value < 10) return
-      time.value = timeNow
-      if (navigatorStore.openNavigator === true && needReopen.value === true) needReopen.value = false
-      setTimeout(() => {
-        navigatorStore.toggleOpenNavigator()
-      }, 10)
-    }
-    const handleBackToTop = () => {
-      navigatorStore.setOpenNavigator(false)
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      })
-    }
-    const handleOpenMenu = () => {
-      navigatorStore.toggleMobileMenu()
-    }
-    const handleGoHome = () => {
-      navigatorStore.setOpenNavigator(false)
-      router.push('/')
-    }
-    const handleSearch: any = (status: boolean) => {
-      navigatorStore.setOpenNavigator(false)
-      searchStore.setOpenModal(status)
-    }
-    return {
-      gradient: computed(() => {
-        return { background: appStore.themeConfig.header_gradient_css }
-      }),
-      showProgress: computed(() => {
-        return progress.value > 5
-      }),
-      isMobile: computed(() => commonStore.isMobile),
-      openNavigator: computed(() => navigatorStore.openNavigator),
-      progress,
-      handleNavigatorToggle,
-      handleBackToTop,
-      handleOpenMenu,
-      handleGoHome,
-      handleSearch,
-      scrolling,
-      t
-    }
+const appStore = useAppStore()
+const commonStore = useCommonStore()
+const navigatorStore = useNavigatorStore()
+const searchStore = useSearchStore()
+const router = useRouter()
+const { t } = useI18n()
+
+const progress = ref(0)
+const scrolling = ref(false)
+const time = ref(0)
+let scrollingHandler: number | undefined
+let menuReopenHandler: number | undefined
+const needReopen = ref(false)
+
+const scrollHandler = () => {
+  if (scrollingHandler) window.clearTimeout(scrollingHandler)
+  if (menuReopenHandler) window.clearTimeout(menuReopenHandler)
+  scrolling.value = true
+  scrollingHandler = window.setTimeout(() => {
+    scrolling.value = false
+  }, 700)
+
+  if (needReopen.value || navigatorStore.openNavigator === true) {
+    if (navigatorStore.openNavigator === true) navigatorStore.setOpenNavigator(false)
+    needReopen.value = true
+    menuReopenHandler = window.setTimeout(() => {
+      navigatorStore.setOpenNavigator(true)
+      needReopen.value = false
+    }, 700)
   }
+  // next tick via 0ms timeout ensures layout is updated
+  window.setTimeout(() => {
+    const height = document.documentElement.scrollHeight - window.innerHeight
+    const ratio = height > 0 ? window.pageYOffset / height : 0
+    progress.value = Math.max(0, Math.min(100, Number((ratio * 100).toFixed(0))))
+  }, 0)
+}
+
+onMounted(() => {
+  document.addEventListener('scroll', scrollHandler, { passive: true })
 })
+onUnmounted(() => {
+  document.removeEventListener('scroll', scrollHandler)
+  if (scrollingHandler) window.clearTimeout(scrollingHandler)
+  if (menuReopenHandler) window.clearTimeout(menuReopenHandler)
+})
+
+const handleNavigatorToggle = () => {
+  const timeNow = Date.now()
+  if (timeNow - time.value < 10) return
+  time.value = timeNow
+  if (navigatorStore.openNavigator === true && needReopen.value === true) needReopen.value = false
+  window.setTimeout(() => {
+    navigatorStore.toggleOpenNavigator()
+  }, 10)
+}
+
+const handleBackToTop = () => {
+  navigatorStore.setOpenNavigator(false)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const handleOpenMenu = () => {
+  navigatorStore.toggleMobileMenu()
+}
+
+const handleGoHome = () => {
+  navigatorStore.setOpenNavigator(false)
+  router.push('/')
+}
+
+const handleSearch = () => {
+  navigatorStore.setOpenNavigator(false)
+  searchStore.setOpenModal(true)
+}
+
+const gradient = computed(() => ({ background: appStore.themeConfig.header_gradient_css }))
+const showProgress = computed(() => progress.value > 5)
+const isMobile = computed(() => commonStore.isMobile)
+const openNavigator = computed(() => navigatorStore.openNavigator)
+
 </script>
 
 <style lang="scss" scoped>
