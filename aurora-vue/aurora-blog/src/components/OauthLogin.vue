@@ -9,49 +9,46 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, getCurrentInstance } from 'vue'
+<script setup lang="ts">
+import { getCurrentInstance, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import { useUserStore } from '@/stores/user'
 import api from '@/api/api'
 
-export default defineComponent({
-  name: 'OauthLoginModel',
-  setup() {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const userStore = useUserStore()
-    const route = useRoute()
-    const router = useRouter()
-    if (route.path === '/oauth/login/qq') {
-      //@ts-ignore
-      if (QC.Login.check()) {
-        //@ts-ignore
-        QC.Login.getMe(function(openId, accessToken) {
-          const params = {
-            openId: openId,
-            accessToken: accessToken
-          }
-          api.qqLogin(params).then(({ data }) => {
-            if (data.flag) {
-              userStore.userInfo = data.data
-              userStore.token = data.data.token
-              sessionStorage.setItem('token', data.data.token)
-              proxy.$notify({
-                title: 'Success',
-                message: '登录成功',
-                type: 'success'
-              })
-            }
+defineOptions({ name: 'OauthLoginModel' })
+
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const userStore = useUserStore()
+const route = useRoute()
+const router = useRouter()
+const { t } = useI18n()
+
+onMounted(() => {
+  if (route.path !== '/oauth/login/qq') return
+  const QC = (window as any).QC
+  if (QC?.Login?.check && QC.Login.check()) {
+    QC.Login.getMe((openId: any, accessToken: any) => {
+      const params = { openId, accessToken }
+      api.qqLogin(params).then(({ data }) => {
+        if (data.flag) {
+          userStore.userInfo = data.data
+          userStore.token = data.data.token
+          sessionStorage.setItem('token', data.data.token)
+          proxy.$notify({
+            title: t('common.success'),
+            message: t('auth.login_success'),
+            type: 'success'
           })
-          if (userStore.currentUrl === '') {
-            router.push({ path: '/' })
-          } else {
-            router.push({ path: userStore.currentUrl })
-          }
-        })
+        }
+      })
+      if (userStore.currentUrl === '') {
+        router.push({ path: '/' })
+      } else {
+        router.push({ path: userStore.currentUrl })
       }
-    }
+    })
   }
 })
 </script>

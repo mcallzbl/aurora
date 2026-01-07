@@ -72,7 +72,10 @@
     "running-time":"Running Time",
     "view-count":"View Count",
     "tips-open-language": "Choose language",
+    "days_suffix": "d ",
+    "hours_suffix": "h ",
     "minutes_suffix": "mins",
+    "seconds_suffix": "s",
     "words_suffix_k": "k"
   },
   "dia": {

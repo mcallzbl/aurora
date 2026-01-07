@@ -4,15 +4,10 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { useCommonStore } from '@/stores/common'
-import { computed, defineComponent } from 'vue'
+import { computed } from 'vue'
 
-export default defineComponent({
-  name: 'Sidebar',
-  setup() {
-    const commonStore = useCommonStore()
-    return { isMobile: computed(() => commonStore.isMobile) }
-  }
-})
+const commonStore = useCommonStore()
+const isMobile = computed(() => commonStore.isMobile)
 </script>

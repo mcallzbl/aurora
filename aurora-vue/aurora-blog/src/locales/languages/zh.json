@@ -72,9 +72,17 @@
     "running-time":"运行时间",
     "view-count":"总访问量",
     "tips-open-language": "选择语言",
+    "days_suffix": "天",
+    "hours_suffix": "时",
     "minutes_suffix": "分钟",
+    "seconds_suffix": "秒",
     "words_suffix_k": "k字"
   },
+  "settings_more": {
+  },
+  "time": {
+  },
+  
   "errors": {
     "article_password_failed": "文章密码认证未通过"
   },
