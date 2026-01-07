@@ -5,17 +5,8 @@
     <CommentList />
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
 import { SubTitle } from '@/components/Title'
 import CommentForm from './CommentForm.vue'
 import CommentList from './CommentList.vue'
-
-export default defineComponent({
-  name: 'Comment',
-  components: { SubTitle, CommentForm, CommentList },
-  setup() {
-    return {}
-  }
-})
 </script>

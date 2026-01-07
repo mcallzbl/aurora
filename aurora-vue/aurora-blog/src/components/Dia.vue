@@ -3,7 +3,7 @@
     <div v-show="showDia" id="bot-container">
       <div id="Aurora-Dia--body" :style="cssVariables">
         <div id="Aurora-Dia--tips-wrapper">
-          <div id="Aurora-Dia--tips" class="Aurora-Dia--tips">早上好呀～</div>
+          <div id="Aurora-Dia--tips" class="Aurora-Dia--tips"></div>
         </div>
         <div id="Aurora-Dia" class="Aurora-Dia">
           <div id="Aurora-Dia--eyes" class="Aurora-Dia--eyes">
@@ -15,48 +15,53 @@
       </div>
     </div>
   </transition>
+  
 </template>
 
-<script lang="ts">
-// @ts-nocheck
-import { computed, defineComponent, onMounted, ref } from 'vue'
+<script lang="ts" setup>
+import { computed, onMounted, ref, watch } from 'vue'
 import { useDiaStore } from '@/stores/dia'
 import { useAppStore } from '@/stores/app'
+import { useI18n } from 'vue-i18n'
 
-export default defineComponent({
-  name: 'Dia',
-  setup() {
-    const diaStore = useDiaStore()
-    const appStore = useAppStore()
-    const showDia = ref(false)
-    onMounted(() => {
-      initializeBot()
-    })
-    const initializeBot = () => {
-      if (!appStore.aurora_bot_enable) return
-      diaStore.initializeBot({
-        locale: diaStore.aurora_bot.locale,
-        tips: diaStore.aurora_bot.tips
-      })
-      setTimeout(() => {
-        showDia.value = true
-      }, 1000)
-    }
-    return {
-      cssVariables: computed(() => {
-        return `
-          --aurora-dia--linear-gradient: ${appStore.themeConfig.header_gradient_css};
-          --aurora-dia--linear-gradient-hover: linear-gradient(
-            to bottom,
-            ${appStore.themeConfig.gradient.color_2},
-            ${appStore.themeConfig.gradient.color_3}
-          );
-          --aurora-dia--platform-light: ${appStore.themeConfig.gradient.color_3};
-        `
-      }),
-      showDia
-    }
-  }
+const diaStore = useDiaStore()
+const appStore = useAppStore()
+const { locale } = useI18n()
+
+const showDia = ref(false)
+
+const initializeBot = (): void => {
+  if (!appStore.aurora_bot_enable) return
+  const botLocale = locale.value === 'zh' ? 'zh' : 'en'
+  // Update software config in place, then reload
+  diaStore.initializeBot({
+    locale: botLocale,
+    tips: (diaStore as any).aurora_bot?.tips
+  })
+  diaStore.dia.software.load()
+  // ensure visible
+  showDia.value = true
+}
+
+onMounted(() => {
+  initializeBot()
+})
+
+watch(locale, () => {
+  // Reinitialize bot when site locale changes
+  initializeBot()
+})
+
+const cssVariables = computed(() => {
+  return `
+    --aurora-dia--linear-gradient: ${appStore.themeConfig.header_gradient_css};
+    --aurora-dia--linear-gradient-hover: linear-gradient(
+      to bottom,
+      ${appStore.themeConfig.gradient.color_2},
+      ${appStore.themeConfig.gradient.color_3}
+    );
+    --aurora-dia--platform-light: ${appStore.themeConfig.gradient.color_3};
+  `
 })
 </script>
 
@@ -356,7 +361,7 @@ export default defineComponent({
   45%,
   55%,
   70% {
-    transform: roate(-7deg) translateY(-8px);
+    transform: rotate(-7deg) translateY(-8px);
   }
 }
 
