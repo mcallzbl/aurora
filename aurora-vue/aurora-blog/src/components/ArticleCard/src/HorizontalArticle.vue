@@ -79,8 +79,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, getCurrentInstance, toRef } from 'vue'
+<script setup lang="ts">
+import { computed, getCurrentInstance, toRef } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
@@ -88,52 +88,47 @@ import { useArticleStore } from '@/stores/article'
 import { useI18n } from 'vue-i18n'
 import emitter from '@/utils/mitt'
 
-export default defineComponent({
-  name: 'HorizontalArticle',
-  setup() {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const appStore = useAppStore()
-    const articleStore = useArticleStore()
-    const userStore = useUserStore()
-    const router = useRouter()
-    const { t, d } = useI18n()
-    const handleAuthorClick = (link: string) => {
-      if (link === '') link = window.location.href
-      window.open(link)
+defineOptions({ name: 'HorizontalArticle' })
+
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const appStore = useAppStore()
+const articleStore = useArticleStore()
+const userStore = useUserStore()
+const router = useRouter()
+const { t, d } = useI18n()
+
+const article = toRef(articleStore.$state, 'topArticle')
+
+const handleAuthorClick = (link: string) => {
+  if (link === '') link = window.location.href
+  window.open(link)
+}
+
+const toArticle = () => {
+  let isAccess = false
+  userStore.accessArticles.forEach((item: any) => {
+    if (item == articleStore.topArticle.id) {
+      isAccess = true
     }
-    const toArticle = () => {
-      let isAccess = false
-      userStore.accessArticles.forEach((item: any) => {
-        if (item == articleStore.topArticle.id) {
-          isAccess = true
-        }
+  })
+  if (articleStore.topArticle.status == 2 && isAccess == false) {
+    if (userStore.userInfo === '') {
+      proxy.$notify({
+        title: t('common.warning'),
+        message: t('article.protected_login_required'),
+        type: 'warning'
       })
-      if (articleStore.topArticle.status == 2 && isAccess == false) {
-        if (userStore.userInfo === '') {
-          proxy.$notify({
-            title: 'Warning',
-            message: '该文章受密码保护,请登录后访问',
-            type: 'warning'
-          })
-        } else {
-          emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle.id)
-        }
-      } else {
-        router.push({ path: '/articles/' + articleStore.topArticle.id })
-      }
+    } else {
+      emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle.id)
     }
-    return {
-      bannerHoverGradient: computed(() => {
-        return { background: appStore.themeConfig.header_gradient_css }
-      }),
-      article: toRef(articleStore.$state, 'topArticle'),
-      handleAuthorClick,
-      toArticle,
-      t,
-      d
-    }
+  } else {
+    router.push({ path: '/articles/' + articleStore.topArticle.id })
   }
-})
+}
+
+const bannerHoverGradient = computed(() => ({
+  background: appStore.themeConfig.header_gradient_css
+}))
 </script>
 <style lang="scss" scoped>
 .article-title:hover {
