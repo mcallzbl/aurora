@@ -26,11 +26,10 @@
               </template>
             </el-row>
           </div>
-          <div
-            class="post-html"
-            v-html="
-              `需要交换友链的可在下方留言💖<br><br>友链信息展示需要，你的信息格式要包含：名称、头像、链接、介绍`
-            " />
+          <div class="post-html">
+            <p>{{ t('friend.link_notice_line1') }}</p>
+            <p>{{ t('friend.link_notice_line2') }}</p>
+          </div>
           <Comment />
         </div>
         <div class="col-span-1">
@@ -43,8 +42,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, provide, reactive, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, provide, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -53,82 +52,82 @@ import { useCommentStore } from '@/stores/comment'
 import emitter from '@/utils/mitt'
 import api from '@/api/api'
 
-export default defineComponent({
-  name: 'FriendLink',
-  components: { Sidebar, Profile, Breadcrumb, Comment },
-  setup() {
-    const { t } = useI18n()
-    const commentStore = useCommentStore()
-    const reactiveData = reactive({
-      links: '' as any,
-      comments: [] as any,
-      haveMore: false as any,
-      isReload: false as any
-    })
-    const pageInfo = reactive({
-      current: 1,
-      size: 7
-    })
-    commentStore.type = 4
-    onMounted(() => {
-      fetchLinks()
-      fetchComments()
-    })
-    provide(
-      'comments',
-      computed(() => reactiveData.comments)
-    )
-    provide(
-      'haveMore',
-      computed(() => reactiveData.haveMore)
-    )
-    emitter.on('friendLinkFetchComment', () => {
-      pageInfo.current = 1
-      reactiveData.isReload = true
-      fetchComments()
-    })
-    emitter.on('friendLinkFetchReplies', (index) => {
-      fetchReplies(index)
-    })
-    emitter.on('friendLinkLoadMore', () => {
-      fetchComments()
-    })
-    const fetchLinks = () => {
-      api.getFriendLink().then(({ data }) => {
-        reactiveData.links = data.data
-      })
-    }
-    const fetchComments = () => {
-      const params = {
-        type: 4,
-        topicId: null,
-        current: pageInfo.current,
-        size: pageInfo.size
-      }
-      api.getComments(params).then(({ data }) => {
-        const records = Array.isArray(data?.data?.records) ? data.data.records : []
-        if (reactiveData.isReload) {
-          reactiveData.comments = records
-          reactiveData.isReload = false
-        } else if (records.length > 0) {
-          reactiveData.comments.push(...records)
-        }
-        const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
-        reactiveData.haveMore = total > reactiveData.comments.length
-        pageInfo.current++
-      })
-    }
-    const fetchReplies = (index: any) => {
-      api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-        reactiveData.comments[index].replyDTOs = data.data
-      })
-    }
-    return {
-      ...toRefs(reactiveData),
-      t
-    }
-  }
+defineOptions({ name: 'FriendLink' })
+
+const { t } = useI18n()
+const commentStore = useCommentStore()
+
+const reactiveData = reactive({
+  links: [] as any[],
+  comments: [] as any[],
+  haveMore: false,
+  isReload: false
 })
+
+const pageInfo = reactive({
+  current: 1,
+  size: 7
+})
+
+commentStore.type = 4
+
+onMounted(() => {
+  fetchLinks()
+  fetchComments()
+})
+
+provide('comments', computed(() => reactiveData.comments))
+provide('haveMore', computed(() => reactiveData.haveMore))
+
+emitter.on('friendLinkFetchComment', () => {
+  pageInfo.current = 1
+  reactiveData.isReload = true
+  fetchComments()
+})
+
+emitter.on('friendLinkFetchReplies', (index) => {
+  fetchReplies(index as number)
+})
+
+emitter.on('friendLinkLoadMore', () => {
+  fetchComments()
+})
+
+const fetchLinks = () => {
+  api.getFriendLink().then(({ data }) => {
+    reactiveData.links = data.data
+  })
+}
+
+const fetchComments = () => {
+  const params = {
+    type: 4,
+    topicId: null,
+    current: pageInfo.current,
+    size: pageInfo.size
+  }
+  api.getComments(params).then(({ data }) => {
+    const records = Array.isArray(data?.data?.records) ? data.data.records : []
+    if (reactiveData.isReload) {
+      reactiveData.comments = records
+      reactiveData.isReload = false
+    } else if (records.length > 0) {
+      reactiveData.comments.push(...records)
+    }
+    const total = typeof data?.data?.count === 'number' ? data.data.count : reactiveData.comments.length
+    reactiveData.haveMore = total > reactiveData.comments.length
+    pageInfo.current++
+  })
+}
+
+const fetchReplies = (index: number) => {
+  api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
+    reactiveData.comments[index].replyDTOs = data.data
+  })
+}
+
+// expose to template
+const links = computed(() => reactiveData.links)
 </script>
 
 <style lang="scss" scoped>

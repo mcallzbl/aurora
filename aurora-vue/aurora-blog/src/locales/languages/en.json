@@ -225,6 +225,10 @@
     "pending_review": "Comment submitted, pending review",
     "success": "Comment added successfully"
   },
+  "friend": {
+    "link_notice_line1": "If you'd like to exchange friend links, leave a comment below 💖",
+    "link_notice_line2": "Please include: Name, Avatar, URL, and a short Introduction."
+  },
   "languages": {
     "en": "English",
     "zh": "Chinese"
