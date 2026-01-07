@@ -89,6 +89,10 @@
     "pending_review": "评论成功，正在审核中",
     "success": "评论成功"
   },
+  "message": {
+    "notice_line1": "这是一个留言版",
+    "notice_line2": "欢迎大家前来留言💖"
+  },
   "friend": {
     "link_notice_line1": "需要交换友链的可在下方留言💖",
     "link_notice_line2": "友链信息展示需要，你的信息格式要包含：名称、头像、链接、介绍"
