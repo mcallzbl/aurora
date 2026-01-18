@@ -66,7 +66,9 @@
         <el-input v-model="loginInfo.password" :placeholder="t('auth.password')" show-password type="password" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="register">{{ t('auth.register') }}</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="register">{{
+          t('auth.register')
+        }}</el-button>
       </el-form-item>
       <span class="text" @click="returnLoginDialog">{{ t('auth.login_existing') }}</span>
     </el-form>
@@ -87,7 +89,9 @@
         <el-input v-model="loginInfo.password" :placeholder="t('auth.new_password')" show-password type="password" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="updatePassword">{{ t('common.confirm') }}</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="updatePassword">{{
+          t('common.confirm')
+        }}</el-button>
       </el-form-item>
       <span class="text" @click="returnLoginDialog">{{ t('auth.back_to_login') }}</span>
     </el-form>
@@ -95,10 +99,15 @@
   <el-dialog v-model="articlePasswordDialogVisible" :fullscreen="isMobile" width="30%">
     <el-form @submit.native.prevent @keyup.enter.native="accessArticle">
       <el-form-item class="mt-5">
-        <el-input id="article-password-input" v-model="articlePassword" :placeholder="t('auth.article_password_placeholder')" />
+        <el-input
+          id="article-password-input"
+          v-model="articlePassword"
+          :placeholder="t('auth.article_password_placeholder')" />
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="accessArticle">{{ t('auth.verify_password') }}</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="accessArticle">{{
+          t('auth.verify_password')
+        }}</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>

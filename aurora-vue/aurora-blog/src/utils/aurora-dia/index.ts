@@ -286,54 +286,70 @@ class AuroraBotSoftware {
       if (event.key === 'F12') this.showMessage(this.botTips.console, 6000, 9)
     }
     document.addEventListener('keydown', onKeydown, { signal })
-    document.addEventListener('copy', () => {
-      this.showMessage(this.botTips.copy, 6000, 9)
-    }, { signal })
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) this.showMessage(this.botTips.visibility_change, 6000, 9)
-    }, { signal })
+    document.addEventListener(
+      'copy',
+      () => {
+        this.showMessage(this.botTips.copy, 6000, 9)
+      },
+      { signal }
+    )
+    document.addEventListener(
+      'visibilitychange',
+      () => {
+        if (!document.hidden) this.showMessage(this.botTips.visibility_change, 6000, 9)
+      },
+      { signal }
+    )
     if (this.botTips.mouseover && this.botTips.mouseover.length > 0) {
-      document.addEventListener('mouseover', (event) => {
-        for (const mouseoverEvents of this.botTips.mouseover) {
-          const selector = mouseoverEvents.selector
-          const raw = mouseoverEvents.text
-          event.preventDefault()
-          if (event.target && event.target instanceof HTMLElement) {
-            if (!event.target.matches(selector)) continue
-            // Avoid message keep popping.
-            if (
-              sessionStorage.getItem(this.mouseoverEventCacheKey) &&
-              sessionStorage.getItem(this.mouseoverEventCacheKey) === selector
-            )
-              return
-
-            let sel = this.randomSelection(raw)
-            sel = sel.replace('{text}', event.target.innerText)
-            this.showMessage(sel, 4000, 8)
-            sessionStorage.setItem(this.mouseoverEventCacheKey, selector)
-            window.setTimeout(() => {
-              sessionStorage.removeItem(this.mouseoverEventCacheKey)
-            }, 4000)
-            return
-          }
-        }
-      }, { signal })
-    }
-    if (this.botTips.click && this.botTips.click.length > 0) {
-      document.addEventListener('click', (event) => {
-        if (event.target && event.target instanceof HTMLElement)
-          for (const mouseoverEvents of this.botTips.click) {
+      document.addEventListener(
+        'mouseover',
+        (event) => {
+          for (const mouseoverEvents of this.botTips.mouseover) {
             const selector = mouseoverEvents.selector
             const raw = mouseoverEvents.text
+            event.preventDefault()
             if (event.target && event.target instanceof HTMLElement) {
               if (!event.target.matches(selector)) continue
+              // Avoid message keep popping.
+              if (
+                sessionStorage.getItem(this.mouseoverEventCacheKey) &&
+                sessionStorage.getItem(this.mouseoverEventCacheKey) === selector
+              )
+                return
+
               let sel = this.randomSelection(raw)
               sel = sel.replace('{text}', event.target.innerText)
               this.showMessage(sel, 4000, 8)
+              sessionStorage.setItem(this.mouseoverEventCacheKey, selector)
+              window.setTimeout(() => {
+                sessionStorage.removeItem(this.mouseoverEventCacheKey)
+              }, 4000)
               return
             }
           }
-      }, { signal })
+        },
+        { signal }
+      )
+    }
+    if (this.botTips.click && this.botTips.click.length > 0) {
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (event.target && event.target instanceof HTMLElement)
+            for (const mouseoverEvents of this.botTips.click) {
+              const selector = mouseoverEvents.selector
+              const raw = mouseoverEvents.text
+              if (event.target && event.target instanceof HTMLElement) {
+                if (!event.target.matches(selector)) continue
+                let sel = this.randomSelection(raw)
+                sel = sel.replace('{text}', event.target.innerText)
+                this.showMessage(sel, 4000, 8)
+                return
+              }
+            }
+        },
+        { signal }
+      )
     }
     if (this.botTips.events && this.botTips.events.length > 0) {
       this.botTips.events.forEach((event: DiaEvent) => {
@@ -362,9 +378,12 @@ class AuroraBotSoftware {
             Number.isFinite(aD) &&
             Number.isFinite(bM) &&
             Number.isFinite(bD) &&
-            aM <= curM && curM <= bM &&
-            aD <= curD && curD <= bD
-          ) matched = true
+            aM <= curM &&
+            curM <= bM &&
+            aD <= curD &&
+            curD <= bD
+          )
+            matched = true
         }
 
         if (matched) {

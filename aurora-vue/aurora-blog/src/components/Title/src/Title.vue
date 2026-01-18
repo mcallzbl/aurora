@@ -6,7 +6,6 @@
   </p>
 </template>
 
-
 <script lang="ts">
 import { useAppStore } from '@/stores/app'
 import { computed, defineComponent, toRefs } from 'vue'

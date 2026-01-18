@@ -6,7 +6,7 @@
     "categories": "分类",
     "tags": "标签",
     "post": "文章",
-    "talks":"说说",
+    "talks": "说说",
     "message": "留言",
     "friends": "友链",
     "album": "相册",
@@ -18,7 +18,7 @@
   },
   "titles": {
     "articles": "文章列表",
-    "talks":"说说",
+    "talks": "说说",
     "about": "关于",
     "category_list": "分类目录",
     "tag_list": "标签目录",
@@ -28,7 +28,7 @@
     "comment": "评论区",
     "recent_comment": "最近评论",
     "website_info": "网站信息",
-    "notice":"公告"
+    "notice": "公告"
   },
   "settings": {
     "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
@@ -66,11 +66,11 @@
     "empty-tag": "目前没有标签",
     "pinned": "置顶",
     "featured": "推荐",
-    "login":"登录",
-    "logout":"登出",
-    "personal-center":"个人中心",
-    "running-time":"运行时间",
-    "view-count":"总访问量",
+    "login": "登录",
+    "logout": "登出",
+    "personal-center": "个人中心",
+    "running-time": "运行时间",
+    "view-count": "总访问量",
     "tips-open-language": "选择语言",
     "days_suffix": "天",
     "hours_suffix": "时",
@@ -78,11 +78,9 @@
     "seconds_suffix": "秒",
     "words_suffix_k": "k字"
   },
-  "settings_more": {
-  },
-  "time": {
-  },
-  
+  "settings_more": {},
+  "time": {},
+
   "errors": {
     "article_password_failed": "文章密码认证未通过"
   },
@@ -177,36 +175,12 @@
         "喝口水，补充能量，继续加油！",
         "适当活动一下，灵感可能就在下一步。"
       ],
-      "11_13": [
-        "中午啦～辛苦了一个上午，午餐时间到！",
-        "午饭好好吃，眼睛也要休息一下～",
-        "小憩片刻，下午更有精神～"
-      ],
-      "13_17": [
-        "午后容易犯困，伸个懒腰醒醒神～",
-        "来杯茶/咖啡继续冲刺吧！",
-        "记得眨眨眼，缓解下用眼疲劳～"
-      ],
-      "17_19": [
-        "傍晚好～夕阳很美呢，今天也要好好收尾～",
-        "微风拂面，慢慢放松～",
-        "给今天的自己点个赞～"
-      ],
-      "19_21": [
-        "晚上好～今天过得怎么样？",
-        "适当放松一下，回顾今天的小收获～",
-        "读会儿书或听听歌也不错～"
-      ],
-      "21_23": [
-        "已经这么晚啦，早点休息，晚安～",
-        "深夜也要好好护眼哦～",
-        "记得保存和备份，明天的你会感谢现在的你。"
-      ],
-      "24": [
-        "夜猫子上线？也要注意休息呀～",
-        "深夜安静又迷人，但要善待眼睛～",
-        "确保明天的你也能元气满满～"
-      ]
+      "11_13": ["中午啦～辛苦了一个上午，午餐时间到！", "午饭好好吃，眼睛也要休息一下～", "小憩片刻，下午更有精神～"],
+      "13_17": ["午后容易犯困，伸个懒腰醒醒神～", "来杯茶/咖啡继续冲刺吧！", "记得眨眨眼，缓解下用眼疲劳～"],
+      "17_19": ["傍晚好～夕阳很美呢，今天也要好好收尾～", "微风拂面，慢慢放松～", "给今天的自己点个赞～"],
+      "19_21": ["晚上好～今天过得怎么样？", "适当放松一下，回顾今天的小收获～", "读会儿书或听听歌也不错～"],
+      "21_23": ["已经这么晚啦，早点休息，晚安～", "深夜也要好好护眼哦～", "记得保存和备份，明天的你会感谢现在的你。"],
+      "24": ["夜猫子上线？也要注意休息呀～", "深夜安静又迷人，但要善待眼睛～", "确保明天的你也能元气满满～"]
     },
     "referrer": {
       "self": "欢迎来到<span>「[PLACEHOLDER]」</span>",
@@ -217,35 +191,72 @@
       "other": "欢迎来到<span>「[PLACEHOLDER]」</span>"
     },
     "mouseover": [
-      { "selector": "#Aurora-Dia", "text": [
-        "哇啊啊啊啊啊啊... <span>你想干嘛</span>? O.O",
-        "请您轻一点，我是<span>很昂贵</span>的机器人哦! O.O",
-        "<span>领导，我在呢!</span> 我有什么可以帮到你呢? O.O",
-        "不要一直盯着人家看啦，会<span>害羞</span>的... >///<",
-        "鼠标指针很凉的！快<span>拿开</span>啦~ (｡>皿<｡)"
-      ]},
-      { "selector": "[data-menu='Home']", "text": ["点它就可以回到首页啦！", "回首页看看吧。"]},
-      { "selector": "[data-menu='Talks']", "text": ["这里有主人日常的说说哦!"]},
-      { "selector": "[data-menu='Archives']", "text": ["这里存储了主人的所有作品哦！", "想看看主人的图书馆吗？"]},
-      { "selector": "[data-menu='About']", "text": ["你想知道我家主人是谁吗？", "这里有一些关于我家主人的秘密哦，要不要看看呢？", "发现主人出没地点！"]},
-      { "selector": "[data-menu='Tags']", "text": ["点击就可以看文章的标签啦！", "使用标签可以更好的分类你的文章哦～"]},
-      { "selector": "[data-menu='Message']", "text": ["来这里给主人留言吧！"]},
-      { "selector": "[data-menu='Friends']", "text": ["这里有主人的朋友们哦！"]},
-      { "selector": "[data-menu='PhotoAlbums']", "text": ["这里有主人的日常照片哦！"]},
-      { "selector": "[data-dia='language']", "text": "主人的博客支持多种语言。"},
-      { "selector": "[data-dia='light-switch']", "text": "您可以点击这里切换黑白模式哦！"},
-      { "selector": "[data-dia='author']", "text": ["这是我主人的简介。", "点击其中任何一个链接都可以传送到我主人的其他世界。"]},
-      { "selector": "[data-dia='jump-to-comment']", "text": ["你想看看评论吗?", "点击这里可以帮助你直接跳转到评论部分。"]}
+      {
+        "selector": "#Aurora-Dia",
+        "text": [
+          "哇啊啊啊啊啊啊... <span>你想干嘛</span>? O.O",
+          "请您轻一点，我是<span>很昂贵</span>的机器人哦! O.O",
+          "<span>领导，我在呢!</span> 我有什么可以帮到你呢? O.O",
+          "不要一直盯着人家看啦，会<span>害羞</span>的... >///<",
+          "鼠标指针很凉的！快<span>拿开</span>啦~ (｡>皿<｡)"
+        ]
+      },
+      { "selector": "[data-menu='Home']", "text": ["点它就可以回到首页啦！", "回首页看看吧。"] },
+      { "selector": "[data-menu='Talks']", "text": ["这里有主人日常的说说哦!"] },
+      { "selector": "[data-menu='Archives']", "text": ["这里存储了主人的所有作品哦！", "想看看主人的图书馆吗？"] },
+      {
+        "selector": "[data-menu='About']",
+        "text": ["你想知道我家主人是谁吗？", "这里有一些关于我家主人的秘密哦，要不要看看呢？", "发现主人出没地点！"]
+      },
+      {
+        "selector": "[data-menu='Tags']",
+        "text": ["点击就可以看文章的标签啦！", "使用标签可以更好的分类你的文章哦～"]
+      },
+      { "selector": "[data-menu='Message']", "text": ["来这里给主人留言吧！"] },
+      { "selector": "[data-menu='Friends']", "text": ["这里有主人的朋友们哦！"] },
+      { "selector": "[data-menu='PhotoAlbums']", "text": ["这里有主人的日常照片哦！"] },
+      { "selector": "[data-dia='language']", "text": "主人的博客支持多种语言。" },
+      { "selector": "[data-dia='light-switch']", "text": "您可以点击这里切换黑白模式哦！" },
+      {
+        "selector": "[data-dia='author']",
+        "text": ["这是我主人的简介。", "点击其中任何一个链接都可以传送到我主人的其他世界。"]
+      },
+      {
+        "selector": "[data-dia='jump-to-comment']",
+        "text": ["你想看看评论吗?", "点击这里可以帮助你直接跳转到评论部分。"]
+      }
     ],
     "click": [
-      { "selector": "[data-dia='search']", "text": ["没有看到你想要的文章，那么就输入你想搜索的关键词吧～", "可以使用 ctrl/cmd + k 快捷键打开搜索哦～"]},
-      { "selector": "[data-dia='article-link']", "text": [
-        "希望你会喜欢这篇文章：<span>「{text}」</span>.",
-        "您的选择真的不错哦！好好享受这篇文章吧～",
-        "希望您能从 <span>「{text}」</span>这篇文章中学到点东西。"
-      ]},
-      { "selector": ".gt-header-textarea", "text": ["要吐槽些什么呢？", "一定要认真填写喵～", "有什么想说的吗？", "如果觉得文章不错的话，就给博主留个言吧～"]},
-      { "selector": ".veditor", "text": ["要吐槽些什么呢？", "一定要认真填写喵～", "有什么想说的吗？", "如果觉得文章不错的话，就给博主留个言吧～"]}
+      {
+        "selector": "[data-dia='search']",
+        "text": ["没有看到你想要的文章，那么就输入你想搜索的关键词吧～", "可以使用 ctrl/cmd + k 快捷键打开搜索哦～"]
+      },
+      {
+        "selector": "[data-dia='article-link']",
+        "text": [
+          "希望你会喜欢这篇文章：<span>「{text}」</span>.",
+          "您的选择真的不错哦！好好享受这篇文章吧～",
+          "希望您能从 <span>「{text}」</span>这篇文章中学到点东西。"
+        ]
+      },
+      {
+        "selector": ".gt-header-textarea",
+        "text": [
+          "要吐槽些什么呢？",
+          "一定要认真填写喵～",
+          "有什么想说的吗？",
+          "如果觉得文章不错的话，就给博主留个言吧～"
+        ]
+      },
+      {
+        "selector": ".veditor",
+        "text": [
+          "要吐槽些什么呢？",
+          "一定要认真填写喵～",
+          "有什么想说的吗？",
+          "如果觉得文章不错的话，就给博主留个言吧～"
+        ]
+      }
     ],
     "events": [
       { "date": "01/01", "text": "<span>元旦</span>了呢，新的一年又开始了，今年是{year}年～" },
@@ -260,9 +271,18 @@
       { "date": "09/10", "text": "<span>教师节</span>，在学校要给老师问声好呀～" },
       { "date": "10/01", "text": "<span>国庆节</span>到了，为祖国母亲庆生！" },
       { "date": "10/31", "text": ["<span>万圣节</span>到啦～不给糖就捣蛋！", "Happy Halloween~"] },
-      { "date": "10/24", "text": ["今天是<span>1024 程序员节</span>，向每一位码农致敬！", "保持热爱，持续精进，Happy 1024!"] },
-      { "rule": { "type": "nth-weekday", "month": 5, "weekday": 0, "nth": 2 }, "text": ["今天是<span>母亲节</span>，给妈妈打个电话吧～", "Happy Mother's Day!"] },
-      { "rule": { "type": "nth-weekday", "month": 6, "weekday": 0, "nth": 3 }, "text": ["今天是<span>父亲节</span>，别忘了向爸爸说声辛苦啦～", "Happy Father's Day!"] },
+      {
+        "date": "10/24",
+        "text": ["今天是<span>1024 程序员节</span>，向每一位码农致敬！", "保持热爱，持续精进，Happy 1024!"]
+      },
+      {
+        "rule": { "type": "nth-weekday", "month": 5, "weekday": 0, "nth": 2 },
+        "text": ["今天是<span>母亲节</span>，给妈妈打个电话吧～", "Happy Mother's Day!"]
+      },
+      {
+        "rule": { "type": "nth-weekday", "month": 6, "weekday": 0, "nth": 3 },
+        "text": ["今天是<span>父亲节</span>，别忘了向爸爸说声辛苦啦～", "Happy Father's Day!"]
+      },
       { "date": "11/05-11/12", "text": "今年的<span>双十一</span>是和谁一起过的呢～" },
       { "date": "12/20-12/31", "text": "这几天是<span>圣诞节</span>，主人肯定又去剁手买买买了～" }
     ]

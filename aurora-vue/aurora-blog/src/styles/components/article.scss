@@ -335,11 +335,11 @@
     border-bottom: transparent;
     border-right: transparent;
     background: linear-gradient(
-                    135deg,
-                    var(--background-primary),
-                    var(--background-primary) 41.07%,
-                    var(--background-secondary) 76.05%,
-                    var(--background-secondary)
+      135deg,
+      var(--background-primary),
+      var(--background-primary) 41.07%,
+      var(--background-secondary) 76.05%,
+      var(--background-secondary)
     );
   }
 
@@ -453,11 +453,11 @@
     @apply rounded-xl;
     padding: 1rem;
     background: linear-gradient(
-                    135deg,
-                    var(--background-primary),
-                    var(--background-primary) 41.07%,
-                    var(--background-secondary) 76.05%,
-                    var(--background-secondary)
+      135deg,
+      var(--background-primary),
+      var(--background-primary) 41.07%,
+      var(--background-secondary) 76.05%,
+      var(--background-secondary)
     );
 
     summary {
@@ -524,8 +524,11 @@
   }
 
   a {
-    text-shadow: -1px -1px 2px var(--background-primary), -1px 1px 2px var(--background-primary),
-    1px -1px 2px var(--background-primary), 1px 1px 2px var(--background-primary);
+    text-shadow:
+      -1px -1px 2px var(--background-primary),
+      -1px 1px 2px var(--background-primary),
+      1px -1px 2px var(--background-primary),
+      1px 1px 2px var(--background-primary);
     -webkit-text-fill-color: var(--text-bright);
     background-position: 0 100%;
     background-repeat: repeat-x;
@@ -544,8 +547,11 @@
   }
 
   a:hover {
-    text-shadow: -1px -1px 2px var(--background-modifier-border), -1px 1px 2px var(--background-modifier-border),
-    1px -1px 2px var(--background-modifier-border), 1px 1px 2px var(--background-modifier-border);
+    text-shadow:
+      -1px -1px 2px var(--background-modifier-border),
+      -1px 1px 2px var(--background-modifier-border),
+      1px -1px 2px var(--background-modifier-border),
+      1px 1px 2px var(--background-modifier-border);
     -webkit-text-fill-color: var(--text-bright);
     background-size: 4px 50px;
   }
@@ -633,7 +639,7 @@
     background: transparent; /* header itself stays transparent, article-block provides bg */
     box-shadow: none;
     border-radius: 0;
-    margin-bottom: 0;        /* eliminate gap between header and content */
+    margin-bottom: 0; /* eliminate gap between header and content */
   }
   /* Keep content inner spacing minimal while header/content share one background */
   .post-html {

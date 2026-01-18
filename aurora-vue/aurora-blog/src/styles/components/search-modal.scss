@@ -34,8 +34,9 @@
     @apply px-4 mt-2 overflow-y-auto;
     min-height: var(--search-modal-spacing);
     max-height: calc(
-            var(--search-modal-height) - var(--search-modal-searchbox-height) -
-            var(--search-modal-spacing) - var(--search-modal-footer-height)
+      var(--search-modal-height) - var(--search-modal-searchbox-height) - var(--search-modal-spacing) - var(
+          --search-modal-footer-height
+        )
     );
     scrollbar-color: var(--search-modal-muted-color) var(--search-modal-background);
     scrollbar-width: thin;
@@ -93,7 +94,9 @@
 
   .search-footer {
     @apply items-center bg-ob-deep-800 rounded-b-2xl flex flex-row-reverse h-11 justify-between px-3 relative select-none w-full;
-    box-shadow: 0 -1px 0 0, #363636 0 -3px 6px 0 rgba(30, 35, 90, 0.12);
+    box-shadow:
+      0 -1px 0 0,
+      #363636 0 -3px 6px 0 rgba(30, 35, 90, 0.12);
     z-index: 300;
   }
 

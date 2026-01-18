@@ -19,9 +19,7 @@
                     {{ d(new Date(talk.createTime), 'short') }}
                   </time>
                   <svg-icon class="message-svg" icon-class="message" />
-                  {{
-                    talk.commentCount == null ? 0 : talk.commentCount
-                  }}
+                  {{ talk.commentCount == null ? 0 : talk.commentCount }}
                 </div>
                 <div class="talk-content" v-html="talk.content" />
                 <el-row v-if="talk.imgs" class="talk-images">
@@ -111,8 +109,14 @@ onMounted(() => {
   fetchComments()
 })
 
-provide('comments', computed(() => reactiveData.comments))
-provide('haveMore', computed(() => reactiveData.haveMore))
+provide(
+  'comments',
+  computed(() => reactiveData.comments)
+)
+provide(
+  'haveMore',
+  computed(() => reactiveData.haveMore)
+)
 
 emitter.on('talkFetchComment', () => {
   pageInfo.current = 1

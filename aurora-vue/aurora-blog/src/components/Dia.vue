@@ -15,7 +15,6 @@
       </div>
     </div>
   </transition>
-  
 </template>
 
 <script lang="ts" setup>
@@ -134,7 +133,9 @@ const cssVariables = computed(() => {
 }
 
 .Aurora-Dia.active {
-  animation: deactivate 0.75s linear, bounce-then-breathe 5s linear infinite;
+  animation:
+    deactivate 0.75s linear,
+    bounce-then-breathe 5s linear infinite;
 }
 
 .Aurora-Dia--eyes > .Aurora-Dia--eye {
@@ -166,8 +167,9 @@ const cssVariables = computed(() => {
   transform: rotateX(70deg);
   width: var(--auora-dia--platform-size);
   height: var(--auora-dia--platform-size);
-  box-shadow: 0 0 var(--auora-dia--platform-size) var(--aurora-dia--platform-light),
-  0 0 15px var(--aurora-dia--platform-light) inset;
+  box-shadow:
+    0 0 var(--auora-dia--platform-size) var(--aurora-dia--platform-light),
+    0 0 15px var(--aurora-dia--platform-light) inset;
   animation: jump-pulse 3s linear infinite;
 }
 
@@ -193,7 +195,9 @@ const cssVariables = computed(() => {
 }
 
 .Aurora-Dia:hover + .Aurora-Dia--platform {
-  box-shadow: 0 0 var(--auora-dia--platform-size) var(--text-accent), 0 0 15px var(--text-accent) inset;
+  box-shadow:
+    0 0 var(--auora-dia--platform-size) var(--text-accent),
+    0 0 15px var(--text-accent) inset;
   animation: shake-pulse 0.5s linear;
 }
 
@@ -330,16 +334,22 @@ const cssVariables = computed(() => {
   40%,
   80%,
   100% {
-    box-shadow: 0 0 30px var(--aurora-dia--platform-light), 0 0 45px var(--aurora-dia--platform-light) inset;
+    box-shadow:
+      0 0 30px var(--aurora-dia--platform-light),
+      0 0 45px var(--aurora-dia--platform-light) inset;
   }
   20%,
   60%,
   70%,
   90% {
-    box-shadow: 0 0 70px var(--aurora-dia--platform-light), 0 0 25px var(--aurora-dia--platform-light) inset;
+    box-shadow:
+      0 0 70px var(--aurora-dia--platform-light),
+      0 0 25px var(--aurora-dia--platform-light) inset;
   }
   85% {
-    box-shadow: 0 0 100px var(--aurora-dia--platform-light), 0 0 15px var(--aurora-dia--platform-light) inset;
+    box-shadow:
+      0 0 100px var(--aurora-dia--platform-light),
+      0 0 15px var(--aurora-dia--platform-light) inset;
   }
 }
 
@@ -375,21 +385,27 @@ const cssVariables = computed(() => {
   60%,
   80%,
   100% {
-    box-shadow: 0 0 var(--auora-dia--platform-size) #2cdcff, 0 0 15px #2cdcff inset;
+    box-shadow:
+      0 0 var(--auora-dia--platform-size) #2cdcff,
+      0 0 15px #2cdcff inset;
   }
   10%,
   25%,
   35%,
   50%,
   65% {
-    box-shadow: 0 0 var(--auora-dia--platform-size-shake-1) #2cdcff, 0 0 15px #2cdcff inset;
+    box-shadow:
+      0 0 var(--auora-dia--platform-size-shake-1) #2cdcff,
+      0 0 15px #2cdcff inset;
   }
   15%,
   30%,
   45%,
   55%,
   70% {
-    box-shadow: 0 0 var(--auora-dia--platform-size-shake-2) #2cdcff, 0 0 15px #2cdcff inset;
+    box-shadow:
+      0 0 var(--auora-dia--platform-size-shake-2) #2cdcff,
+      0 0 15px #2cdcff inset;
   }
 }
 </style>

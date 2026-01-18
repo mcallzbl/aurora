@@ -39,7 +39,10 @@ const comments = inject<ComputedRef<CommentListItem[]>>(
   'comments',
   computed(() => [] as CommentListItem[])
 )
-const haveMore = inject<ComputedRef<boolean>>('haveMore', computed(() => false))
+const haveMore = inject<ComputedRef<boolean>>(
+  'haveMore',
+  computed(() => false)
+)
 
 const loadMore = () => {
   switch (commentStore.type) {

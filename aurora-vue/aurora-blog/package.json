@@ -13,7 +13,9 @@
     "deploy": "node deploy.js",
     "lint": "eslint . --fix",
     "type-check": "vue-tsc --noEmit",
-    "build:ssg-old": "vite-ssg build"
+    "build:ssg-old": "vite-ssg build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@agoose77/markdown-it-mermaid": "^1.1.0",

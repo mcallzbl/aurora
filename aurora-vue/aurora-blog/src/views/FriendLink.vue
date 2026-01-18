@@ -76,8 +76,14 @@ onMounted(() => {
   fetchComments()
 })
 
-provide('comments', computed(() => reactiveData.comments))
-provide('haveMore', computed(() => reactiveData.haveMore))
+provide(
+  'comments',
+  computed(() => reactiveData.comments)
+)
+provide(
+  'haveMore',
+  computed(() => reactiveData.haveMore)
+)
 
 emitter.on('friendLinkFetchComment', () => {
   pageInfo.current = 1

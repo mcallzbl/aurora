@@ -27,9 +27,7 @@
                   <span style="color: #f21835">置顶</span>
                 </template>
                 <svg-icon class="message-svg" icon-class="message" />
-                {{
-                  item.commentCount == null ? 0 : item.commentCount
-                }}
+                {{ item.commentCount == null ? 0 : item.commentCount }}
               </div>
               <div class="talk-content" v-html="item.content" />
               <el-row v-if="item.imgs" class="talk-images">

@@ -4,39 +4,49 @@ import cookies from 'js-cookie'
 type LocaleMessages = Record<string, Record<string, Record<string, string>>>
 
 const datetimeFormats: IntlDateTimeFormats = {
-  'en': {
+  en: {
     short: {
-      year: 'numeric', month: 'short', day: 'numeric'
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     },
     long: {
-      year: 'numeric', month: 'long', day: 'numeric',
-      weekday: 'short', hour: 'numeric', minute: 'numeric'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+      hour: 'numeric',
+      minute: 'numeric'
     },
     monthYear: {
-      year: 'numeric', month: 'short'
+      year: 'numeric',
+      month: 'short'
     }
   },
-  'zh': {
+  zh: {
     short: {
-      year: 'numeric', month: 'long', day: 'numeric'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     },
     long: {
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: 'numeric', minute: 'numeric'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric'
     },
     monthYear: {
-      year: 'numeric', month: 'long'
+      year: 'numeric',
+      month: 'long'
     }
   }
 }
 
 function loadLocaleMessages(): LocaleMessages {
-  const locales = import.meta.glob<{ default: Record<string, Record<string, string>> }>(
-    '../locales/languages/*.json',
-    {
-      eager: true
-    }
-  )
+  const locales = import.meta.glob<{ default: Record<string, Record<string, string>> }>('../locales/languages/*.json', {
+    eager: true
+  })
   const messages: LocaleMessages = {}
   Object.keys(locales).forEach((key) => {
     const matched = key.match(/([A-Za-z0-9-_]+)\.json$/i)

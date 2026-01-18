@@ -78,10 +78,9 @@ function xmlEscape(s) {
 
 async function main() {
   const routes = await gatherRoutes()
-  const rows = routes
-    .map((r) => `  <url>\n    <loc>${xmlEscape(SITE_URL + r)}</loc>\n  </url>`)
-    .join('\n')
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  const rows = routes.map((r) => `  <url>\n    <loc>${xmlEscape(SITE_URL + r)}</loc>\n  </url>`).join('\n')
+  const xml =
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows}\n</urlset>\n`
 
   const outDist = path.resolve(process.cwd(), OUTPUT_DIR, 'sitemap.xml')

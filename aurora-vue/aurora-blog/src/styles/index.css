@@ -1,87 +1,90 @@
-@import "./tailwind.css";
+@import './tailwind.css';
 @import './theme-variables.css';
 @import './components/article.scss';
 @import './components/sidebar-box.scss';
 @import './components/search-modal.scss';
 @import './transitions.scss';
 
-
 .stroke-ob-bright {
-    stroke: var(--text-bright) !important;
+  stroke: var(--text-bright) !important;
 }
 
 .diamond-clip-path {
-    clip-path: polygon(50% 3%, 91% 25%, 91% 75%, 50% 97%, 9% 75%, 9% 25%);
-    background: var(--background-trans);
+  clip-path: polygon(50% 3%, 91% 25%, 91% 75%, 50% 97%, 9% 75%, 9% 25%);
+  background: var(--background-trans);
 }
 
 .diamond-icon {
-    @apply w-12 h-12 text-xl flex items-center justify-center text-ob-bright hover:opacity-50 transition cursor-pointer;
+  @apply w-12 h-12 text-xl flex items-center justify-center text-ob-bright hover:opacity-50 transition cursor-pointer;
 }
 
 html {
-    scrollbar-color: rgba(82, 82, 82, 0.8) transparent;
+  scrollbar-color: rgba(82, 82, 82, 0.8) transparent;
 }
 
 html::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+  width: 12px;
+  height: 12px;
 }
 
 html::-webkit-scrollbar-thumb {
-    background: #434343;
-    border-radius: 16px;
-    box-shadow: inset 2px 2px 2px rgba(100, 100, 100, 0.25), inset -2px -2px 2px rgba(0, 0, 0, 0.25);
+  background: #434343;
+  border-radius: 16px;
+  box-shadow:
+    inset 2px 2px 2px rgba(100, 100, 100, 0.25),
+    inset -2px -2px 2px rgba(0, 0, 0, 0.25);
 }
 
 html::-webkit-scrollbar-track {
-    border: none;
-    background: linear-gradient(90deg, #434343, #434343 1px, #111 0, #111);
+  border: none;
+  background: linear-gradient(90deg, #434343, #434343 1px, #111 0, #111);
 }
 
 div::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+  width: 10px;
+  height: 10px;
 }
 
 div::-webkit-scrollbar-thumb {
-    background: #434343;
-    border-radius: 16px;
-    box-shadow: inset 2px 2px 2px rgba(100, 100, 100, 0.25), inset -2px -2px 2px rgba(0, 0, 0, 0.25);
+  background: #434343;
+  border-radius: 16px;
+  box-shadow:
+    inset 2px 2px 2px rgba(100, 100, 100, 0.25),
+    inset -2px -2px 2px rgba(0, 0, 0, 0.25);
 }
 
 div::-webkit-scrollbar-track {
-    border: none;
-    background: transparent !important;
+  border: none;
+  background: transparent !important;
 }
 
 /* Responsive card container: reduce padding on small screens to avoid narrow content */
 .ob-card {
-    @apply bg-ob-deep-800 rounded-2xl shadow-xl block;
-    padding: 1rem; /* ~16px on mobile */
+  @apply bg-ob-deep-800 rounded-2xl shadow-xl block;
+  padding: 1rem; /* ~16px on mobile */
 }
 
 @media (min-width: 768px) {
-    .ob-card {
-        padding: 2rem; /* md and up */
-    }
+  .ob-card {
+    padding: 2rem; /* md and up */
+  }
 }
 
 @media (min-width: 1024px) {
-    .ob-card {
-        padding-left: 3.5rem; /* ≈ px-14 */
-        padding-right: 3.5rem;
-        padding-top: 4rem;    /* ≈ py-16 */
-        padding-bottom: 4rem;
-    }
+  .ob-card {
+    padding-left: 3.5rem; /* ≈ px-14 */
+    padding-right: 3.5rem;
+    padding-top: 4rem; /* ≈ py-16 */
+    padding-bottom: 4rem;
+  }
 }
 
 .is-collapsible {
-    max-height: 1000px;
-    overflow: hidden;
-    transition: all 300ms ease-in-out;
+  max-height: 1000px;
+  overflow: hidden;
+  transition: all 300ms ease-in-out;
 }
 
 .is-collapsed {
-    max-height: 0;
+  max-height: 0;
 }

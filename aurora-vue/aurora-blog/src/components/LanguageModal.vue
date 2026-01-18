@@ -21,7 +21,6 @@
       </div>
     </transition>
   </div>
-  
 </template>
 
 <script lang="ts" setup>
@@ -96,6 +95,12 @@ onUnmounted(() => {
   border-color: var(--text-accent);
   color: var(--text-bright);
 }
-.code { font-weight: 700; width: 3rem; text-align: center; }
-.name { opacity: 0.9; }
+.code {
+  font-weight: 700;
+  width: 3rem;
+  text-align: center;
+}
+.name {
+  opacity: 0.9;
+}
 </style>

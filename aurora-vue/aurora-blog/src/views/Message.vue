@@ -54,8 +54,14 @@ onMounted(() => {
   fetchComments()
 })
 
-provide('comments', computed(() => reactiveData.comments))
-provide('haveMore', computed(() => reactiveData.haveMore))
+provide(
+  'comments',
+  computed(() => reactiveData.comments)
+)
+provide(
+  'haveMore',
+  computed(() => reactiveData.haveMore)
+)
 
 emitter.on('messageFetchComment', () => {
   pageInfo.current = 1

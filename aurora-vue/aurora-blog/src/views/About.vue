@@ -98,8 +98,14 @@ onUnmounted(() => {
   tocbot.destroy()
 })
 
-provide('comments', computed(() => reactiveData.comments))
-provide('haveMore', computed(() => reactiveData.haveMore))
+provide(
+  'comments',
+  computed(() => reactiveData.comments)
+)
+provide(
+  'haveMore',
+  computed(() => reactiveData.haveMore)
+)
 
 emitter.on('aboutFetchComment', () => {
   pageInfo.current = 1
@@ -136,14 +142,14 @@ const initTocbot = () => {
     headingSelector: 'h1, h2, h3',
     collapseDepth: 3,
     disableTocScrollSync: true,
-    onClick: function(e: Event) {
+    onClick: function (e: Event) {
       e.preventDefault()
     }
   })
   const imgs = postRef.value?.getElementsByTagName('img') || []
   for (let i = 0; i < imgs.length; i++) {
     reactiveData.images.push(imgs[i].src)
-    imgs[i].addEventListener('click', function(e: any) {
+    imgs[i].addEventListener('click', function (e: any) {
       handlePreview(e.target.currentSrc)
     })
   }

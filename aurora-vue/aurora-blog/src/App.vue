@@ -137,7 +137,7 @@ const initFavicon = (faviconUrl: string) => {
   if (!faviconUrl) {
     return
   }
-  let favicon = document.querySelector<HTMLLinkElement>('link[rel*=\'icon\']')
+  let favicon = document.querySelector<HTMLLinkElement>("link[rel*='icon']")
   if (!favicon) {
     favicon = document.createElement('link')
     favicon.rel = 'icon'

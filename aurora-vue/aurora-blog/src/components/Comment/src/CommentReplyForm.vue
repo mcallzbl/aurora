@@ -24,7 +24,7 @@
       </div>
     </div>
   </div>
- </template>
+</template>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, inject, ref } from 'vue'

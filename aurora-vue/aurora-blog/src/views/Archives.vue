@@ -6,9 +6,7 @@
     </div>
     <div class="ob-card min-h-screen">
       <ul class="timeline timeline-centered">
-        <template
-          v-for="archive in archives"
-          :key="archive.time">
+        <template v-for="archive in archives" :key="archive.time">
           <li class="timeline-item period">
             <div class="timeline-info"></div>
             <div class="timeline-marker"></div>
@@ -200,7 +198,9 @@ const toArticle = (article: any) => {
     top: 4px;
     left: 0;
     width: 15px;
-    transition: background 0.3s ease-in-out, border 0.3s ease-in-out;
+    transition:
+      background 0.3s ease-in-out,
+      border 0.3s ease-in-out;
   }
 
   &:after {

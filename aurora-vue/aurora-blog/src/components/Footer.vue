@@ -10,15 +10,18 @@
               Copyright © 2024 - {{ currentYear }}
               <b class="font-extrabold">&nbsp;{{ websiteConfig.author }}</b>
             </li>
-            <li v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined"
-                class="flex flex-row mx-auto">
+            <li
+              v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined"
+              class="flex flex-row mx-auto">
               <a href="https://beian.mps.gov.cn/#/query/webSearch" target="_blank">
-                <img alt="" src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float:left;" /> &nbsp;
+                <img alt="" src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float: left" />
+                &nbsp;
                 <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.gonganBeianNumber }} </b>
               </a>
             </li>
-            <li v-if="websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined"
-                class="flex flex-row mx-auto">
+            <li
+              v-if="websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined"
+              class="flex flex-row mx-auto">
               <a href="https://beian.miit.gov.cn/" target="_blank">
                 <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.beianNumber }} </b>
               </a>

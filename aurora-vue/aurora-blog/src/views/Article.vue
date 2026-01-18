@@ -4,28 +4,28 @@
       <div>
         <div class="article-block">
           <div class="post-header">
-          <span class="post-labels">
-            <ob-skeleton v-if="loading" height="20px" tag="b" width="35px" />
-            <b v-else-if="!loading && article.categoryName">
-              <span>{{ article.categoryName }}</span>
-            </b>
-            <b v-else>{{ t('settings.default-category') }}</b>
-            <ul>
-              <ob-skeleton v-if="loading" :count="2" class="mr-2" height="16px" tag="li" width="35px" />
-              <template v-else-if="!loading && article.tags && article.tags.length > 0">
-                <li v-for="tag in article.tags" :key="tag.id">
-                  <em class="opacity-50">#</em>
-                  {{ tag.tagName }}
-                </li>
-              </template>
-              <template v-else>
-                <li>
-                  <b class="opacity-50">#</b>
-                  {{ t('settings.default-tag') }}
-                </li>
-              </template>
-            </ul>
-          </span>
+            <span class="post-labels">
+              <ob-skeleton v-if="loading" height="20px" tag="b" width="35px" />
+              <b v-else-if="!loading && article.categoryName">
+                <span>{{ article.categoryName }}</span>
+              </b>
+              <b v-else>{{ t('settings.default-category') }}</b>
+              <ul>
+                <ob-skeleton v-if="loading" :count="2" class="mr-2" height="16px" tag="li" width="35px" />
+                <template v-else-if="!loading && article.tags && article.tags.length > 0">
+                  <li v-for="tag in article.tags" :key="tag.id">
+                    <em class="opacity-50">#</em>
+                    {{ tag.tagName }}
+                  </li>
+                </template>
+                <template v-else>
+                  <li>
+                    <b class="opacity-50">#</b>
+                    {{ t('settings.default-tag') }}
+                  </li>
+                </template>
+              </ul>
+            </span>
             <h1 v-if="article.articleTitle" class="post-title text-white">
               {{ article.articleTitle }}
             </h1>
@@ -42,54 +42,51 @@
                   class="hover:opacity-50 cursor-pointer"
                   @click="handleAuthorClick(article.author.website)" />
                 <span class="text-white opacity-80">
-                <strong
-                  class="text-white pr-1.5 hover:opacity-50 cursor-pointer"
-                  @click="handleAuthorClick(article.author.website)">
-                  {{ article.author.nickname }}
-                </strong>
-                <time
-                  :datetime="new Date(article.createTime).toISOString()"
-                  class="opacity-70"
-                >
-                {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
-              </time>
-              </span>
+                  <strong
+                    class="text-white pr-1.5 hover:opacity-50 cursor-pointer"
+                    @click="handleAuthorClick(article.author.website)">
+                    {{ article.author.nickname }}
+                  </strong>
+                  <time :datetime="new Date(article.createTime).toISOString()" class="opacity-70">
+                    {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
+                  </time>
+                </span>
               </div>
               <div v-else class="post-footer">
                 <div class="flex flex-row items-center">
                   <ob-skeleton :circle="true" class="mr-2" height="28px" width="28px" />
                   <span class="text-ob-dim mt-1">
-                  <ob-skeleton height="20px" width="150px" />
-                </span>
+                    <ob-skeleton height="20px" width="150px" />
+                  </span>
                 </div>
               </div>
               <div v-if="wordNum !== '' && readTime !== ''" class="post-stats">
-              <span>
-                <svg-icon icon-class="text-outline" style="stroke: white" />
-                <span class="pl-2 opacity-70">
-                  {{ wordNum }}
-                </span>
-              </span>
                 <span>
-                <svg-icon icon-class="clock-outline" style="stroke: white" />
-                <span class="pl-2 opacity-70">
-                  {{ readTime }}
+                  <svg-icon icon-class="text-outline" style="stroke: white" />
+                  <span class="pl-2 opacity-70">
+                    {{ wordNum }}
+                  </span>
                 </span>
-              </span>
+                <span>
+                  <svg-icon icon-class="clock-outline" style="stroke: white" />
+                  <span class="pl-2 opacity-70">
+                    {{ readTime }}
+                  </span>
+                </span>
               </div>
               <div v-else class="post-stats">
-              <span>
-                <svg-icon icon-class="clock" />
-                <span class="pl-2">
-                  <ob-skeleton height="16px" width="40px" />
-                </span>
-              </span>
                 <span>
-                <svg-icon icon-class="text" />
-                <span class="pl-2">
-                  <ob-skeleton height="16px" width="40px" />
+                  <svg-icon icon-class="clock" />
+                  <span class="pl-2">
+                    <ob-skeleton height="16px" width="40px" />
+                  </span>
                 </span>
-              </span>
+                <span>
+                  <svg-icon icon-class="text" />
+                  <span class="pl-2">
+                    <ob-skeleton height="16px" width="40px" />
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -238,14 +235,16 @@ onServerPrefetch(async () => {
       reactiveData.readTime = Math.round(plain.length / 400) + 'mins'
       if (a.articleCover) commonStore.setHeaderImage(a.articleCover)
       if (a.preArticleCard) {
-        const txt = mdSSR.render(a.preArticleCard.articleContent || '')
+        const txt = mdSSR
+          .render(a.preArticleCard.articleContent || '')
           .replace(/<\/?[^>]*>/g, '')
           .replace(/[|]*\n/, '')
           .replace(/&npsp;/gi, '')
         reactiveData.preArticleCard = { ...a.preArticleCard, articleContent: txt }
       }
       if (a.nextArticleCard) {
-        const txt = mdSSR.render(a.nextArticleCard.articleContent || '')
+        const txt = mdSSR
+          .render(a.nextArticleCard.articleContent || '')
           .replace(/<\/?[^>]*>/g, '')
           .replace(/[|]*\n/, '')
           .replace(/&npsp;/gi, '')
@@ -296,8 +295,14 @@ onBeforeRouteUpdate((to: any) => {
   fetchComments()
 })
 
-provide('comments', computed(() => reactiveData.comments))
-provide('haveMore', computed(() => reactiveData.haveMore))
+provide(
+  'comments',
+  computed(() => reactiveData.comments)
+)
+provide(
+  'haveMore',
+  computed(() => reactiveData.haveMore)
+)
 
 emitter.on('articleFetchComment', () => {
   pageInfo.current = 1
@@ -333,14 +338,14 @@ const initTocbot = () => {
     headingSelector: 'h1, h2, h3',
     collapseDepth: 3,
     disableTocScrollSync: true,
-    onClick: function(e) {
+    onClick: function (e) {
       e.preventDefault()
     }
   })
   const imgs = articleRef.value.getElementsByTagName('img')
   for (let i = 0; i < imgs.length; i++) {
     reactiveData.images.push(imgs[i].src)
-    imgs[i].addEventListener('click', function(e: any) {
+    imgs[i].addEventListener('click', function (e: any) {
       handlePreview(e.target.currentSrc)
     })
   }
@@ -443,17 +448,8 @@ const deleteHTMLTag = (content: any) => {
     .replace(/&npsp;/gi, '')
 }
 
-const {
-  article,
-  wordNum,
-  readTime,
-  comments,
-  images,
-  preArticleCard,
-  nextArticleCard,
-  haveMore,
-  isReload
-} = toRefs(reactiveData)
+const { article, wordNum, readTime, comments, images, preArticleCard, nextArticleCard, haveMore, isReload } =
+  toRefs(reactiveData)
 const isMobile = computed(() => commonStore.isMobile)
 
 // SEO head tags
@@ -506,7 +502,6 @@ useHead(() => ({
     }
   ]
 }))
-
 </script>
 <style lang="scss">
 .post-html {

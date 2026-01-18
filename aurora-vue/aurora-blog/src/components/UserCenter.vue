@@ -73,7 +73,9 @@
         </el-input>
       </el-form-item>
       <el-form-item>
-        <el-button class="mx-auto mt-3" size="large" type="primary" @click="bingingEmail">{{ t('auth.bind') }}</el-button>
+        <el-button class="mx-auto mt-3" size="large" type="primary" @click="bingingEmail">{{
+          t('auth.bind')
+        }}</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
