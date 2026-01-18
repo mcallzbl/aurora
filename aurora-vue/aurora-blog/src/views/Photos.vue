@@ -45,37 +45,56 @@ import { computed, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCommonStore } from '@/stores/common'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import v3ImgPreviewPkg from 'v3-img-preview'
 import api from '@/api/api'
 
-defineOptions({ name: 'Photos' })
+defineOptions({ name: 'PhotoGallery' })
 
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
+type ImgPreviewFn = (options: { images: string[]; index: number }) => void
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as { v3ImgPreviewFn: ImgPreviewFn }
+
+type AlbumIdParam = string | string[] | undefined
+const normalizeAlbumId = (value: AlbumIdParam): string => {
+  if (Array.isArray(value)) {
+    return value[0] ?? ''
+  }
+  return value ?? ''
+}
+
+interface PhotoState {
+  photoAlbumName: string
+  noResult: boolean
+  photos: string[]
+  current: number
+  size: number
+  albumId: string
+}
 
 const { t } = useI18n()
 const route = useRoute()
 const commonStore = useCommonStore()
-const reactiveData = reactive({
-  photoAlbumName: '' as any,
+const reactiveData = reactive<PhotoState>({
+  photoAlbumName: '',
   noResult: false,
-  photos: [] as any,
+  photos: [],
   current: 1,
   size: 10,
-  albumId: route.params.albumId
+  albumId: normalizeAlbumId(route.params.albumId as AlbumIdParam)
 })
 
-onBeforeRouteUpdate((to: any) => {
+onBeforeRouteUpdate((to: RouteLocationNormalizedLoaded) => {
   reactiveData.photoAlbumName = ''
   reactiveData.photos = []
   reactiveData.noResult = false
   reactiveData.current = 1
-  reactiveData.albumId = to.params.albumId
+  reactiveData.albumId = normalizeAlbumId(to.params.albumId as AlbumIdParam)
   loadDataFromServer()
 })
 
-const handlePreview = (index: any) => {
+const handlePreview = (index: number) => {
   v3ImgPreviewFn({ images: reactiveData.photos, index })
 }
 

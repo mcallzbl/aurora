@@ -14,7 +14,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, onUnmounted, toRef } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { useI18n } from 'vue-i18n'
@@ -23,7 +23,7 @@ import { TagItem, TagList } from '@/components/Tag'
 import { useCommonStore } from '@/stores/common'
 import api from '@/api/api'
 
-defineOptions({ name: 'Tag' })
+defineOptions({ name: 'TagsView' })
 
 const commonStore = useCommonStore()
 const { t } = useI18n()
