@@ -58,22 +58,44 @@ import { Comment } from '../components/Comment'
 import Avatar from '../components/Avatar.vue'
 import { useCommentStore } from '@/stores/comment'
 import v3ImgPreviewPkg from 'v3-img-preview'
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import emitter from '@/utils/mitt'
 import api from '@/api/api'
 
-defineOptions({ name: 'talks' })
+type ImgPreviewFn = (options: { images: string[]; index: number }) => void
+type TalkData = {
+  avatar?: string
+  nickname?: string
+  createTime?: string | number | Date
+  commentCount?: number | null
+  content?: string
+  imgs?: string[]
+}
+type CommentRecord = {
+  id: string | number
+  replyDTOs?: unknown[]
+}
+type ReactiveData = {
+  talk: TalkData
+  comments: CommentRecord[]
+  haveMore: boolean
+  isReload: boolean
+  images: string[]
+}
+
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as { v3ImgPreviewFn: ImgPreviewFn }
+
+defineOptions({ name: 'TalkDetail' })
 
 const { t, d } = useI18n()
 const commentStore = useCommentStore()
 const route = useRoute()
 const router = useRouter()
-const reactiveData = reactive({
-  talk: '' as any,
-  comments: [] as any,
-  haveMore: false as any,
-  isReload: false as any,
-  images: [] as any
+const reactiveData = reactive<ReactiveData>({
+  talk: {},
+  comments: [],
+  haveMore: false,
+  isReload: false,
+  images: []
 })
 const pageInfo = reactive({
   current: 1,
@@ -98,7 +120,7 @@ emitter.on('talkFetchComment', () => {
   fetchComments()
 })
 
-emitter.on('talkFetchReplies', (index) => {
+emitter.on('talkFetchReplies', (index: number) => {
   fetchReplies(index)
 })
 
@@ -106,8 +128,8 @@ emitter.on('talkLoadMore', () => {
   fetchComments()
 })
 
-const handlePreview = (index: any) => {
-  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+const handlePreview = (image: string) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(image) })
 }
 
 const fetchTalk = () => {
@@ -146,7 +168,7 @@ const fetchComments = () => {
   })
 }
 
-const fetchReplies = (index: any) => {
+const fetchReplies = (index: number) => {
   api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
     reactiveData.comments[index].replyDTOs = data.data
   })
