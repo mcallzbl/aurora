@@ -60,8 +60,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs } from 'vue'
+<script setup lang="ts">
+import { onMounted, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { Profile, Sidebar } from '../components/Sidebar'
@@ -72,74 +72,60 @@ const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import { useRouter } from 'vue-router'
 import api from '@/api/api'
 
-export default defineComponent({
-  name: 'talkList',
-  components: { Breadcrumb, Sidebar, Profile, Paginator, Avatar },
-  setup() {
-    const { t, d } = useI18n()
-    const router = useRouter()
-    const pagination = reactive({
-      size: 7,
-      total: 0,
-      current: 1
-    })
-    const reactiveData = reactive({
-      images: [] as any,
-      talks: '' as any
-    })
-    onMounted(() => {
-      fetchTalks()
-    })
-    const handlePreview = (index: any) => {
-      v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
-    }
-    const fetchTalks = () => {
-      const params = {
-        current: pagination.current,
-        size: pagination.size
-      }
-      api.getTalks(params).then(({ data }) => {
-        reactiveData.talks = data.data.records
-        pagination.total = data.data.count
-        reactiveData.talks.forEach((item: any) => {
-          if (item.imgs) {
-            reactiveData.images.push(...item.imgs)
-          }
-        })
-      })
-    }
-    const formatTime = (data: any): string => {
-      const date = new Date(data)
-      const h = String(date.getHours()).padStart(2, '0')
-      const m = String(date.getMinutes()).padStart(2, '0')
-      const s = String(date.getSeconds()).padStart(2, '0')
-      return `${h}:${m}:${s}`
-    }
-    const toPageTop = () => {
-      window.scrollTo({
-        top: 0
-      })
-    }
-    const pageChangeHanlder = (current: number) => {
-      reactiveData.talks = ''
-      toPageTop()
-      pagination.current = current
-      fetchTalks()
-    }
-    const toTalk = (id: any) => {
-      router.push({ path: '/talks/' + id })
-    }
-    return {
-      pagination,
-      ...toRefs(reactiveData),
-      formatTime,
-      d,
-      pageChangeHanlder,
-      handlePreview,
-      toTalk,
-      t
-    }
+defineOptions({ name: 'talkList' })
+
+const { t, d } = useI18n()
+const router = useRouter()
+const pagination = reactive({
+  size: 7,
+  total: 0,
+  current: 1
+})
+const reactiveData = reactive({
+  images: [] as any,
+  talks: '' as any
+})
+const { talks } = toRefs(reactiveData)
+
+const handlePreview = (index: any) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+}
+
+const fetchTalks = () => {
+  const params = {
+    current: pagination.current,
+    size: pagination.size
   }
+  api.getTalks(params).then(({ data }) => {
+    reactiveData.talks = data.data.records
+    pagination.total = data.data.count
+    reactiveData.talks.forEach((item: any) => {
+      if (item.imgs) {
+        reactiveData.images.push(...item.imgs)
+      }
+    })
+  })
+}
+
+const toPageTop = () => {
+  window.scrollTo({
+    top: 0
+  })
+}
+
+const pageChangeHanlder = (current: number) => {
+  reactiveData.talks = ''
+  toPageTop()
+  pagination.current = current
+  fetchTalks()
+}
+
+const toTalk = (id: any) => {
+  router.push({ path: '/talks/' + id })
+}
+
+onMounted(() => {
+  fetchTalks()
 })
 </script>
 

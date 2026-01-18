@@ -14,8 +14,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, onUnmounted, toRef } from 'vue'
+<script setup lang="ts">
+import { onMounted, onUnmounted, toRef } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import { useI18n } from 'vue-i18n'
 import { useTagStore } from '@/stores/tag'
@@ -23,28 +23,25 @@ import { TagItem, TagList } from '@/components/Tag'
 import { useCommonStore } from '@/stores/common'
 import api from '@/api/api'
 
-export default defineComponent({
-  name: 'Tag',
-  components: { Breadcrumb, TagList, TagItem },
-  setup() {
-    const commonStore = useCommonStore()
-    const { t } = useI18n()
-    const tagStore = useTagStore()
-    onMounted(() => {
-      fetchTags()
-    })
-    onUnmounted(() => {
-      commonStore.resetHeaderImage()
-    })
-    const fetchTags = () => {
-      api.getAllTags().then(({ data }) => {
-        tagStore.tags = data.data
-      })
-    }
-    return {
-      tags: toRef(tagStore.$state, 'tags'),
-      t
-    }
-  }
+defineOptions({ name: 'Tag' })
+
+const commonStore = useCommonStore()
+const { t } = useI18n()
+const tagStore = useTagStore()
+
+onMounted(() => {
+  fetchTags()
 })
+
+onUnmounted(() => {
+  commonStore.resetHeaderImage()
+})
+
+const fetchTags = () => {
+  api.getAllTags().then(({ data }) => {
+    tagStore.tags = data.data
+  })
+}
+
+const tags = toRef(tagStore.$state, 'tags')
 </script>
