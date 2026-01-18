@@ -57,7 +57,7 @@ import { useI18n } from 'vue-i18n'
 import Social from '@/components/Social.vue'
 
 export default defineComponent({
-  name: 'Profile',
+  name: 'SidebarProfile',
   components: { Social },
   setup() {
     const appStore = useAppStore()

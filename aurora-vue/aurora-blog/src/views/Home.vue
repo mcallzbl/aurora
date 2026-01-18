@@ -99,6 +99,11 @@ const sanitizeArticleContent = (item: ArticleRecord) => {
     .replace(/&npsp;/gi, '')
 }
 
+const normalizeCategoryId = (value: string | number) => {
+  const normalized = typeof value === 'string' ? Number(value) : value
+  return Number.isFinite(normalized) ? normalized : 0
+}
+
 const appStore = useAppStore()
 const userStore = useUserStore()
 const articleStore = useArticleStore()
@@ -202,17 +207,18 @@ const expandHandler = () => {
   tabClass.value['expanded-tab'] = !tabClass.value['expanded-tab']
 }
 
-const handleTabChange = (categoryId: number) => {
-  userStore.tab = categoryId
+const handleTabChange = (categoryId: string | number) => {
+  const normalized = normalizeCategoryId(categoryId)
+  userStore.tab = normalized
   userStore.page = 1
   pagination.current = 1
-  activeTab.value = categoryId
-  nowCategoryId = categoryId
+  activeTab.value = normalized
+  nowCategoryId = normalized
   toArticleOffset()
-  if (categoryId === 0) {
+  if (normalized === 0) {
     fetchArticles()
   } else {
-    fetchArticlesByCategoryId(categoryId)
+    fetchArticlesByCategoryId(normalized)
   }
 }
 
@@ -222,8 +228,9 @@ const toArticleOffset = () => {
   })
 }
 
-const activeTabStyle = (catagoryId: number) => {
-  if (catagoryId === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
+const activeTabStyle = (catagoryId: string | number) => {
+  const normalized = normalizeCategoryId(catagoryId)
+  if (normalized === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
   return {}
 }
 

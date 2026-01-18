@@ -37,7 +37,7 @@ import { computed, defineComponent, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
-  name: 'Paginator',
+  name: 'ObPaginator',
   emits: ['pageChange'],
   props: ['pageTotal', 'pageSize', 'page'],
   setup(props, { emit }) {

@@ -90,7 +90,20 @@ import api from '@/api/api'
 defineOptions({ name: 'UserCenter' })
 
 const { t } = useI18n()
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+type NotifyFn = (options: { title: string; message: string; type: 'success' | 'warning' | 'error' | 'info' }) => void
+type UserInfo = {
+  userInfoId?: string | number
+  avatar?: string
+  nickname?: string
+  website?: string
+  intro?: string
+  email?: string | null
+  isSubscribe?: number
+}
+type AvatarUploadResponse = { flag: boolean; data?: string }
+type AvatarCropperPayload = { response: Response }
+
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const userStore = useUserStore()
 
 const reactiveData = reactive({
@@ -101,12 +114,14 @@ const reactiveData = reactive({
   loading: false,
   switchState: false
 })
-const { message, emailDialogVisible, email, VerificationCode, loading, switchState } = toRefs(reactiveData)
+const { message, emailDialogVisible, email, VerificationCode, loading } = toRefs(reactiveData)
 
 const showCropper = ref(false)
 const userInfo = toRef(userStore.$state, 'userInfo')
 const visible = toRef(userStore.$state, 'userVisible')
-const userInfoValue = computed(() => (userStore.userInfo === '' ? null : userStore.userInfo))
+const userInfoValue = computed<UserInfo | null>(() =>
+  userStore.userInfo === '' ? null : (userStore.userInfo as UserInfo)
+)
 const isClient = typeof window !== 'undefined'
 const AvatarCropper = isClient
   ? defineAsyncComponent(() => import('vue-avatar-cropper'))
@@ -129,7 +144,7 @@ const bingingEmail = () => {
   }
   api.bindingEmail(params).then(({ data }) => {
     if (data.flag) {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.success'),
         message: t('auth.bind_success'),
         type: 'success'
@@ -139,15 +154,15 @@ const bingingEmail = () => {
     }
   })
 }
-const handleSuccess = (data: any) => {
-  data.response.json().then((data: any) => {
+const handleSuccess = (payload: AvatarCropperPayload) => {
+  payload.response.json().then((data: AvatarUploadResponse) => {
     if (data.flag) {
       const info = userInfoValue.value
       if (!info) {
         return
       }
       info.avatar = data.data
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.success'),
         message: t('common.upload_success'),
         type: 'success'
@@ -167,7 +182,7 @@ const changeSubscribe = () => {
     }
     api.updateUserSubscribe(params).then(({ data }) => {
       if (data.flag) {
-        proxy.$notify({
+        proxy?.$notify?.({
           title: t('common.success'),
           message: t('auth.update_success'),
           type: 'success'
@@ -188,7 +203,7 @@ const commit = () => {
   }
   api.submitUserInfo(params).then(({ data }) => {
     if (data.flag) {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.success'),
         message: t('auth.update_success'),
         type: 'success'
@@ -199,7 +214,7 @@ const commit = () => {
 const sendCode = () => {
   api.sendValidationCode(reactiveData.email).then(({ data }) => {
     if (data.flag) {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.success'),
         message: t('auth.code_sent'),
         type: 'success'
@@ -214,7 +229,7 @@ const beforeChange = (): boolean | Promise<boolean> => {
     const info = userInfoValue.value
     if (!info || info.email === '' || info.email === null) {
       reactiveData.loading = false
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.warning'),
         message: t('user.email_unbound_warning'),
         type: 'warning'

@@ -251,16 +251,24 @@ import { useLocalStore } from '@/stores/local'
 export default defineComponent({
   name: 'SearchModel',
   setup() {
+    type SearchResult = {
+      id: number | string
+      weight?: number
+      articleTitle?: string
+      articleContent?: string
+      [key: string]: unknown
+    }
+
     const searchStore = useSearchStore()
     const localStore = useLocalStore()
-    const searchInput = ref<HTMLDivElement>()
+    const searchInput = ref<HTMLInputElement>()
     const searchIndexStatus = ref(false)
-    const searchResults = ref<any>([])
+    const searchResults = ref<SearchResult[]>([])
     const router = useRouter()
     const openModal = ref(false)
     const openSearchContainer = ref(false)
     const keywords = ref('')
-    const recentResults = ref()
+    const recentResults = ref<SearchResult[]>([])
     const menuActiveIndex = ref(0)
     const menuMaxIndex = ref(0)
     const isEmpty = ref(false)
@@ -283,10 +291,8 @@ export default defineComponent({
     })
     watch(
       () => searchStore.openModal,
-      (status: any) => {
-        if (!(status instanceof Boolean)) {
-          reloadRecentResult()
-        }
+      (status: boolean) => {
+        reloadRecentResult()
         openModal.value = status
         setTimeout(() => {
           openSearchContainer.value = status
@@ -296,24 +302,24 @@ export default defineComponent({
     const handleStatusChange = (status: boolean) => {
       searchStore.setOpenModal(status)
     }
-    const handleLinkClick = (result: any) => {
+    const handleLinkClick = (result: SearchResult) => {
       saveRecentSearch(result)
       router.push({ path: '/articles/' + result.id })
       searchStore.setOpenModal(false)
     }
-    const saveRecentSearch = async (result: any) => {
+    const saveRecentSearch = async (result: SearchResult) => {
       const temp = localStore.weight
       result.weight = localStore.weight
       localStore.weight++
-      localStore.recentSearch.forEach((item: any) => {
+      localStore.recentSearch.forEach((item) => {
         if (item.id === result.id) {
           item.weight = -1
         }
       })
-      localStore.recentSearch = localStore.recentSearch.filter((item: any) => item.weight > 0)
+      localStore.recentSearch = localStore.recentSearch.filter((item) => (item.weight ?? 0) > 0)
       result.weight = temp
       localStore.recentSearch.push(result)
-      localStore.recentSearch = localStore.recentSearch.sort((a: any, b: any) => b.weight - a.weight)
+      localStore.recentSearch = localStore.recentSearch.sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0))
     }
     const handleResetInput = () => {
       keywords.value = ''
@@ -367,17 +373,19 @@ export default defineComponent({
       }
     }
     let index = 0
-    const searchKeywords = (e: any) => {
+    const searchKeywords = (e: Event) => {
+      const target = e.target as HTMLInputElement | null
+      const value = target?.value ?? ''
       const curIndex = ++index
-      if (e.target.value !== '') {
+      if (value !== '') {
         const params = {
-          keywords: e.target.value
+          keywords: value
         }
         api.searchArticles(params).then(({ data }) => {
           if (curIndex < index) {
             return
           }
-          searchResults.value = data.data
+          searchResults.value = Array.isArray(data?.data) ? (data.data as SearchResult[]) : []
           if (searchResults.value.length > 0) {
             resetIndex(searchResults.value.length)
             isEmpty.value = false

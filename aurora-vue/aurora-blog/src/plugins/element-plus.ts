@@ -16,7 +16,7 @@ import {
   ElUpload
 } from 'element-plus'
 
-export const components: any[] = [
+export const components = [
   ElNotification,
   ElDrawer,
   ElRow,
@@ -33,7 +33,7 @@ export const components: any[] = [
   ElButton,
   ElDialog
 ]
-export const plugins: any[] = [
+export const plugins = [
   ElNotification,
   ElDrawer,
   ElRow,

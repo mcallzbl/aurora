@@ -19,7 +19,16 @@ import api from '@/api/api'
 
 defineOptions({ name: 'OauthLoginModel' })
 
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+type NotifyFn = (options: { title: string; message: string; type: string }) => void
+type QQLogin = {
+  check: () => boolean
+  getMe: (cb: (openId: string, accessToken: string) => void) => void
+}
+type QQGlobal = {
+  Login: QQLogin
+}
+
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
@@ -27,16 +36,16 @@ const { t } = useI18n()
 
 onMounted(() => {
   if (route.path !== '/oauth/login/qq') return
-  const QC = (window as any).QC
+  const QC = (window as Window & { QC?: QQGlobal }).QC
   if (QC?.Login?.check && QC.Login.check()) {
-    QC.Login.getMe((openId: any, accessToken: any) => {
+    QC.Login.getMe((openId, accessToken) => {
       const params = { openId, accessToken }
       api.qqLogin(params).then(({ data }) => {
         if (data.flag) {
           userStore.userInfo = data.data
           userStore.token = data.data.token
           sessionStorage.setItem('token', data.data.token)
-          proxy.$notify({
+          proxy?.$notify?.({
             title: t('common.success'),
             message: t('auth.login_success'),
             type: 'success'

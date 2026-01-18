@@ -20,6 +20,56 @@ const setTheme = (theme: string) => {
   }
 }
 
+type WebsiteConfig = {
+  websiteTitle?: string
+  name?: string
+  englishName?: string
+  logo?: string
+  author?: string
+  authorAvatar?: string
+  authorIntro?: string
+  beianNumber?: string
+  gonganBeianNumber?: string
+  github?: string
+  gitee?: string
+  twitter?: string
+  stackoverflow?: string
+  wechat?: string
+  qq?: string
+  weibo?: string
+  csdn?: string
+  zhihu?: string
+  juejin?: string
+  notice?: string
+  websiteCreateTime?: string
+  touristAvatar?: string
+  multiLanguage?: boolean
+  isCommentReview?: boolean
+  [key: string]: unknown
+}
+
+type I18nLocaleTarget = { value: string }
+type I18nGlobals = {
+  locale: string | I18nLocaleTarget
+  fallbackLocale?: string | I18nLocaleTarget
+}
+
+const setI18nLocale = (locale: string) => {
+  const global = i18n.global as unknown as I18nGlobals
+  if (typeof global.locale === 'object' && global.locale && 'value' in global.locale) {
+    global.locale.value = locale
+  } else {
+    global.locale = locale
+  }
+  if (global.fallbackLocale) {
+    if (typeof global.fallbackLocale === 'object' && 'value' in global.fallbackLocale) {
+      global.fallbackLocale.value = locale
+    } else {
+      global.fallbackLocale = locale
+    }
+  }
+}
+
 export const useAppStore = defineStore('appStore', {
   state: () => {
     const storedTheme = typeof window !== 'undefined' ? window.localStorage.getItem('theme') : null
@@ -43,14 +93,14 @@ export const useAppStore = defineStore('appStore', {
         }
       },
       appLoading: false,
-      websiteConfig: '' as any,
+      websiteConfig: {} as WebsiteConfig,
       viewCount: 0,
       articleCount: 0,
       talkCount: 0,
       categoryCount: 0,
       tagCount: 0,
-      NPTimeout: -1,
-      loadingTimeout: -1,
+      NPTimeout: null as ReturnType<typeof setTimeout> | null,
+      loadingTimeout: null as ReturnType<typeof setTimeout> | null,
       aurora_bot_enable: true
     }
   },
@@ -59,17 +109,7 @@ export const useAppStore = defineStore('appStore', {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('locale', locale)
       }
-      if ('value' in i18n.global.locale) {
-        ;(i18n.global.locale as any).value = locale
-      } else {
-        // fallback for legacy mode
-        ;(i18n.global.locale as any) = locale
-      }
-      if ('fallbackLocale' in i18n.global && 'value' in (i18n.global as any).fallbackLocale) {
-        ;((i18n.global as any).fallbackLocale as any).value = locale
-      } else if ('fallbackLocale' in i18n.global) {
-        ;(i18n.global as any).fallbackLocale = locale
-      }
+      setI18nLocale(locale)
     },
     initializeTheme(mode: string) {
       setTheme(mode)
@@ -85,8 +125,8 @@ export const useAppStore = defineStore('appStore', {
     startLoading() {
       if (typeof document === 'undefined') return
       if (this.appLoading === true) return
-      if (this.NPTimeout !== -1) clearTimeout(this.NPTimeout)
-      if (this.loadingTimeout !== -1) clearTimeout(this.loadingTimeout)
+      if (this.NPTimeout !== null) clearTimeout(this.NPTimeout)
+      if (this.loadingTimeout !== null) clearTimeout(this.loadingTimeout)
       const parentEl = document.getElementById('loading-bar-wrapper')
       if (parentEl) nProgress.configure({ parent: '#loading-bar-wrapper' })
       else nProgress.configure({ parent: 'body' })
@@ -94,11 +134,12 @@ export const useAppStore = defineStore('appStore', {
       this.appLoading = true
     },
     endLoading() {
-      this.NPTimeout = <any>setTimeout(() => {
+      if (typeof document === 'undefined') return
+      this.NPTimeout = window.setTimeout(() => {
         nProgress.done()
       }, 100)
 
-      this.loadingTimeout = <any>setTimeout(() => {
+      this.loadingTimeout = window.setTimeout(() => {
         this.appLoading = false
       }, 300)
     }

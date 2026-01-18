@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 type SearchResult = {
-  id?: number | string
+  id: number | string
   weight?: number
   articleTitle?: string
   articleContent?: string

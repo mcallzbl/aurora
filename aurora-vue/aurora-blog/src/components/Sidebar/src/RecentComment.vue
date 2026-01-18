@@ -38,30 +38,39 @@
 import { defineComponent, onMounted, toRef } from 'vue'
 import { SubTitle } from '@/components/Title'
 import { useCommentStore } from '@/stores/comment'
-import { useI18n } from 'vue-i18n'
 import api from '@/api/api'
+
+type RecentCommentRecord = {
+  id: string | number
+  avatar?: string | null
+  nickname?: string
+  createTime?: string | number | Date
+  commentContent?: string
+}
 
 export default defineComponent({
   name: 'RecentComment',
   components: { SubTitle },
   setup() {
     const commentStore = useCommentStore()
-    const { t } = useI18n()
     onMounted(() => {
       initRecentComment()
     })
     const initRecentComment = () => {
       api.getTopSixComments().then(({ data }) => {
-        if (data.data.length === 0) {
+        const records = Array.isArray(data?.data) ? (data.data as RecentCommentRecord[]) : []
+        if (records.length === 0) {
           commentStore.recentComment = []
+          return
         }
-        data.data.forEach((itme: any) => {
-          itme.createTime = formatTime(itme.createTime)
+        records.forEach((item) => {
+          item.createTime = formatTime(item.createTime)
         })
-        commentStore.recentComment = data.data
+        commentStore.recentComment = records
       })
     }
-    const formatTime = (time: any): any => {
+    const formatTime = (time: string | number | Date | undefined): string => {
+      if (time == null) return ''
       const date = new Date(time)
       const year = date.getFullYear()
       const month = date.getMonth() + 1
@@ -70,8 +79,7 @@ export default defineComponent({
     }
     return {
       comments: toRef(commentStore.$state, 'recentComment'),
-      defaultAvatar: 'https://bucket.devillusion.asia/aurora/avatar/c80e915a1b7f235b17072419e4094abd.png',
-      t
+      defaultAvatar: 'https://bucket.devillusion.asia/aurora/avatar/c80e915a1b7f235b17072419e4094abd.png'
     }
   }
 })

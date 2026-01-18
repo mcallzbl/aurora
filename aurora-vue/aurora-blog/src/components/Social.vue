@@ -55,6 +55,8 @@
 import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 
+defineOptions({ name: 'SocialLinks' })
+
 const appStore = useAppStore()
 const websiteConfig = computed(() => appStore.websiteConfig)
 </script>

@@ -12,7 +12,7 @@ import { computed, defineComponent, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
-  name: 'Title',
+  name: 'SectionTitle',
   props: {
     title: {
       type: String,

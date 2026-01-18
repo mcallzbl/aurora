@@ -13,7 +13,7 @@ import { SubTitle } from '@/components/Title'
 import { useAppStore } from '@/stores/app'
 
 export default defineComponent({
-  name: 'Notice',
+  name: 'SidebarNotice',
   components: { SubTitle },
   setup() {
     const appStore = useAppStore()

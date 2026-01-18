@@ -26,7 +26,7 @@ import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
-  name: 'Example',
+  name: 'SidebarNavigator',
   setup() {
     const router = useRouter()
     const commentOffset = ref(0)

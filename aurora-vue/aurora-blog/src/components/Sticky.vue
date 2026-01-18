@@ -1,15 +1,6 @@
 <template>
-  <div id="sticky" :style="{ height: height + 'px', zIndex: zIndex }">
-    <div
-      :class="className"
-      :style="{
-        top: isSticky ? (top === -1 ? 'initial' : top + 'px') : '',
-        bottom: isBottom ? 0 : 'initial',
-        zIndex: zIndex,
-        position: position,
-        width: width,
-        height: height + 'px'
-      }">
+  <div id="sticky" :style="wrapperStyle">
+    <div :class="className" :style="stickyStyle">
       <slot>
         <div>sticky</div>
       </slot>
@@ -18,10 +9,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref, type StyleValue } from 'vue'
 
 export default defineComponent({
-  name: 'Sticky',
+  name: 'StickyContainer',
   props: {
     stickyTop: {
       type: Number,
@@ -48,15 +39,27 @@ export default defineComponent({
       default: ''
     }
   },
-  setup() {
-    const active = ref(false),
-      position = ref('' as any),
-      width = ref(),
-      height = ref(),
-      isSticky = ref(false),
-      newTop = ref(0),
-      top = ref(0),
-      isBottom = ref(false)
+  setup(props) {
+    const active = ref(false)
+    const position = ref<'' | 'fixed' | 'absolute'>('')
+    const width = ref<number | string>('auto')
+    const height = ref(0)
+    const isSticky = ref(false)
+    const newTop = ref(0)
+    const top = ref(0)
+    const isBottom = ref(false)
+    const wrapperStyle = computed<StyleValue>(() => ({
+      height: `${height.value}px`,
+      zIndex: props.zIndex
+    }))
+    const stickyStyle = computed<StyleValue>(() => ({
+      top: isSticky.value ? (top.value === -1 ? 'initial' : `${top.value}px`) : undefined,
+      bottom: isBottom.value ? 0 : undefined,
+      zIndex: props.zIndex,
+      position: isSticky.value ? position.value || undefined : undefined,
+      width: width.value,
+      height: `${height.value}px`
+    }))
     return {
       active,
       position,
@@ -65,7 +68,9 @@ export default defineComponent({
       isSticky,
       newTop,
       top,
-      isBottom
+      isBottom,
+      wrapperStyle,
+      stickyStyle
     }
   },
   mounted() {
@@ -81,7 +86,7 @@ export default defineComponent({
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
-    sticky(top: number, position: any) {
+    sticky(top: number, position: 'fixed' | 'absolute') {
       if (this.active) {
         return
       }

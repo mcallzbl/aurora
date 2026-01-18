@@ -1,6 +1,7 @@
 import App from './App.vue'
 
 import { ViteSSG } from 'vite-ssg'
+import type { Directive } from 'vue'
 import { routes } from './router'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
@@ -10,7 +11,7 @@ import { registerSvgIcon } from '@/icons'
 import { registerObSkeleton } from '@/components/LoadingSkeleton'
 import { installRouterGuards } from '@/router/guard'
 
-import axios from 'axios'
+import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { ElNotification } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
@@ -21,6 +22,19 @@ export const createApp = ViteSSG(App, { routes }, async ({ app, router }) => {
   }
   app.use(pinia)
   app.use(i18n)
+
+  const resolveAsset = (asset: unknown): string => {
+    if (typeof asset === 'string') return asset
+    if (asset && typeof asset === 'object' && 'default' in asset) {
+      const maybeDefault = (asset as { default?: unknown }).default
+      return typeof maybeDefault === 'string' ? maybeDefault : ''
+    }
+    return ''
+  }
+
+  const noopDirective: Directive = {}
+  const ssrDirective: Directive = { getSSRProps: () => ({}) }
+
   if (!import.meta.env.SSR) {
     // load global styles only in client
     await Promise.all([
@@ -45,7 +59,7 @@ export const createApp = ViteSSG(App, { routes }, async ({ app, router }) => {
       import('vue3-lazy'),
       import('@/assets/default-cover.jpg')
     ])
-    const defaultCover = (cover as any).default || (cover as any)
+    const defaultCover = resolveAsset(cover)
 
     app.use(VueClickAway)
     app.use(infiniteScroll)
@@ -57,18 +71,18 @@ export const createApp = ViteSSG(App, { routes }, async ({ app, router }) => {
   } else {
     // SSR: register no-op directives used in templates so SSR won't fail
     // v-lazy and v-infinite-scroll are client-only behaviors
-    app.directive('lazy', {} as any)
-    app.directive('infinite-scroll', {} as any)
+    app.directive('lazy', noopDirective)
+    app.directive('infinite-scroll', noopDirective)
   }
 
   if (import.meta.env.SSR) {
     // SSR stubs for client-only directives to avoid SSR renderer errors
     // v-lazy
-    app.directive('lazy', { getSSRProps: () => ({}) } as any)
+    app.directive('lazy', ssrDirective)
     // v-infinite-scroll
-    app.directive('infinite-scroll', { getSSRProps: () => ({}) } as any)
+    app.directive('infinite-scroll', ssrDirective)
     // v-click-away
-    app.directive('click-away', { getSSRProps: () => ({}) } as any)
+    app.directive('click-away', ssrDirective)
   }
 
   // SVG icons and skeleton components
@@ -84,7 +98,7 @@ export const createApp = ViteSSG(App, { routes }, async ({ app, router }) => {
     // expose Element Plus notification as $notify
     app.config.globalProperties.$notify = ElNotification
     const userStore = useUserStore()
-    axios.interceptors.request.use((config: any) => {
+    axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       config.headers['Authorization'] = 'Bearer ' + sessionStorage.getItem('token')
       return config
     })
