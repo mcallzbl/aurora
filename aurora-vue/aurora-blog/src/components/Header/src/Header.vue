@@ -11,6 +11,8 @@
 <script lang="ts" setup>
 import { Controls, Logo, Navigation } from '../index'
 
+defineOptions({ name: 'SiteHeader' })
+
 defineProps<{
   msg?: string
 }>()

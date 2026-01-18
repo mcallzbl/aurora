@@ -40,7 +40,15 @@ defineOptions({ name: 'CommentItem' })
 
 interface ReplyDTO {
   id: number | string
-  [key: string]: any
+  avatar?: string
+  replyUserId?: string | number
+  replyWebsite?: string
+  replyNickname?: string
+  commentContent?: string
+  nickname?: string
+  createTime?: string | number | Date
+  userId?: string | number
+  [key: string]: unknown
 }
 
 interface CommentItemProps {

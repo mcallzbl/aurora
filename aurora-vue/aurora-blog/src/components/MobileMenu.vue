@@ -102,16 +102,26 @@ import api from '@/api/api'
 
 export default defineComponent({
   name: 'ObMobileMenu',
-  components: { Dropdown, DropdownMenu, DropdownItem, Social },
+  components: { Dropdown, DropdownMenu, DropdownItem, Social, ThemeToggle },
   setup() {
+    type NavRoute = {
+      name?: string
+      path: string
+      children?: NavRoute[]
+    }
+    type AlbumItem = {
+      id: string | number
+      albumName: string
+    }
+
     const appStore = useAppStore()
     const router = useRouter()
     const navigatorStore = useNavigatorStore()
     const searchStore = useSearchStore()
     const { t } = useI18n()
     const reactiveData = reactive({
-      routes: '' as any,
-      albums: [] as any
+      routes: [] as NavRoute[],
+      albums: [] as AlbumItem[]
     })
     onMounted(() => {
       reactiveData.routes = config.routes
@@ -138,8 +148,9 @@ export default defineComponent({
       navigatorStore.setOpenNavigator(false)
       searchStore.setOpenModal(true)
     }
-    const getMenuLabel = (name: string): string => {
-      const key = `menu.${String(name).toLowerCase()}`
+    const getMenuLabel = (name?: string): string => {
+      const label = name ?? ''
+      const key = `menu.${label.toLowerCase()}`
       return t(key)
     }
 

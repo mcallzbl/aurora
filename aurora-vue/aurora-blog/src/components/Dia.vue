@@ -22,6 +22,9 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDiaStore } from '@/stores/dia'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
+import type { DiaConfig } from '@/utils/aurora-dia'
+
+defineOptions({ name: 'AuroraDia' })
 
 const diaStore = useDiaStore()
 const appStore = useAppStore()
@@ -33,9 +36,10 @@ const initializeBot = (): void => {
   if (!appStore.aurora_bot_enable) return
   const botLocale = locale.value === 'zh' ? 'zh' : 'en'
   // Update software config in place, then reload
+  const botState = diaStore.aurora_bot as { tips?: DiaConfig['tips'] }
   diaStore.initializeBot({
     locale: botLocale,
-    tips: (diaStore as any).aurora_bot?.tips
+    tips: botState.tips
   })
   // ensure visible
   showDia.value = true

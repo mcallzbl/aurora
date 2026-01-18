@@ -37,6 +37,8 @@
 import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 
+defineOptions({ name: 'AppFooter' })
+
 const appStore = useAppStore()
 
 const gradientBackground = computed(() => ({

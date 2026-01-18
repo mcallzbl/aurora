@@ -113,7 +113,8 @@ type HorizontalArticleData = {
   createTime?: string | number | Date
 }
 
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+type NotifyFn = (options: { title: string; message: string; type: string }) => void
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const appStore = useAppStore()
 const articleStore = useArticleStore()
 const userStore = useUserStore()
@@ -129,14 +130,14 @@ const handleAuthorClick = (link?: string | null) => {
 
 const toArticle = () => {
   let isAccess = false
-  userStore.accessArticles.forEach((item: any) => {
+  userStore.accessArticles.forEach((item) => {
     if (item == articleStore.topArticle.id) {
       isAccess = true
     }
   })
   if (articleStore.topArticle.status == 2 && isAccess == false) {
     if (userStore.userInfo === '') {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.warning'),
         message: t('article.protected_login_required'),
         type: 'warning'

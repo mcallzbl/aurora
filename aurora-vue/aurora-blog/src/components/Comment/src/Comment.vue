@@ -9,4 +9,6 @@
 import { SubTitle } from '@/components/Title'
 import CommentForm from './CommentForm.vue'
 import CommentList from './CommentList.vue'
+
+defineOptions({ name: 'CommentSection' })
 </script>

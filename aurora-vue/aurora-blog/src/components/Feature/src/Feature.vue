@@ -9,7 +9,7 @@ import { defineComponent } from 'vue'
 import HorizontalArticle from '@/components/ArticleCard/src/HorizontalArticle.vue'
 
 export default defineComponent({
-  name: 'Feature',
+  name: 'FeatureSection',
   components: { HorizontalArticle },
   setup() {
     return {}

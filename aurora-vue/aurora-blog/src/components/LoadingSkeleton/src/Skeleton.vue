@@ -1,15 +1,19 @@
 <script lang="ts">
-import { computed, defineComponent, h, inject, toRefs } from 'vue'
+import { computed, defineComponent, h, inject, toRefs, type Slot, type VNode } from 'vue'
 import { SkeletonStyle } from './SkeletonTheme.vue'
 
-const isEmptyVNode = (children: any) => {
+const isEmptyVNode = (children?: Slot) => {
   if (!children) return true
-  const firstNode = children()[0]
-  let str = firstNode.text
+  const nodes = children()
+  const firstNode = nodes[0] as VNode | undefined
+  let str = ''
+  if (typeof firstNode?.children === 'string') {
+    str = firstNode.children
+  }
   if (str) {
     str = str.replace(/(\n|\r\n|\s)/g, '')
   }
-  return typeof firstNode.tag === 'undefined' && !str
+  return (!firstNode || typeof firstNode.type === 'symbol') && !str
 }
 
 export default defineComponent({

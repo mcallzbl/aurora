@@ -31,7 +31,14 @@ import { useI18n } from 'vue-i18n'
 import api from '@/api/api'
 import emitter from '@/utils/mitt'
 
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+type NotifyFn = (options: { title: string; message: string; type: string }) => void
+type SaveCommentParams = {
+  commentContent: string
+  type: number
+  topicId?: string
+}
+
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const { t } = useI18n()
 const userStore = useUserStore()
 const commentStore = useCommentStore()
@@ -62,7 +69,7 @@ const fetchComments = () => {
 
 const saveComment = () => {
   if (userStore.userInfo === '') {
-    proxy.$notify({
+    proxy?.$notify?.({
       title: 'Warning',
       message: t('comments.login_required'),
       type: 'warning'
@@ -70,7 +77,7 @@ const saveComment = () => {
     return
   }
   if (commentContent.value.trim() === '') {
-    proxy.$notify({
+    proxy?.$notify?.({
       title: 'Warning',
       message: t('comments.empty'),
       type: 'warning'
@@ -79,7 +86,7 @@ const saveComment = () => {
   }
   const path = route.path
   const arr = path.split('/')
-  const params: any = {
+  const params: SaveCommentParams = {
     commentContent: commentContent.value,
     type: commentStore.type
   }
@@ -89,13 +96,13 @@ const saveComment = () => {
       fetchComments()
       const isCommentReview = appStore.websiteConfig.isCommentReview
       if (isCommentReview) {
-        proxy.$notify({
+        proxy?.$notify?.({
           title: 'Warning',
           message: t('comments.pending_review'),
           type: 'warning'
         })
       } else {
-        proxy.$notify({
+        proxy?.$notify?.({
           title: 'Success',
           message: t('comments.success'),
           type: 'success'

@@ -30,11 +30,10 @@
 </template>
 
 <script lang="ts">
-// @ts-nocheck
 import { useAppStore } from '@/stores/app'
 import { useArticleStore } from '@/stores/article'
 import { useI18n } from 'vue-i18n'
-import { computed, defineComponent, toRef } from 'vue'
+import { computed, defineComponent, toRef, type StyleValue } from 'vue'
 import { ArticleCard } from '@/components/ArticleCard'
 
 export default defineComponent({
@@ -50,7 +49,13 @@ export default defineComponent({
       gradientBackground: computed(() => {
         return { background: appStore.themeConfig.header_gradient_css }
       }),
-      gradientText: appStore.themeConfig.background_gradient_style,
+      gradientText: computed<StyleValue>(() => ({
+        background: appStore.themeConfig.header_gradient_css,
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        WebkitBoxDecorationBreak: 'clone',
+        boxDecorationBreak: 'clone'
+      })),
       featuredArticles: toRef(articleStore.$state, 'featuredArticles'),
       t
     }

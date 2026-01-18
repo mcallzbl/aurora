@@ -10,6 +10,8 @@
 import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 
+defineOptions({ name: 'ObAvatar' })
+
 // 1. 定义 Props，使用 TypeScript 接口提供更好的类型提示
 interface Props {
   url?: string | null

@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-start self-stretch relative" @click="handleClick">
-    <div class="flex flex-col relative py-4 z-10 text-white font-medium ob-drop-shadow cursor-pointer" @click="">
+    <div class="flex flex-col relative py-4 z-10 text-white font-medium ob-drop-shadow cursor-pointer">
       <span v-if="websiteConfig.name" class="flex text-3xl">
         {{ websiteConfig.name }}
       </span>
@@ -21,7 +21,7 @@ import { useCommonStore } from '@/stores/common'
 import { useNavigatorStore } from '@/stores/navigator'
 
 export default defineComponent({
-  name: 'Logo',
+  name: 'HeaderLogo',
   setup() {
     const appStore = useAppStore()
     const commonStore = useCommonStore()

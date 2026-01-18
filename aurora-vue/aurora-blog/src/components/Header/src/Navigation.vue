@@ -44,7 +44,6 @@
 </template>
 
 <script lang="ts">
-// @ts-nocheck
 import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -54,9 +53,19 @@ import config from '@/config/config'
 import api from '@/api/api'
 
 export default defineComponent({
-  name: 'Navigation',
+  name: 'HeaderNavigation',
   components: { Dropdown, DropdownMenu, DropdownItem },
   setup() {
+    type NavRoute = {
+      name?: string
+      path: string
+      children?: NavRoute[]
+    }
+    type AlbumItem = {
+      id: string | number
+      albumName: string
+    }
+
     const { t, te } = useI18n()
     const router = useRouter()
     const pushPage = (path: string): void => {
@@ -70,24 +79,25 @@ export default defineComponent({
       }
     }
     const reactiveData = reactive({
-      albums: [] as any
+      albums: [] as AlbumItem[]
     })
     onMounted(() => {
       api.getAlbums().then(({ data }) => {
         reactiveData.albums = data.data
       })
     })
-    const openPhotoAlbum = (id: any): void => {
+    const openPhotoAlbum = (id: string | number): void => {
       router.push('/photos/' + id)
     }
-    const getMenuLabel = (name: string): string => {
-      const key = `menu.${String(name).toLowerCase()}`
-      return te(key) ? t(key) : String(name)
+    const getMenuLabel = (name?: string): string => {
+      const label = name ?? ''
+      const key = `menu.${label.toLowerCase()}`
+      return te(key) ? t(key) : label
     }
 
     return {
       ...toRefs(reactiveData),
-      routes: config.routes,
+      routes: config.routes as NavRoute[],
       pushPage,
       openPhotoAlbum,
       te,

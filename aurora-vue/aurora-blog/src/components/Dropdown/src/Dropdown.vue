@@ -16,7 +16,7 @@ import { useCommonStore } from '@/stores/common'
 
 export default defineComponent({
   emits: ['command'],
-  name: 'Dropdown',
+  name: 'AppDropdown',
   props: {
     hover: {
       type: Boolean,

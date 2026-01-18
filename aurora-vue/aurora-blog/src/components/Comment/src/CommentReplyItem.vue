@@ -22,7 +22,7 @@
     <CommentReplyForm
       v-show="show"
       :initialContent="replyContent"
-      :replyUserId="reply.userId"
+      :replyUserId="reply.userId ?? commentUserId"
       class="mt-5"
       @changeShow="changeShow" />
   </div>
@@ -38,12 +38,24 @@ defineOptions({ name: 'CommentReplyItem' })
 
 const { t } = useI18n()
 
+type ReplyRecord = {
+  avatar?: string
+  replyUserId?: string | number
+  replyWebsite?: string
+  replyNickname?: string
+  commentContent?: string
+  nickname?: string
+  createTime?: string | number | Date
+  userId?: string | number
+}
+
 const props = defineProps<{
-  reply: any
-  commentUserId: any
+  reply: ReplyRecord
+  commentUserId: string | number
 }>()
 
-const formatTime = (time: any): string => {
+const formatTime = (time: string | number | Date | undefined): string => {
+  if (time == null) return ''
   const date = new Date(time)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -56,7 +68,7 @@ const replyContent = ref('')
 const time = computed(() => formatTime(props.reply.createTime))
 
 const clickOnSonReply = () => {
-  replyContent.value = '@' + props.reply.nickname
+  replyContent.value = '@' + (props.reply.nickname ?? '')
   show.value = true
 }
 

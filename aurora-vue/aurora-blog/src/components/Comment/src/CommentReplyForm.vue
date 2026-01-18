@@ -43,19 +43,27 @@ const props = defineProps<{ replyUserId: number | string; initialContent: string
 const emit = defineEmits<{ (e: 'changeShow'): void }>()
 
 const { t } = useI18n()
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+type NotifyFn = (options: { title: string; message: string; type: 'warning' | 'success' | 'error' | 'info' }) => void
+type SaveCommentParams = {
+  type: number
+  replyUserId: number | string
+  parentId: number | string | null
+  commentContent: string
+  topicId?: string | number
+}
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const userStore = useUserStore()
 const commentStore = useCommentStore()
 const appStore = useAppStore()
 const route = useRoute()
 
 const commentContent = ref<string>('')
-const parentId = inject('parentId') as any
-const index = inject('index') as any
+const parentId = inject<number | string | null>('parentId', null)
+const index = inject<number>('index', -1)
 
 const saveReply = () => {
   if (userStore.userInfo === '') {
-    proxy.$notify({
+    proxy?.$notify?.({
       title: t('common.warning'),
       message: t('comments.login_required'),
       type: 'warning'
@@ -63,7 +71,7 @@ const saveReply = () => {
     return
   }
   if (commentContent.value.trim() === '') {
-    proxy.$notify({
+    proxy?.$notify?.({
       title: t('common.warning'),
       message: t('comments.empty'),
       type: 'warning'
@@ -72,7 +80,7 @@ const saveReply = () => {
   }
   const path = route.path
   const arr = path.split('/')
-  const params: any = {
+  const params: SaveCommentParams = {
     type: commentStore.type,
     replyUserId: props.replyUserId,
     parentId: parentId,
@@ -85,13 +93,13 @@ const saveReply = () => {
       fetchReplies()
       const isCommentReview = appStore.websiteConfig.isCommentReview
       if (isCommentReview) {
-        proxy.$notify({
+        proxy?.$notify?.({
           title: t('common.warning'),
           message: t('comments.pending_review'),
           type: 'warning'
         })
       } else {
-        proxy.$notify({
+        proxy?.$notify?.({
           title: t('common.success'),
           message: t('comments.reply_success'),
           type: 'success'

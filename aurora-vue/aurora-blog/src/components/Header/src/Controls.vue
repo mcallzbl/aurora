@@ -31,7 +31,7 @@
     </span>
   </div>
   <el-dialog v-model="loginDialogVisible" :fullscreen="isMobile" width="30%">
-    <el-form @keyup.enter.native="login">
+    <el-form @keyup.enter="login">
       <el-form-item class="mt-5">
         <el-input v-model="loginInfo.username" :placeholder="t('auth.email')" />
       </el-form-item>
@@ -97,7 +97,7 @@
     </el-form>
   </el-dialog>
   <el-dialog v-model="articlePasswordDialogVisible" :fullscreen="isMobile" width="30%">
-    <el-form @submit.native.prevent @keyup.enter.native="accessArticle">
+    <el-form @submit.prevent @keyup.enter="accessArticle">
       <el-form-item class="mt-5">
         <el-input
           id="article-password-input"
@@ -131,8 +131,14 @@ import config from '@/config/config'
 import { useI18n } from 'vue-i18n'
 import emitter from '@/utils/mitt'
 
-const { t, locale } = useI18n()
-const proxy = getCurrentInstance()!.appContext.config.globalProperties as any
+defineOptions({ name: 'HeaderControls' })
+
+type NotifyFn = (options: { title: string; message: string; type: 'success' | 'warning' | 'error' | 'info' }) => void
+type QQLogin = { showPopup: (options: { appId: string; redirectURI: string }) => void }
+type QQGlobal = { Login: QQLogin }
+
+const { t } = useI18n()
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const appStore = useAppStore()
 const commonStore = useCommonStore()
 const userStore = useUserStore()
@@ -155,10 +161,7 @@ const articleId = ref('')
 
 const isMobile = computed(() => commonStore.isMobile)
 const userInfo = computed(() => userStore.userInfo)
-const multiLanguage = computed(() => {
-  const websiteConfig: any = appStore.websiteConfig
-  return websiteConfig?.multiLanguage
-})
+const multiLanguage = computed(() => Number(appStore.websiteConfig?.multiLanguage ?? 0))
 
 const handleOpenModel = () => {
   searchStore.setOpenModal(true)
@@ -197,7 +200,7 @@ const openForgetPasswordDialog = () => {
 const sendCode = () => {
   api.sendValidationCode(loginInfo.username).then(({ data }) => {
     if (data.flag) {
-      proxy.$notify({ title: t('common.success'), message: t('auth.code_sent'), type: 'success' })
+      proxy?.$notify?.({ title: t('common.success'), message: t('auth.code_sent'), type: 'success' })
     }
   })
 }
@@ -210,7 +213,7 @@ const register = () => {
   }
   api.register(params).then(({ data }) => {
     if (data.flag) {
-      proxy.$notify({ title: t('common.success'), message: t('auth.register_success'), type: 'success' })
+      proxy?.$notify?.({ title: t('common.success'), message: t('auth.register_success'), type: 'success' })
       registerDialogVisible.value = false
       loginDialogVisible.value = true
     }
@@ -219,7 +222,7 @@ const register = () => {
 
 const login = () => {
   if (loginInfo.username.trim().length === 0 || loginInfo.password.trim().length === 0) {
-    proxy.$notify({ title: t('common.warning'), message: t('auth.password_empty'), type: 'warning' })
+    proxy?.$notify?.({ title: t('common.warning'), message: t('auth.password_empty'), type: 'warning' })
     return
   }
   const params = new URLSearchParams()
@@ -230,7 +233,7 @@ const login = () => {
       userStore.userInfo = data.data
       sessionStorage.setItem('token', data.data.token)
       userStore.token = data.data.token
-      proxy.$notify({ title: t('common.success'), message: t('auth.login_success'), type: 'success' })
+      proxy?.$notify?.({ title: t('common.success'), message: t('auth.login_success'), type: 'success' })
       loginDialogVisible.value = false
     }
   })
@@ -243,7 +246,7 @@ const logout = () => {
       userStore.token = ''
       userStore.accessArticles = []
       sessionStorage.removeItem('token')
-      proxy.$notify({ title: t('common.success'), message: t('auth.logout_success'), type: 'success' })
+      proxy?.$notify?.({ title: t('common.success'), message: t('auth.logout_success'), type: 'success' })
     }
   })
 }
@@ -252,11 +255,13 @@ const qqLogin = () => {
   userStore.currentUrl = route.path
   loginDialogVisible.value = false
   if (commonStore.isMobile) {
-    // @ts-ignore QQ SDK global
-    QC.Login.showPopup({
-      appId: config.qqLogin.QQ_APP_ID,
-      redirectURI: config.qqLogin.QQ_REDIRECT_URI
-    })
+    const QC = (window as Window & { QC?: QQGlobal }).QC
+    if (QC?.Login?.showPopup) {
+      QC.Login.showPopup({
+        appId: config.qqLogin.QQ_APP_ID,
+        redirectURI: config.qqLogin.QQ_REDIRECT_URI
+      })
+    }
   } else {
     const url =
       'https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=' +
@@ -270,7 +275,7 @@ const qqLogin = () => {
 const updatePassword = () => {
   api.updatePassword(loginInfo).then(({ data }) => {
     if (data.flag) {
-      proxy.$notify({ title: t('common.success'), message: t('auth.update_success'), type: 'success' })
+      proxy?.$notify?.({ title: t('common.success'), message: t('auth.update_success'), type: 'success' })
       forgetPasswordDialogVisible.value = false
       loginDialogVisible.value = true
     }
@@ -279,7 +284,7 @@ const updatePassword = () => {
 
 const accessArticle = () => {
   if (articlePassword.value.trim().length === 0) {
-    proxy.$notify({ title: t('common.warning'), message: t('auth.password_empty'), type: 'warning' })
+    proxy?.$notify?.({ title: t('common.warning'), message: t('auth.password_empty'), type: 'warning' })
     return
   }
   api

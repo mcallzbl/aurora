@@ -60,8 +60,8 @@
                 @click="handleAuthorClick(article.author.website)">
                 {{ article.author.nickname }}
               </strong>
-              <time :datetime="new Date(article.createTime).toISOString()" class="opacity-70">
-                {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
+              <time :datetime="toIso(article.createTime)" class="opacity-70">
+                {{ t('settings.shared-on') }} {{ formatDate(article.createTime) }}
               </time>
             </span>
           </div>
@@ -89,9 +89,33 @@ import emitter from '@/utils/mitt'
 
 defineOptions({ name: 'ArticleCard' })
 
-const props = defineProps<{ data: any }>()
+type NotifyFn = (options: { title: string; message: string; type: string }) => void
+type TagInfo = {
+  id: number | string
+  tagName?: string
+}
+type AuthorInfo = {
+  avatar?: string
+  website?: string
+  nickname?: string
+}
+type ArticleCardData = {
+  id?: number | string
+  isTop?: boolean
+  isFeatured?: boolean
+  articleCover?: string
+  categoryName?: string
+  tags?: TagInfo[]
+  articleTitle?: string
+  status?: number
+  articleContent?: string
+  author?: AuthorInfo
+  createTime?: string | number | Date
+}
 
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const props = defineProps<{ data: ArticleCardData }>()
+
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const appStore = useAppStore()
 const userStore = useUserStore()
 const router = useRouter()
@@ -99,21 +123,21 @@ const { t, d } = useI18n()
 
 const article = toRef(props, 'data')
 
-const handleAuthorClick = (link: string) => {
-  if (link === '') link = window.location.href
-  window.open(link)
+const handleAuthorClick = (link?: string | null) => {
+  const target = link && link !== '' ? link : window.location.href
+  window.open(target)
 }
 
 const toArticle = () => {
   let isAccess = false
-  userStore.accessArticles.forEach((item: any) => {
+  userStore.accessArticles.forEach((item) => {
     if (item == props.data.id) {
       isAccess = true
     }
   })
   if (props.data.status === 2 && isAccess == false) {
     if (userStore.userInfo === '') {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: t('common.warning'),
         message: t('article.protected_login_required'),
         type: 'warning'
@@ -129,6 +153,14 @@ const toArticle = () => {
 const gradientBackground = computed(() => ({
   background: appStore.themeConfig.header_gradient_css
 }))
+
+const toIso = (value?: string | number | Date) => {
+  return value ? new Date(value).toISOString() : ''
+}
+
+const formatDate = (value?: string | number | Date) => {
+  return value ? d(new Date(value), 'short') : ''
+}
 </script>
 
 <style lang="scss" scoped>

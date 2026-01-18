@@ -31,8 +31,8 @@ interface CommentListItem {
   nickname: string
   commentContent: string
   createTime: string | number | Date
-  replyDTOs: Array<{ id: number | string; [key: string]: any }>
-  [key: string]: any
+  replyDTOs: Array<{ id: number | string; [key: string]: unknown }>
+  [key: string]: unknown
 }
 
 const comments = inject<ComputedRef<CommentListItem[]>>(
