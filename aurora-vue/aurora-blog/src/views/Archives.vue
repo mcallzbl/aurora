@@ -45,16 +45,16 @@
         :page="pagination.current"
         :pageSize="pagination.size"
         :pageTotal="pagination.total"
-        @pageChange="pageChangeHanlder" />
+        @pageChange="pageChangeHandler" />
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { useArticleStore } from '@/stores/article'
 import { useCommonStore } from '@/stores/common'
 import { useUserStore } from '@/stores/user'
-import { defineComponent, getCurrentInstance, onMounted, onUnmounted, reactive, toRef } from 'vue'
+import { getCurrentInstance, onMounted, onUnmounted, reactive, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -63,89 +63,84 @@ import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 import emitter from '@/utils/mitt'
 
-export default defineComponent({
-  name: 'Archives',
-  components: { Breadcrumb, Paginator },
-  setup() {
-    const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
-    const articleStore = useArticleStore()
-    const commonStore = useCommonStore()
-    const userStore = useUserStore()
-    const router = useRouter()
-    const { t, d } = useI18n()
-    const pagination = reactive({
-      current: 1,
-      total: 0,
-      size: 12
-    })
-    onMounted(() => {
-      toPageTop()
-      fetchArchives()
-    })
-    onUnmounted(() => {
-      commonStore.resetHeaderImage()
-    })
-    const fetchArchives = () => {
-      articleStore.archives = ''
-      api
-        .getAllArchives({
-          current: pagination.current,
-          size: pagination.size
-        })
-        .then(({ data }) => {
-          data.data.records.forEach((item: any) => {
-            item.articles.forEach((article: any) => {
-              article.articleContent = markdownToHtml(article.articleContent)
-                .replace(/<\/?[^>]*>/g, '')
-                .replace(/[|]*\n/, '')
-                .replace(/&npsp;/gi, '')
-            })
-          })
-          articleStore.archives = data.data.records
-          pagination.total = data.data.count
-        })
-    }
-    const pageChangeHanlder = (current: number) => {
-      pagination.current = current
-      toPageTop()
-      fetchArchives()
-    }
-    const toPageTop = () => {
-      window.scrollTo({
-        top: 0
-      })
-    }
-    const toArticle = (article: any) => {
-      let isAccess = false
-      userStore.accessArticles.forEach((item: any) => {
-        if (item == article.id) {
-          isAccess = true
-        }
-      })
-      if (article.status === 2 && isAccess === false) {
-        if (userStore.userInfo === '') {
-          proxy.$notify({
-            title: 'Warning',
-            message: '该文章受密码保护,请登录后访问',
-            type: 'warning'
-          })
-        } else {
-          emitter.emit('changeArticlePasswordDialogVisible', article.id)
-        }
-      } else {
-        router.push({ path: '/articles/' + article.id })
-      }
-    }
-    return {
-      pageChangeHanlder,
-      toArticle,
-      pagination,
-      archives: toRef(articleStore.$state, 'archives'),
-      t,
-      d
-    }
-  }
+defineOptions({ name: 'Archives' })
+
+const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const articleStore = useArticleStore()
+const commonStore = useCommonStore()
+const userStore = useUserStore()
+const router = useRouter()
+const { t, d } = useI18n()
+const pagination = reactive({
+  current: 1,
+  total: 0,
+  size: 12
 })
+const archives = toRef(articleStore.$state, 'archives')
+
+onMounted(() => {
+  toPageTop()
+  fetchArchives()
+})
+
+onUnmounted(() => {
+  commonStore.resetHeaderImage()
+})
+
+const fetchArchives = () => {
+  articleStore.archives = ''
+  api
+    .getAllArchives({
+      current: pagination.current,
+      size: pagination.size
+    })
+    .then(({ data }) => {
+      data.data.records.forEach((item: any) => {
+        item.articles.forEach((article: any) => {
+          article.articleContent = markdownToHtml(article.articleContent)
+            .replace(/<\/?[^>]*>/g, '')
+            .replace(/[|]*\n/, '')
+            .replace(/&npsp;/gi, '')
+        })
+      })
+      articleStore.archives = data.data.records
+      pagination.total = data.data.count
+    })
+}
+
+const pageChangeHandler = (current: number) => {
+  pagination.current = current
+  toPageTop()
+  fetchArchives()
+}
+
+const toPageTop = () => {
+  window.scrollTo({
+    top: 0
+  })
+}
+
+const toArticle = (article: any) => {
+  let isAccess = false
+  userStore.accessArticles.forEach((item: any) => {
+    if (item == article.id) {
+      isAccess = true
+    }
+  })
+  if (article.status === 2 && !isAccess) {
+    if (userStore.userInfo === '') {
+      proxy.$notify({
+        title: 'Warning',
+        message: '该文章受密码保护,请登录后访问',
+        type: 'warning'
+      })
+    } else {
+      emitter.emit('changeArticlePasswordDialogVisible', article.id)
+    }
+  } else {
+    router.push({ path: '/articles/' + article.id })
+  }
+}
 </script>
 
 <style lang="scss" scoped>

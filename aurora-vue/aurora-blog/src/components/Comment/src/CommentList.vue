@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { computed, inject, type ComputedRef } from 'vue'
 import CommentItem from './CommentItem.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommentStore } from '@/stores/comment'
@@ -24,8 +24,22 @@ defineOptions({ name: 'CommentList' })
 const { t } = useI18n()
 const commentStore = useCommentStore()
 
-const comments = inject('comments')
-const haveMore = inject('haveMore')
+interface CommentListItem {
+  id: number | string
+  userId: number | string
+  avatar: string
+  nickname: string
+  commentContent: string
+  createTime: string | number | Date
+  replyDTOs: Array<{ id: number | string; [key: string]: any }>
+  [key: string]: any
+}
+
+const comments = inject<ComputedRef<CommentListItem[]>>(
+  'comments',
+  computed(() => [] as CommentListItem[])
+)
+const haveMore = inject<ComputedRef<boolean>>('haveMore', computed(() => false))
 
 const loadMore = () => {
   switch (commentStore.type) {

@@ -17,14 +17,14 @@ import { useUserStore } from '@/stores/user'
 export const createApp = ViteSSG(
   App,
   { routes },
-  async ({ app, router, isClient }) => {
+  async ({ app, router }) => {
     const pinia = createPinia()
-    if (isClient) {
+    if (!import.meta.env.SSR) {
       pinia.use(piniaPluginPersistedstate)
     }
     app.use(pinia)
     app.use(i18n)
-    if (isClient) {
+    if (!import.meta.env.SSR) {
       // load global styles only in client
       await Promise.all([
         import('normalize.css/normalize.css'),
@@ -64,7 +64,7 @@ export const createApp = ViteSSG(
       app.directive('infinite-scroll', {} as any)
     }
 
-    if (!isClient) {
+    if (import.meta.env.SSR) {
       // SSR stubs for client-only directives to avoid SSR renderer errors
       // v-lazy
       app.directive('lazy', { getSSRProps: () => ({}) } as any)
@@ -75,15 +75,15 @@ export const createApp = ViteSSG(
     }
 
     // SVG icons and skeleton components
-    if (isClient) {
+    if (!import.meta.env.SSR) {
       registerSvgIcon(app)
       registerObSkeleton(app)
     }
 
     // Guards (client only, due to nprogress DOM usage)
-    if (isClient) installRouterGuards(router)
+    if (!import.meta.env.SSR) installRouterGuards(router)
 
-    if (isClient) {
+    if (!import.meta.env.SSR) {
       // expose Element Plus notification as $notify
       app.config.globalProperties.$notify = ElNotification
       const userStore = useUserStore()

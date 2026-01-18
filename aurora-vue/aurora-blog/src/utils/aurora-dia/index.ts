@@ -380,7 +380,7 @@ class AuroraBotSoftware {
     // month: 1-12, weekday: 0=Sunday..6=Saturday
     const first = new Date(year, month - 1, 1)
     const firstWeekday = first.getDay()
-    let day = 1 + ((7 + weekday - firstWeekday) % 7) + (nth - 1) * 7
+    const day = 1 + ((7 + weekday - firstWeekday) % 7) + (nth - 1) * 7
     const daysInMonth = new Date(year, month, 0).getDate()
     if (day > daysInMonth) return null
     return day
