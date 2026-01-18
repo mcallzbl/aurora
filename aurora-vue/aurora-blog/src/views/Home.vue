@@ -68,10 +68,10 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref, toRef, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref, toRef } from 'vue'
 import { Feature, FeatureList } from '@/components/Feature'
-import { ArticleCard, HorizontalArticle } from '@/components/ArticleCard'
+import { ArticleCard } from '@/components/ArticleCard'
 import { Title } from '@/components/Title'
 import { Notice, Profile, RecentComment, Sidebar, TagBox, WebsiteInfo } from '@/components/Sidebar'
 import { useAppStore } from '@/stores/app'
@@ -83,107 +83,76 @@ import Paginator from '@/components/Paginator.vue'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
-export default defineComponent({
-  name: 'Home',
-  components: {
-    Feature,
-    FeatureList,
-    ArticleCard,
-    HorizontalArticle,
-    Title,
-    Paginator,
-    Sidebar,
-    Profile,
-    RecentComment,
-    TagBox,
-    Notice,
-    WebsiteInfo
-  },
-  setup() {
-    const appStore = useAppStore()
-    const userStore = useUserStore()
-    const articleStore = useArticleStore()
-    const categoryStore = useCategoryStore()
-    const { t } = useI18n()
-    const expanderClass = ref({
-      'tab-expander': true,
-      expanded: false
+defineOptions({ name: 'Home' })
+
+const appStore = useAppStore()
+const userStore = useUserStore()
+const articleStore = useArticleStore()
+const categoryStore = useCategoryStore()
+const { t } = useI18n()
+const expanderClass = ref({
+  'tab-expander': true,
+  expanded: false
+})
+const tabClass = ref({
+  tab: true,
+  'expanded-tab': false
+})
+const activeTab = ref(0)
+const articleOffset = ref(0)
+const reactiveData = reactive({
+  haveArticles: false
+})
+const pagination = reactive({
+  size: 12,
+  total: 0,
+  current: 1
+})
+let nowCategoryId = 0
+
+const haveArticles = toRef(reactiveData, 'haveArticles')
+const articles = toRef(articleStore.$state, 'articles')
+const categories = toRef(categoryStore.$state, 'categories')
+const themeConfig = computed(() => appStore.themeConfig)
+
+onMounted(() => {
+  fetchTopAndFeatured()
+  fetchCategories()
+  fetchArticles()
+  const articleListEl = document.getElementById('article-list')
+  articleOffset.value = articleListEl && articleListEl instanceof HTMLElement ? articleListEl.offsetTop + 120 : 0
+})
+
+const fetchTopAndFeatured = () => {
+  api.getTopAndFeaturedArticles().then(({ data }) => {
+    data.data.topArticle.articleContent = markdownToHtml(data.data.topArticle.articleContent)
+      .replace(/<\/?[^>]*>/g, '')
+      .replace(/[|]*\n/, '')
+      .replace(/&npsp;/gi, '')
+    data.data.featuredArticles.forEach((item: any) => {
+      item.articleContent = markdownToHtml(item.articleContent)
+        .replace(/<\/?[^>]*>/g, '')
+        .replace(/[|]*\n/, '')
+        .replace(/&npsp;/gi, '')
     })
-    const tabClass = ref({
-      tab: true,
-      'expanded-tab': false
-    })
-    const activeTab = ref(0)
-    const articleOffset = ref(0)
-    const reactiveData = reactive({
-      haveArticles: false
-    })
-    const pagination = reactive({
-      size: 12,
-      total: 0,
-      current: 1
-    })
-    let nowCategoryId = 0
-    onMounted(() => {
-      fetchTopAndFeatured()
-      fetchCategories()
-      fetchArticles()
-      const articleListEl = document.getElementById('article-list')
-      articleOffset.value = articleListEl && articleListEl instanceof HTMLElement ? articleListEl.offsetTop + 120 : 0
-    })
-    const fetchTopAndFeatured = () => {
-      api.getTopAndFeaturedArticles().then(({ data }) => {
-        data.data.topArticle.articleContent = markdownToHtml(data.data.topArticle.articleContent)
-          .replace(/<\/?[^>]*>/g, '')
-          .replace(/[|]*\n/, '')
-          .replace(/&npsp;/gi, '')
-        data.data.featuredArticles.forEach((item: any) => {
-          item.articleContent = markdownToHtml(item.articleContent)
-            .replace(/<\/?[^>]*>/g, '')
-            .replace(/[|]*\n/, '')
-            .replace(/&npsp;/gi, '')
-        })
-        articleStore.topArticle = data.data.topArticle
-        articleStore.featuredArticles = data.data.featuredArticles
+    articleStore.topArticle = data.data.topArticle
+    articleStore.featuredArticles = data.data.featuredArticles
+  })
+}
+
+const fetchArticles = () => {
+  activeTab.value = userStore.tab
+  nowCategoryId = userStore.tab
+  pagination.current = userStore.page
+  if (userStore.tab === 0) {
+    reactiveData.haveArticles = false
+    api
+      .getArticles({
+        current: pagination.current,
+        size: pagination.size
       })
-    }
-    const fetchArticles = () => {
-      activeTab.value = userStore.tab
-      nowCategoryId = userStore.tab
-      pagination.current = userStore.page
-      if (userStore.tab === 0) {
-        reactiveData.haveArticles = false
-        api
-          .getArticles({
-            current: pagination.current,
-            size: pagination.size
-          })
-          .then(({ data }) => {
-            if (data.flag) {
-              data.data.records.forEach((item: any) => {
-                item.articleContent = markdownToHtml(item.articleContent)
-                  .replace(/<\/?[^>]*>/g, '')
-                  .replace(/[|]*\n/, '')
-                  .replace(/&npsp;/gi, '')
-              })
-              articleStore.articles = data.data.records
-              pagination.total = data.data.count
-              reactiveData.haveArticles = true
-            }
-          })
-      } else {
-        fetchArticlesByCategoryId(userStore.tab)
-      }
-    }
-    const fetchArticlesByCategoryId = (categoryId: any) => {
-      reactiveData.haveArticles = false
-      api
-        .getArticlesByCategoryId({
-          current: pagination.current,
-          size: pagination.size,
-          categoryId: categoryId
-        })
-        .then(({ data }) => {
+      .then(({ data }) => {
+        if (data.flag) {
           data.data.records.forEach((item: any) => {
             item.articleContent = markdownToHtml(item.articleContent)
               .replace(/<\/?[^>]*>/g, '')
@@ -193,71 +162,81 @@ export default defineComponent({
           articleStore.articles = data.data.records
           pagination.total = data.data.count
           reactiveData.haveArticles = true
-        })
-    }
-    const fetchCategories = () => {
-      categoryStore.categories = []
-      api.getAllCategories().then(({ data }) => {
-        categoryStore.categories.push(...data.data)
+        }
       })
-    }
-    const expandHandler = () => {
-      expanderClass.value.expanded = !expanderClass.value.expanded
-      tabClass.value['expanded-tab'] = !tabClass.value['expanded-tab']
-    }
-    const handleTabChange = (categoryId: any) => {
-      userStore.tab = categoryId
-      userStore.page = 1
-      pagination.current = 1
-      activeTab.value = categoryId
-      nowCategoryId = categoryId
-      toArticleOffset()
-      if (categoryId === 0) {
-        fetchArticles()
-      } else {
-        fetchArticlesByCategoryId(categoryId)
-      }
-    }
-    const toArticleOffset = () => {
-      window.scrollTo({
-        top: articleOffset.value
-      })
-    }
-    const activeTabStyle = (catagoryId: any) => {
-      if (catagoryId === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
-      return {}
-    }
-    const pageChangeHanlder = (current: number) => {
-      userStore.page = current
-      pagination.current = current
-      toArticleOffset()
-      if (nowCategoryId === 0) {
-        fetchArticles()
-      } else {
-        fetchArticlesByCategoryId(nowCategoryId)
-      }
-    }
-    return {
-      ...toRefs(reactiveData),
-      ...toRefs(articleStore.$state),
-      categories: toRef(categoryStore.$state, 'categories'),
-      gradientText: computed(() => appStore.themeConfig.background_gradient_style),
-      gradientBackground: computed(() => {
-        return { background: appStore.themeConfig.header_gradient_css }
-      }),
-      themeConfig: computed(() => appStore.themeConfig),
-      expanderClass,
-      tabClass,
-      expandHandler,
-      handleTabChange,
-      activeTabStyle,
-      activeTab,
-      pagination,
-      pageChangeHanlder,
-      t
-    }
+  } else {
+    fetchArticlesByCategoryId(userStore.tab)
   }
-})
+}
+
+const fetchArticlesByCategoryId = (categoryId: any) => {
+  reactiveData.haveArticles = false
+  api
+    .getArticlesByCategoryId({
+      current: pagination.current,
+      size: pagination.size,
+      categoryId: categoryId
+    })
+    .then(({ data }) => {
+      data.data.records.forEach((item: any) => {
+        item.articleContent = markdownToHtml(item.articleContent)
+          .replace(/<\/?[^>]*>/g, '')
+          .replace(/[|]*\n/, '')
+          .replace(/&npsp;/gi, '')
+      })
+      articleStore.articles = data.data.records
+      pagination.total = data.data.count
+      reactiveData.haveArticles = true
+    })
+}
+
+const fetchCategories = () => {
+  categoryStore.categories = []
+  api.getAllCategories().then(({ data }) => {
+    categoryStore.categories.push(...data.data)
+  })
+}
+
+const expandHandler = () => {
+  expanderClass.value.expanded = !expanderClass.value.expanded
+  tabClass.value['expanded-tab'] = !tabClass.value['expanded-tab']
+}
+
+const handleTabChange = (categoryId: any) => {
+  userStore.tab = categoryId
+  userStore.page = 1
+  pagination.current = 1
+  activeTab.value = categoryId
+  nowCategoryId = categoryId
+  toArticleOffset()
+  if (categoryId === 0) {
+    fetchArticles()
+  } else {
+    fetchArticlesByCategoryId(categoryId)
+  }
+}
+
+const toArticleOffset = () => {
+  window.scrollTo({
+    top: articleOffset.value
+  })
+}
+
+const activeTabStyle = (catagoryId: any) => {
+  if (catagoryId === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
+  return {}
+}
+
+const pageChangeHanlder = (current: number) => {
+  userStore.page = current
+  pagination.current = current
+  toArticleOffset()
+  if (nowCategoryId === 0) {
+    fetchArticles()
+  } else {
+    fetchArticlesByCategoryId(nowCategoryId)
+  }
+}
 </script>
 <style lang="scss">
 .home-article {

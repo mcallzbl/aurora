@@ -40,67 +40,63 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from 'vue'
+<script setup lang="ts">
+import { computed, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCommonStore } from '@/stores/common'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
 import { Profile, Sidebar } from '../components/Sidebar'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import v3ImgPreviewPkg from 'v3-img-preview'
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import api from '@/api/api'
 
-export default defineComponent({
-  name: 'Photos',
-  components: { Breadcrumb, Sidebar, Profile },
-  setup() {
-    const { t } = useI18n()
-    const route = useRoute()
-    const commonStore = useCommonStore()
-    const reactiveData = reactive({
-      photoAlbumName: '' as any,
-      noResult: false,
-      photos: [] as any,
-      current: 1,
-      size: 10,
-      albumId: route.params.albumId
-    })
-    onBeforeRouteUpdate((to: any) => {
-      reactiveData.photoAlbumName = ''
-      reactiveData.photos = []
-      reactiveData.noResult = false
-      reactiveData.current = 1
-      reactiveData.albumId = to.params.albumId
-      loadDataFromServer()
-    })
-    const handlePreview = (index: any) => {
-      v3ImgPreviewFn({ images: reactiveData.photos, index })
-    }
-    const loadDataFromServer = () => {
-      const params = {
-        current: reactiveData.current,
-        size: reactiveData.size
-      }
-      api.getPhotosBuAlbumId(reactiveData.albumId, params).then(({ data }) => {
-        if (data.data.photos.length > 0) {
-          reactiveData.current++
-          reactiveData.photoAlbumName = data.data.photoAlbumName
-          reactiveData.photos.push(...data.data.photos)
-        } else {
-          reactiveData.noResult = true
-        }
-      })
-    }
-    return {
-      ...toRefs(reactiveData),
-      handlePreview,
-      loadDataFromServer,
-      isMobile: computed(() => commonStore.isMobile),
-      t
-    }
-  }
+defineOptions({ name: 'Photos' })
+
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
+
+const { t } = useI18n()
+const route = useRoute()
+const commonStore = useCommonStore()
+const reactiveData = reactive({
+  photoAlbumName: '' as any,
+  noResult: false,
+  photos: [] as any,
+  current: 1,
+  size: 10,
+  albumId: route.params.albumId
 })
+
+onBeforeRouteUpdate((to: any) => {
+  reactiveData.photoAlbumName = ''
+  reactiveData.photos = []
+  reactiveData.noResult = false
+  reactiveData.current = 1
+  reactiveData.albumId = to.params.albumId
+  loadDataFromServer()
+})
+
+const handlePreview = (index: any) => {
+  v3ImgPreviewFn({ images: reactiveData.photos, index })
+}
+
+const loadDataFromServer = () => {
+  const params = {
+    current: reactiveData.current,
+    size: reactiveData.size
+  }
+  api.getPhotosBuAlbumId(reactiveData.albumId, params).then(({ data }) => {
+    if (data.data.photos.length > 0) {
+      reactiveData.current++
+      reactiveData.photoAlbumName = data.data.photoAlbumName
+      reactiveData.photos.push(...data.data.photos)
+    } else {
+      reactiveData.noResult = true
+    }
+  })
+}
+
+const { photoAlbumName, noResult, photos } = toRefs(reactiveData)
+const isMobile = computed(() => commonStore.isMobile)
 </script>
 <style lang="scss" scoped>
 .photo-wrap {
