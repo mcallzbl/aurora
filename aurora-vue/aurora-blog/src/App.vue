@@ -104,10 +104,10 @@ const fetchWebsiteConfig = async () => {
     console.error('配置获取失败', error)
   }
 }
-const copyEventHandler = (event: any) => {
+const copyEventHandler = (event: ClipboardEvent) => {
   if (document.getSelection() instanceof Selection) {
     if (document.getSelection()?.toString() !== '' && event.clipboardData) {
-      event.clipboardData.setData('text', document.getSelection())
+      event.clipboardData.setData('text', document.getSelection()?.toString() ?? '')
       event.preventDefault()
     }
   }

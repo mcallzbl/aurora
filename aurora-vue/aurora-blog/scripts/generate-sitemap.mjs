@@ -9,7 +9,7 @@ async function safeJson(url) {
   try {
     const r = await fetch(url)
     return await r.json()
-  } catch (e) {
+  } catch {
     console.warn('[sitemap] fetch failed:', url)
     return null
   }
@@ -39,7 +39,7 @@ async function gatherRoutes() {
       current += 1
       fetched = true
     }
-  } catch (e) {
+  } catch {
     // ignore; will fallback to dist scan
   }
 

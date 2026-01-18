@@ -1,16 +1,20 @@
 import axios from 'axios'
 
+type ApiParams = Record<string, unknown>
+type RequestPayload = ApiParams | URLSearchParams
+type IdParam = string | number
+
 export default {
   getTopAndFeaturedArticles: () => {
     return axios.get('/api/articles/topAndFeatured')
   },
-  getArticles: (params: any) => {
+  getArticles: (params: ApiParams) => {
     return axios.get('/api/articles/all', { params: params })
   },
-  getArticlesByCategoryId: (params: any) => {
+  getArticlesByCategoryId: (params: ApiParams) => {
     return axios.get('/api/articles/categoryId', { params: params })
   },
-  getArticeById: (articleId: any) => {
+  getArticeById: (articleId: IdParam) => {
     return axios.get('/api/articles/' + articleId)
   },
   getAllCategories: () => {
@@ -22,19 +26,19 @@ export default {
   getTopTenTags: () => {
     return axios.get('/api/tags/topTen')
   },
-  getArticlesByTagId: (params: any) => {
+  getArticlesByTagId: (params: ApiParams) => {
     return axios.get('/api/articles/tagId', { params: params })
   },
-  getAllArchives: (params: any) => {
+  getAllArchives: (params: ApiParams) => {
     return axios.get('/api/archives/all', { params: params })
   },
-  login: (params: any) => {
+  login: (params: RequestPayload) => {
     return axios.post('/api/users/login', params)
   },
-  saveComment: (params: any) => {
+  saveComment: (params: ApiParams) => {
     return axios.post('/api/comments/save', params)
   },
-  getComments: (params: any) => {
+  getComments: (params: ApiParams) => {
     return axios.get('/api/comments', { params: params })
   },
   getTopSixComments: () => {
@@ -46,29 +50,29 @@ export default {
   getFriendLink: () => {
     return axios.get('/api/links')
   },
-  submitUserInfo: (params: any) => {
+  submitUserInfo: (params: ApiParams) => {
     return axios.put('/api/users/info', params)
   },
-  getUserInfoById: (id: any) => {
+  getUserInfoById: (id: IdParam) => {
     return axios.get('/api/users/info/' + id)
   },
-  updateUserSubscribe: (params: any) => {
+  updateUserSubscribe: (params: ApiParams) => {
     return axios.put('/api/users/subscribe', params)
   },
-  sendValidationCode: (username: any) => {
+  sendValidationCode: (username: string) => {
     return axios.get('/api/users/code', {
       params: {
         username: username
       }
     })
   },
-  bindingEmail: (params: any) => {
+  bindingEmail: (params: ApiParams) => {
     return axios.put('/api/users/email', params)
   },
-  register: (params: any) => {
+  register: (params: ApiParams) => {
     return axios.post('/api/users/register', params)
   },
-  searchArticles: (params: any) => {
+  searchArticles: (params: ApiParams) => {
     return axios.get('/api/articles/search', {
       params: params
     })
@@ -76,7 +80,7 @@ export default {
   getAlbums: () => {
     return axios.get('/api/photos/albums')
   },
-  getPhotosBuAlbumId: (albumId: any, params: any) => {
+  getPhotosBuAlbumId: (albumId: IdParam, params: ApiParams) => {
     return axios.get('/api/albums/' + albumId + '/photos', {
       params: params
     })
@@ -84,30 +88,30 @@ export default {
   getWebsiteConfig: () => {
     return axios.get('/api')
   },
-  qqLogin: (params: any) => {
+  qqLogin: (params: ApiParams) => {
     return axios.post('/api/users/oauth/qq', params)
   },
   report: () => {
     axios.post('/api/report')
   },
-  getTalks: (params: any) => {
+  getTalks: (params: ApiParams) => {
     return axios.get('/api/talks', {
       params: params
     })
   },
-  getTalkById: (id: any) => {
+  getTalkById: (id: IdParam) => {
     return axios.get('/api/talks/' + id)
   },
   logout: () => {
     return axios.post('/api/users/logout')
   },
-  getRepliesByCommentId: (commentId: any) => {
+  getRepliesByCommentId: (commentId: IdParam) => {
     return axios.get(`/api/comments/${commentId}/replies`)
   },
-  updatePassword: (params: any) => {
+  updatePassword: (params: ApiParams) => {
     return axios.put('/api/users/password', params)
   },
-  accessArticle: (params: any) => {
+  accessArticle: (params: ApiParams) => {
     return axios.post('/api/articles/access', params)
   }
 }

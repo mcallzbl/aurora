@@ -399,6 +399,10 @@ const initTocbot = () => {
 }
 
 const fetchArticle = () => {
+  if (reactiveData.articleId == null) {
+    router.push({ path: '/404' })
+    return
+  }
   loading.value = true
   api.getArticeById(reactiveData.articleId).then(({ data }) => {
     if (data.code === 52003) {

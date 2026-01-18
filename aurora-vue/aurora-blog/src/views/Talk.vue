@@ -138,8 +138,13 @@ const handlePreview = (image: string) => {
   v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(image) })
 }
 
+const getTalkIdParam = (value: string | string[] | undefined) => {
+  return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
+}
+
 const fetchTalk = () => {
-  api.getTalkById(route.params.talkId).then(({ data }) => {
+  const talkId = getTalkIdParam(route.params.talkId as string | string[] | undefined)
+  api.getTalkById(talkId).then(({ data }) => {
     if (data.data === null) {
       router.push({ path: '/出错啦' })
       return
@@ -154,7 +159,7 @@ const fetchTalk = () => {
 const fetchComments = () => {
   const params = {
     type: 5,
-    topicId: route.params.talkId,
+    topicId: getTalkIdParam(route.params.talkId as string | string[] | undefined),
     current: pageInfo.current,
     size: pageInfo.size
   }
