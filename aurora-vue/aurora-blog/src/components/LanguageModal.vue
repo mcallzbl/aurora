@@ -12,7 +12,6 @@
           <ul>
             <li v-for="code in locales" :key="code">
               <button type="button" :class="['lang-item', { active: code === locale }]" @click="switchLocale(code)">
-                <span class="code">{{ code.toUpperCase() }}</span>
                 <span class="name">{{ getName(code) }}</span>
               </button>
             </li>
@@ -94,11 +93,6 @@ onUnmounted(() => {
 .lang-item.active {
   border-color: var(--text-accent);
   color: var(--text-bright);
-}
-.code {
-  font-weight: 700;
-  width: 3rem;
-  text-align: center;
 }
 .name {
   opacity: 0.9;

@@ -34,7 +34,10 @@ const showDia = ref(false)
 
 const initializeBot = (): void => {
   if (!appStore.aurora_bot_enable) return
-  const botLocale = locale.value === 'zh' ? 'zh' : 'en'
+  const rawLocale = String(locale.value || 'en')
+  const normalized = rawLocale === 'cn' ? 'zh' : rawLocale
+  const normalizedKey = normalized.toLowerCase()
+  const botLocale = normalizedKey === 'zh-tw' || normalizedKey === 'zh_tw' ? 'zh-TW' : normalized
   // Update software config in place, then reload
   const botState = diaStore.aurora_bot as { tips?: DiaConfig['tips'] }
   diaStore.initializeBot({

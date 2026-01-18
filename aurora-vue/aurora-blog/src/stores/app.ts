@@ -54,6 +54,13 @@ type I18nGlobals = {
   fallbackLocale?: string | I18nLocaleTarget
 }
 
+const normalizeLocaleKey = (value: string) => {
+  const normalized = value === 'cn' ? 'zh' : value
+  const lower = normalized.toLowerCase()
+  if (lower === 'zh-tw' || lower === 'zh_tw') return 'zh-TW'
+  return normalized
+}
+
 const setI18nLocale = (locale: string) => {
   const global = i18n.global as unknown as I18nGlobals
   if (typeof global.locale === 'object' && global.locale && 'value' in global.locale) {
@@ -106,10 +113,11 @@ export const useAppStore = defineStore('appStore', {
   },
   actions: {
     changeLocale(locale: string) {
+      const normalized = normalizeLocaleKey(locale)
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem('locale', locale)
+        window.localStorage.setItem('locale', normalized)
       }
-      setI18nLocale(locale)
+      setI18nLocale(normalized)
     },
     initializeTheme(mode: string) {
       setTheme(mode)

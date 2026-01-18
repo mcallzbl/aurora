@@ -254,9 +254,34 @@ class AuroraBotSoftware {
   injectBotScripts() {
     let botScriptKeys: string[] = []
     const botScript = this.config.botScript
-    // Prefer project i18n's `dia` namespace; fallback to bundled JSON
-    const siteLocale = this.config.locale === 'zh' ? 'zh' : 'en'
-    const siteMsg = i18n.global.getLocaleMessage(siteLocale) as unknown as { dia?: DiaI18n }
+    // Prefer project i18n's `dia` namespace; fall back to base-locale or current locale.
+    const resolveLocale = (value: string): string => {
+      const available = i18n.global.availableLocales
+      const normalized = value.replace('_', '-')
+      const lower = normalized.toLowerCase()
+      const normalizedKey = lower === 'cn' ? 'zh' : lower
+      const exact = available.find((item) => item.toLowerCase() === normalizedKey)
+      if (exact) return exact
+      const base = normalizedKey.split('-')[0]
+      const baseMatch = available.find((item) => item.toLowerCase() === base)
+      if (baseMatch) return baseMatch
+      const current = i18n.global.locale
+      const currentKey =
+        typeof current === 'string'
+          ? current
+          : typeof current === 'object' && current && 'value' in current
+            ? String(current.value)
+            : ''
+      const currentMatch = available.find((item) => item.toLowerCase() === currentKey.toLowerCase())
+      return currentMatch || available[0] || 'en'
+    }
+
+    const preferredLocale = resolveLocale(this.config.locale || 'en')
+    const fallbackLocale = resolveLocale(preferredLocale.split('-')[0] || preferredLocale)
+    let siteMsg = i18n.global.getLocaleMessage(preferredLocale) as unknown as { dia?: DiaI18n }
+    if (!siteMsg?.dia && preferredLocale !== fallbackLocale) {
+      siteMsg = i18n.global.getLocaleMessage(fallbackLocale) as unknown as { dia?: DiaI18n }
+    }
     const i18nDia = siteMsg?.dia
     const base = defaultDia()
     if (i18nDia) {
@@ -479,7 +504,9 @@ class AuroraBotSoftware {
   }
 
   showQuote() {
-    if (this.config.locale === 'zh' || this.config.locale === 'cn') {
+    const rawLocale = this.config.locale || 'en'
+    const normalized = rawLocale === 'cn' ? 'zh' : rawLocale
+    if (normalized.toLowerCase().startsWith('zh')) {
       this.getHitokoto()
     } else {
       this.getTheySaidSo()
