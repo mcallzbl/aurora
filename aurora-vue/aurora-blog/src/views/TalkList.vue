@@ -48,7 +48,7 @@
             :page="pagination.current"
             :pageSize="pagination.size"
             :pageTotal="pagination.total"
-            @pageChange="pageChangeHanlder" />
+            @pageChange="pageChangeHandler" />
         </div>
         <div class="col-span-1">
           <Sidebar>
@@ -60,7 +60,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, reactive, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -68,27 +68,47 @@ import { Profile, Sidebar } from '../components/Sidebar'
 import Paginator from '@/components/Paginator.vue'
 import Avatar from '../components/Avatar.vue'
 import v3ImgPreviewPkg from 'v3-img-preview'
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import { useRouter } from 'vue-router'
 import api from '@/api/api'
 
 defineOptions({ name: 'talkList' })
 
+type TalkItem = {
+  id: number | string
+  avatar?: string
+  nickname?: string
+  createTime: string | number | Date
+  isTop?: number
+  commentCount?: number | null
+  content?: string
+  imgs?: string[]
+}
+
+type TalkListApiResponse = {
+  data: {
+    records: TalkItem[]
+    count: number
+  }
+}
+
+type ImgPreviewFn = (options: { images: string[]; index: number }) => void
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as { v3ImgPreviewFn: ImgPreviewFn }
+
 const { t, d } = useI18n()
 const router = useRouter()
-const pagination = reactive({
+const pagination = reactive<{ size: number; total: number; current: number }>({
   size: 7,
   total: 0,
   current: 1
 })
-const reactiveData = reactive({
-  images: [] as any,
-  talks: '' as any
+const reactiveData = reactive<{ images: string[]; talks: TalkItem[] }>({
+  images: [],
+  talks: []
 })
 const { talks } = toRefs(reactiveData)
 
-const handlePreview = (index: any) => {
-  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+const handlePreview = (imageUrl: string) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(imageUrl) })
 }
 
 const fetchTalks = () => {
@@ -96,10 +116,10 @@ const fetchTalks = () => {
     current: pagination.current,
     size: pagination.size
   }
-  api.getTalks(params).then(({ data }) => {
+  api.getTalks(params).then(({ data }: { data: TalkListApiResponse }) => {
     reactiveData.talks = data.data.records
     pagination.total = data.data.count
-    reactiveData.talks.forEach((item: any) => {
+    reactiveData.talks.forEach((item) => {
       if (item.imgs) {
         reactiveData.images.push(...item.imgs)
       }
@@ -113,14 +133,14 @@ const toPageTop = () => {
   })
 }
 
-const pageChangeHanlder = (current: number) => {
-  reactiveData.talks = ''
+const pageChangeHandler = (current: number) => {
+  reactiveData.talks = []
   toPageTop()
   pagination.current = current
   fetchTalks()
 }
 
-const toTalk = (id: any) => {
+const toTalk = (id: TalkItem['id']) => {
   router.push({ path: '/talks/' + id })
 }
 
