@@ -39,7 +39,7 @@ const appStore = useAppStore()
 const route = useRoute()
 
 const commentContent = ref('')
-const avatar = computed(() => userStore.userInfo.avatar)
+const avatar = computed(() => (userStore.userInfo === '' ? '' : userStore.userInfo.avatar))
 
 const fetchComments = () => {
   switch (commentStore.type) {

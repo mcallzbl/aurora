@@ -186,7 +186,7 @@ class AuroraBotSoftware {
   controller: AbortController | undefined = undefined
   messages: string[] = []
   locales: BotLocales = {}
-  botTips: DiaI18n & Record<string, any> = defaultDia()
+  botTips: DiaI18n = defaultDia()
 
   constructor(configs?: ABConfig) {
     if (configs) {
@@ -265,7 +265,7 @@ class AuroraBotSoftware {
         Object.assign(base, clone)
       } catch {
         // Fallback to shallow assign if deep-clone fails (e.g., proxies)
-        Object.assign(base, i18nDia as any)
+        Object.assign(base, i18nDia as Partial<DiaI18n>)
       }
     }
     this.botTips = base

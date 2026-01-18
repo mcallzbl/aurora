@@ -2,7 +2,7 @@
   <div class="sidebar-box">
     <SubTitle :title="'titles.tag_list'" icon="tag" />
     <TagList>
-      <template v-if="tags != '' && tags.length > 0">
+      <template v-if="tags.length > 0">
         <TagItem v-for="tag in tags" :id="tag.id" :key="tag.id" :count="tag.count" :name="tag.tagName" size="xs" />
         <div class="flex flex-row items-center hover:opacity-50 mr-2 mb-2 cursor-pointer transition-all">
           <span class="text-center px-3 py-1 rounded-md text-sm">

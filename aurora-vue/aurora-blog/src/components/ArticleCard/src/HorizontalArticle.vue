@@ -47,10 +47,10 @@
         <ob-skeleton v-else height="3rem" tag="h1" />
         <p v-if="article.articleContent" class="article-content-main">{{ article.articleContent }}</p>
         <ob-skeleton v-else :count="4" height="20px" tag="p" />
-        <div v-if="article" class="article-footer">
+        <div v-if="article && article.author" class="article-footer">
           <div class="flex flex-row items-center">
             <img
-              :src="article.author.avatar"
+              :src="article.author.avatar || ''"
               alt=""
               class="hover:opacity-50 cursor-pointer"
               @click="handleAuthorClick(article.author.website)" />
@@ -60,8 +60,8 @@
                 @click="handleAuthorClick(article.author.website)">
                 {{ article.author.nickname }}
               </strong>
-              <time :datetime="new Date(article.createTime).toISOString()" class="opacity-70">
-                {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
+              <time :datetime="toIso(article.createTime)" class="opacity-70">
+                {{ t('settings.shared-on') }} {{ formatDate(article.createTime) }}
               </time>
             </span>
           </div>
@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, toRef } from 'vue'
+import { computed, getCurrentInstance, toRef, type Ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
@@ -90,6 +90,29 @@ import emitter from '@/utils/mitt'
 
 defineOptions({ name: 'HorizontalArticle' })
 
+type TagInfo = {
+  id: string | number
+  tagName?: string
+}
+type AuthorInfo = {
+  avatar?: string
+  website?: string
+  nickname?: string
+}
+type HorizontalArticleData = {
+  id?: string | number
+  isTop?: boolean
+  isfeatured?: boolean
+  articleCover?: string
+  categoryName?: string
+  tags?: TagInfo[]
+  articleTitle?: string
+  status?: number
+  articleContent?: string
+  author?: AuthorInfo
+  createTime?: string | number | Date
+}
+
 const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
 const appStore = useAppStore()
 const articleStore = useArticleStore()
@@ -97,11 +120,11 @@ const userStore = useUserStore()
 const router = useRouter()
 const { t, d } = useI18n()
 
-const article = toRef(articleStore.$state, 'topArticle')
+const article = toRef(articleStore.$state, 'topArticle') as Ref<HorizontalArticleData>
 
-const handleAuthorClick = (link: string) => {
-  if (link === '') link = window.location.href
-  window.open(link)
+const handleAuthorClick = (link?: string | null) => {
+  const target = link && link !== '' ? link : window.location.href
+  window.open(target)
 }
 
 const toArticle = () => {
@@ -129,6 +152,14 @@ const toArticle = () => {
 const bannerHoverGradient = computed(() => ({
   background: appStore.themeConfig.header_gradient_css
 }))
+
+const toIso = (value?: string | number | Date) => {
+  return value ? new Date(value).toISOString() : ''
+}
+
+const formatDate = (value?: string | number | Date) => {
+  return value ? d(new Date(value), 'short') : ''
+}
 </script>
 <style lang="scss" scoped>
 .article-title:hover {

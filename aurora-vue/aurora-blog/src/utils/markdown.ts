@@ -13,7 +13,7 @@ import mermaidPlugin from '@agoose77/markdown-it-mermaid'
 
 const isServer = typeof window === 'undefined'
 
-export default function markdownToHtml(content: any) {
+export default function markdownToHtml(content: string | null | undefined) {
   const md = new MarkdownIt({
     html: true
   })
@@ -33,5 +33,5 @@ export default function markdownToHtml(content: any) {
   if (!isServer) {
     md.use(mermaidPlugin)
   }
-  return md.render(content)
+  return md.render(String(content ?? ''))
 }

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { i18n } from '@/locales'
-import cookies from 'js-cookie'
 import nProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -23,9 +22,10 @@ const setTheme = (theme: string) => {
 
 export const useAppStore = defineStore('appStore', {
   state: () => {
+    const storedTheme = typeof window !== 'undefined' ? window.localStorage.getItem('theme') : null
     return {
       themeConfig: {
-        theme: cookies.get('theme') ? String(cookies.get('theme')) : 'theme-dark',
+        theme: storedTheme || 'theme-dark',
         profile_shape: 'circle-avatar',
         feature: true,
         gradient: {
@@ -56,7 +56,9 @@ export const useAppStore = defineStore('appStore', {
   },
   actions: {
     changeLocale(locale: string) {
-      cookies.set('locale', locale, { expires: 7 })
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('locale', locale)
+      }
       if ('value' in i18n.global.locale) {
         ;(i18n.global.locale as any).value = locale
       } else {
@@ -75,7 +77,9 @@ export const useAppStore = defineStore('appStore', {
     toggleTheme(isDark?: boolean) {
       this.themeConfig.theme =
         isDark === true || this.themeConfig.theme === 'theme-light' ? 'theme-dark' : 'theme-light'
-      cookies.set('theme', this.themeConfig.theme, { expires: 7 })
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('theme', this.themeConfig.theme)
+      }
       setTheme(this.themeConfig.theme)
     },
     startLoading() {

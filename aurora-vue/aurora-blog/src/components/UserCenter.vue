@@ -26,7 +26,7 @@
             <el-input v-model="userInfo.intro" :placeholder="t('user.intro_placeholder')" />
           </el-form-item>
           <el-form-item class="mt-5" :label="t('auth.email') + ':'" model="userInfo">
-            <el-input :placeholder="userInfo.email" disabled>
+            <el-input :placeholder="userInfo.email ?? ''" disabled>
               <template v-if="userInfo.email === null" #append>
                 <span class="text" @click="changeEmailDialogVisible">{{ t('auth.bind') }}</span>
               </template>
@@ -106,6 +106,7 @@ const { message, emailDialogVisible, email, VerificationCode, loading, switchSta
 const showCropper = ref(false)
 const userInfo = toRef(userStore.$state, 'userInfo')
 const visible = toRef(userStore.$state, 'userVisible')
+const userInfoValue = computed(() => (userStore.userInfo === '' ? null : userStore.userInfo))
 const isClient = typeof window !== 'undefined'
 const AvatarCropper = isClient
   ? defineAsyncComponent(() => import('vue-avatar-cropper'))
@@ -118,6 +119,10 @@ const changeEmailDialogVisible = () => {
   reactiveData.emailDialogVisible = true
 }
 const bingingEmail = () => {
+  const info = userInfoValue.value
+  if (!info) {
+    return
+  }
   const params = {
     email: reactiveData.email,
     code: reactiveData.VerificationCode
@@ -129,7 +134,7 @@ const bingingEmail = () => {
         message: t('auth.bind_success'),
         type: 'success'
       })
-      userStore.userInfo.email = reactiveData.email
+      info.email = reactiveData.email
       reactiveData.emailDialogVisible = false
     }
   })
@@ -137,7 +142,11 @@ const bingingEmail = () => {
 const handleSuccess = (data: any) => {
   data.response.json().then((data: any) => {
     if (data.flag) {
-      userStore.userInfo.avatar = data.data
+      const info = userInfoValue.value
+      if (!info) {
+        return
+      }
+      info.avatar = data.data
       proxy.$notify({
         title: t('common.success'),
         message: t('common.upload_success'),
@@ -148,9 +157,13 @@ const handleSuccess = (data: any) => {
 }
 const changeSubscribe = () => {
   if (reactiveData.switchState) {
+    const info = userInfoValue.value
+    if (!info) {
+      return
+    }
     const params = {
-      userId: userStore.userInfo.userInfoId,
-      isSubscribe: userStore.userInfo.isSubscribe
+      userId: info.userInfoId,
+      isSubscribe: info.isSubscribe
     }
     api.updateUserSubscribe(params).then(({ data }) => {
       if (data.flag) {
@@ -164,10 +177,14 @@ const changeSubscribe = () => {
   }
 }
 const commit = () => {
+  const info = userInfoValue.value
+  if (!info) {
+    return
+  }
   const params = {
-    nickname: userStore.userInfo.nickname,
-    website: userStore.userInfo.website,
-    intro: userStore.userInfo.intro
+    nickname: info.nickname,
+    website: info.website,
+    intro: info.intro
   }
   api.submitUserInfo(params).then(({ data }) => {
     if (data.flag) {
@@ -194,7 +211,8 @@ const beforeChange = (): boolean | Promise<boolean> => {
   reactiveData.switchState = true
   reactiveData.loading = true
   return new Promise<boolean>((resolve) => {
-    if (userStore.userInfo.email === '' || userStore.userInfo.email === null) {
+    const info = userInfoValue.value
+    if (!info || info.email === '' || info.email === null) {
       reactiveData.loading = false
       proxy.$notify({
         title: t('common.warning'),

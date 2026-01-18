@@ -6,7 +6,7 @@
     </div>
     <div class="ob-card">
       <TagList>
-        <template v-if="tags != '' && tags.length > 0">
+        <template v-if="tags.length > 0">
           <TagItem v-for="tag in tags" :id="tag.id" :key="tag.id" :count="tag.count" :name="tag.tagName" size="xl" />
         </template>
       </TagList>

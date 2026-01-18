@@ -1,10 +1,20 @@
 declare module 'markdown-it' {
-  import type { PluginSimple } from 'markdown-it'
+  export type MarkdownItOptions = {
+    html?: boolean
+    [key: string]: unknown
+  }
+
+  export type PluginSimple = (md: MarkdownIt) => void
+  export type PluginWithOptions<T = unknown> = (md: MarkdownIt, options?: T) => void
+
   export default class MarkdownIt {
-    constructor(options?: any)
+    constructor(options?: MarkdownItOptions)
 
-    use(plugin: PluginSimple | any, ...params: any[]): this
+    use(
+      plugin: PluginSimple | PluginWithOptions | ((md: MarkdownIt, ...params: unknown[]) => void),
+      ...params: unknown[]
+    ): this
 
-    render(src: string, env?: any): string
+    render(src: string, env?: Record<string, unknown>): string
   }
 }

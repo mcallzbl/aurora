@@ -1,18 +1,37 @@
 import { defineStore } from 'pinia'
 const ssrSafeSessionStorage: Storage | undefined = typeof window !== 'undefined' ? window.sessionStorage : undefined
 
+type UserInfo = {
+  userInfoId?: number | string
+  avatar?: string
+  nickname?: string
+  website?: string
+  intro?: string
+  email?: string | null
+  isSubscribe?: number
+  [key: string]: unknown
+}
+
+type UserStoreState = {
+  currentUrl: string
+  userVisible: boolean
+  userInfo: UserInfo | ''
+  token: string
+  accessArticles: Array<number | string>
+  tab: number
+  page: number
+}
+
 export const useUserStore = defineStore('userStore', {
-  state: () => {
-    return {
-      currentUrl: '' as any,
-      userVisible: false,
-      userInfo: '' as any,
-      token: '' as any,
-      accessArticles: [] as any,
-      tab: 0 as any,
-      page: 1 as any
-    }
-  },
+  state: (): UserStoreState => ({
+    currentUrl: '',
+    userVisible: false,
+    userInfo: '',
+    token: '',
+    accessArticles: [],
+    tab: 0,
+    page: 1
+  }),
   actions: {},
-  persist: ssrSafeSessionStorage ? { storage: ssrSafeSessionStorage } : (false as any)
+  persist: ssrSafeSessionStorage ? { storage: ssrSafeSessionStorage } : false
 })

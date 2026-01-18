@@ -31,7 +31,7 @@
             <Sticky :stickyTop="32" dynamicElClass="#sticky-sidebar" endingElId="footer">
               <div id="sticky-sidebar">
                 <transition mode="out-in" name="fade-slide-y">
-                  <div class="sidebar-box mb-4">
+                  <div v-show="!!about" class="sidebar-box mb-4">
                     <SubTitle :title="'titles.toc'" icon="toc" />
                     <div id="toc2"></div>
                   </div>
@@ -62,10 +62,14 @@ import '@/styles/prism-aurora-future.css'
 import api from '@/api/api'
 import emitter from '@/utils/mitt'
 import v3ImgPreviewPkg from 'v3-img-preview'
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import markdownToHtml from '@/utils/markdown'
 
-defineOptions({ name: 'About' })
+type ImgPreviewFn = (options: { images: string[]; index: number }) => void
+type CommentRecord = { id: string | number; replyDTOs?: unknown[] }
+
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as { v3ImgPreviewFn: ImgPreviewFn }
+
+defineOptions({ name: 'AboutPage' })
 
 const commonStore = useCommonStore()
 const commentStore = useCommentStore()
@@ -74,7 +78,7 @@ const { t } = useI18n()
 const postRef = ref<HTMLElement | null>(null)
 const reactiveData = reactive({
   about: '' as string,
-  comments: [] as any[],
+  comments: [] as CommentRecord[],
   haveMore: false,
   isReload: false,
   images: [] as string[]
@@ -113,16 +117,18 @@ emitter.on('aboutFetchComment', () => {
   fetchComments()
 })
 
-emitter.on('aboutFetchReplies', (index) => {
-  fetchReplies(index as number)
+emitter.on('aboutFetchReplies', (payload: unknown) => {
+  const index = typeof payload === 'number' ? payload : Number(payload)
+  if (!Number.isFinite(index)) return
+  fetchReplies(index)
 })
 
 emitter.on('aboutLoadMore', () => {
   fetchComments()
 })
 
-const handlePreview = (index: any) => {
-  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+const handlePreview = (image: string) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(image) })
 }
 
 const initTocbot = () => {
@@ -149,8 +155,8 @@ const initTocbot = () => {
   const imgs = postRef.value?.getElementsByTagName('img') || []
   for (let i = 0; i < imgs.length; i++) {
     reactiveData.images.push(imgs[i].src)
-    imgs[i].addEventListener('click', function (e: any) {
-      handlePreview(e.target.currentSrc)
+    imgs[i].addEventListener('click', () => {
+      handlePreview(imgs[i].currentSrc)
     })
   }
 }

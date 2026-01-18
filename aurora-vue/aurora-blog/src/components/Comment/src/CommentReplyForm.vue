@@ -125,7 +125,7 @@ const cancelReply = () => {
   emit('changeShow')
 }
 
-const avatar = computed(() => userStore.userInfo.avatar)
+const avatar = computed(() => (userStore.userInfo === '' ? '' : userStore.userInfo.avatar))
 </script>
 <style lang="scss" scoped>
 .reply::before {

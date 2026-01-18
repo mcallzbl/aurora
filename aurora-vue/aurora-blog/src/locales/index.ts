@@ -1,5 +1,4 @@
 import { createI18n, IntlDateTimeFormats } from 'vue-i18n'
-import cookies from 'js-cookie'
 
 type LocaleMessages = Record<string, Record<string, Record<string, string>>>
 
@@ -58,9 +57,10 @@ function loadLocaleMessages(): LocaleMessages {
 }
 
 const isClient = typeof window !== 'undefined'
-const cookieLocale = isClient && cookies.get('locale') ? String(cookies.get('locale')) : 'en'
+const storedLocale = isClient ? window.localStorage.getItem('locale') : null
+const rawLocale = storedLocale ? String(storedLocale) : 'en'
 // normalize legacy 'cn' to 'zh'
-const normalizedLocale = cookieLocale === 'cn' ? 'zh' : cookieLocale
+const normalizedLocale = rawLocale === 'cn' ? 'zh' : rawLocale
 
 export const i18n = createI18n({
   locale: normalizedLocale,

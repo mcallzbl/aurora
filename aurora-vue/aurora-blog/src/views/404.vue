@@ -76,6 +76,10 @@
   </div>
 </template>
 
+<script setup lang="ts">
+defineOptions({ name: 'NotFoundPage' })
+</script>
+
 <style>
 @reference "@/styles/tailwind.css"
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans');

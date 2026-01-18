@@ -21,8 +21,8 @@
           <li v-for="article in archive.articles" :key="article.id" class="timeline-item">
             <div class="timeline-info">
               <span>
-                <time :datetime="new Date(article.createTime).toISOString()">
-                  {{ d(new Date(article.createTime), 'short') }}
+                <time :datetime="toIso(article.createTime)">
+                  {{ formatDate(article.createTime) }}
                 </time>
               </span>
             </div>
@@ -52,7 +52,7 @@
 import { useArticleStore } from '@/stores/article'
 import { useCommonStore } from '@/stores/common'
 import { useUserStore } from '@/stores/user'
-import { getCurrentInstance, onMounted, onUnmounted, reactive, toRef } from 'vue'
+import { getCurrentInstance, onMounted, onUnmounted, reactive, toRef, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Breadcrumb from '@/components/Breadcrumb.vue'
@@ -61,9 +61,22 @@ import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 import emitter from '@/utils/mitt'
 
-defineOptions({ name: 'Archives' })
+type ArticleSummary = {
+  id?: string | number
+  articleTitle?: string
+  articleContent?: string
+  createTime?: string | number | Date
+  status?: number
+}
+type ArchiveRecord = {
+  time: string
+  articles: ArticleSummary[]
+}
+type NotifyFn = (options: { title: string; message: string; type: 'warning' | 'info' | 'success' | 'error' }) => void
 
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+defineOptions({ name: 'ArchivesPage' })
+
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const articleStore = useArticleStore()
 const commonStore = useCommonStore()
 const userStore = useUserStore()
@@ -74,7 +87,7 @@ const pagination = reactive({
   total: 0,
   size: 12
 })
-const archives = toRef(articleStore.$state, 'archives')
+const archives = toRef(articleStore.$state, 'archives') as Ref<ArchiveRecord[]>
 
 onMounted(() => {
   toPageTop()
@@ -86,23 +99,24 @@ onUnmounted(() => {
 })
 
 const fetchArchives = () => {
-  articleStore.archives = ''
+  articleStore.archives = []
   api
     .getAllArchives({
       current: pagination.current,
       size: pagination.size
     })
     .then(({ data }) => {
-      data.data.records.forEach((item: any) => {
-        item.articles.forEach((article: any) => {
-          article.articleContent = markdownToHtml(article.articleContent)
+      const records = Array.isArray(data?.data?.records) ? (data.data.records as ArchiveRecord[]) : []
+      records.forEach((item) => {
+        item.articles.forEach((article) => {
+          article.articleContent = markdownToHtml(article.articleContent || '')
             .replace(/<\/?[^>]*>/g, '')
             .replace(/[|]*\n/, '')
             .replace(/&npsp;/gi, '')
         })
       })
-      articleStore.archives = data.data.records
-      pagination.total = data.data.count
+      articleStore.archives = records
+      pagination.total = typeof data?.data?.count === 'number' ? data.data.count : records.length
     })
 }
 
@@ -118,16 +132,13 @@ const toPageTop = () => {
   })
 }
 
-const toArticle = (article: any) => {
-  let isAccess = false
-  userStore.accessArticles.forEach((item: any) => {
-    if (item == article.id) {
-      isAccess = true
-    }
-  })
+const toArticle = (article: ArticleSummary) => {
+  if (article.id == null) return
+  const accessArticles = userStore.accessArticles as Array<string | number>
+  const isAccess = accessArticles.some((item) => item == article.id)
   if (article.status === 2 && !isAccess) {
     if (userStore.userInfo === '') {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: 'Warning',
         message: '该文章受密码保护,请登录后访问',
         type: 'warning'
@@ -138,6 +149,14 @@ const toArticle = (article: any) => {
   } else {
     router.push({ path: '/articles/' + article.id })
   }
+}
+
+const toIso = (value?: string | number | Date) => {
+  return value ? new Date(value).toISOString() : ''
+}
+
+const formatDate = (value?: string | number | Date) => {
+  return value ? d(new Date(value), 'short') : ''
 }
 </script>
 
