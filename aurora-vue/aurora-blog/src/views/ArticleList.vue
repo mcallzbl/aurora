@@ -24,95 +24,91 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, onMounted, onServerPrefetch, reactive, toRefs } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+<script setup lang="ts">
+import { onMounted, onServerPrefetch, reactive, toRefs } from 'vue'
 import { ArticleCard } from '@/components/ArticleCard'
 import Paginator from '@/components/Paginator.vue'
 import { useRoute } from 'vue-router'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
-export default defineComponent({
-  name: 'ArticleList',
-  components: { Breadcrumb, ArticleCard, Paginator },
-  setup() {
-    const route = useRoute()
-    const pagination = reactive({
-      size: 12,
-      total: 0,
-      current: 1
+defineOptions({ name: 'ArticleList' })
+
+const route = useRoute()
+const pagination = reactive({
+  size: 12,
+  total: 0,
+  current: 1
+})
+const reactiveData = reactive({
+  articles: [] as any,
+  tagName: '' as any,
+  haveArticles: false
+})
+const { articles, tagName, haveArticles } = toRefs(reactiveData)
+
+onMounted(() => {
+  reactiveData.tagName = route.query.tagName
+  fetchArticles()
+})
+
+// SSR prefetch so tag list pages render with content during SSG
+onServerPrefetch(async () => {
+  try {
+    reactiveData.tagName = route.query.tagName as any
+    const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api'
+    const params = new URLSearchParams({
+      tagId: String(route.params.tagId ?? ''),
+      current: String(pagination.current),
+      size: String(pagination.size)
     })
-    const reactiveData = reactive({
-      articles: [] as any,
-      tagName: '' as any,
-      haveArticles: false
+    const resp = await fetch(`${API_BASE}/articles/tagId?${params.toString()}`)
+    const j = await resp.json()
+    const records = Array.isArray(j?.data?.records) ? j.data.records : []
+    records.forEach((item: any) => {
+      item.articleContent = markdownToHtml(item.articleContent)
+        .replace(/<\/?[^>]*>/g, '')
+        .replace(/[|]*\n/, '')
+        .replace(/&npsp;/gi, '')
     })
-    onMounted(() => {
-      reactiveData.tagName = route.query.tagName
-      fetchArticles()
-    })
-    // SSR prefetch so tag list pages render with content during SSG
-    onServerPrefetch(async () => {
-      try {
-        reactiveData.tagName = route.query.tagName as any
-        const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api'
-        const params = new URLSearchParams({
-          tagId: String(route.params.tagId ?? ''),
-          current: String(pagination.current),
-          size: String(pagination.size)
-        })
-        const resp = await fetch(`${API_BASE}/articles/tagId?${params.toString()}`)
-        const j = await resp.json()
-        const records = Array.isArray(j?.data?.records) ? j.data.records : []
-        records.forEach((item: any) => {
-          item.articleContent = markdownToHtml(item.articleContent)
-            .replace(/<\/?[^>]*>/g, '')
-            .replace(/[|]*\n/, '')
-            .replace(/&npsp;/gi, '')
-        })
-        reactiveData.articles = records
-        pagination.total = typeof j?.data?.count === 'number' ? j.data.count : records.length
-        reactiveData.haveArticles = true
-      } catch (_) {
-        // ignore SSR failure; client will refetch
-      }
-    })
-    const fetchArticles = async () => {
-      reactiveData.haveArticles = false
-      const { data } = await api.getArticlesByTagId({
-        tagId: route.params.tagId,
-        current: pagination.current,
-        size: pagination.size
-      })
-      data.data.records.forEach((item: any) => {
-        item.articleContent = markdownToHtml(item.articleContent)
-          .replace(/<\/?[^>]*>/g, '')
-          .replace(/[|]*\n/, '')
-          .replace(/&npsp;/gi, '')
-      })
-      reactiveData.articles = data.data.records
-      pagination.total = data.data.count
-      reactiveData.haveArticles = true
-    }
-    const backToPageTop = () => {
-      window.scrollTo({
-        top: 0
-      })
-    }
-    const pageChangeHandler = (current: number) => {
-      reactiveData.articles = []
-      pagination.current = current
-      backToPageTop()
-      fetchArticles()
-    }
-    return {
-      pagination,
-      pageChangeHandler: pageChangeHandler,
-      ...toRefs(reactiveData)
-    }
+    reactiveData.articles = records
+    pagination.total = typeof j?.data?.count === 'number' ? j.data.count : records.length
+    reactiveData.haveArticles = true
+  } catch (_) {
+    // ignore SSR failure; client will refetch
   }
 })
+
+const fetchArticles = async () => {
+  reactiveData.haveArticles = false
+  const { data } = await api.getArticlesByTagId({
+    tagId: route.params.tagId,
+    current: pagination.current,
+    size: pagination.size
+  })
+  data.data.records.forEach((item: any) => {
+    item.articleContent = markdownToHtml(item.articleContent)
+      .replace(/<\/?[^>]*>/g, '')
+      .replace(/[|]*\n/, '')
+      .replace(/&npsp;/gi, '')
+  })
+  reactiveData.articles = data.data.records
+  pagination.total = data.data.count
+  reactiveData.haveArticles = true
+}
+
+const backToPageTop = () => {
+  window.scrollTo({
+    top: 0
+  })
+}
+
+const pageChangeHandler = (current: number) => {
+  reactiveData.articles = []
+  pagination.current = current
+  backToPageTop()
+  fetchArticles()
+}
 </script>
 <style lang="scss">
 .tag-article {

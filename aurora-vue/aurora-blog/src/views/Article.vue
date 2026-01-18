@@ -3,7 +3,7 @@
     <div class="main-grid">
       <div>
         <div class="article-block">
-        <div class="post-header">
+          <div class="post-header">
           <span class="post-labels">
             <ob-skeleton v-if="loading" height="20px" tag="b" width="35px" />
             <b v-else-if="!loading && article.categoryName">
@@ -26,22 +26,22 @@
               </template>
             </ul>
           </span>
-          <h1 v-if="article.articleTitle" class="post-title text-white">
-            {{ article.articleTitle }}
-          </h1>
-          <ob-skeleton
-            v-else
-            class="post-title text-white uppercase"
-            height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)"
-            width="100%" />
-          <div class="flex flex-row items-center justify-start mt-8 mb-4">
-            <div v-if="article.author" class="post-footer">
-              <img
-                v-lazy="article.author.avatar || ''"
-                alt="author avatar"
-                class="hover:opacity-50 cursor-pointer"
-                @click="handleAuthorClick(article.author.website)" />
-              <span class="text-white opacity-80">
+            <h1 v-if="article.articleTitle" class="post-title text-white">
+              {{ article.articleTitle }}
+            </h1>
+            <ob-skeleton
+              v-else
+              class="post-title text-white uppercase"
+              height="clamp(1.2rem, calc(1rem + 3.5vw), 4rem)"
+              width="100%" />
+            <div class="flex flex-row items-center justify-start mt-8 mb-4">
+              <div v-if="article.author" class="post-footer">
+                <img
+                  v-lazy="article.author.avatar || ''"
+                  alt="author avatar"
+                  class="hover:opacity-50 cursor-pointer"
+                  @click="handleAuthorClick(article.author.website)" />
+                <span class="text-white opacity-80">
                 <strong
                   class="text-white pr-1.5 hover:opacity-50 cursor-pointer"
                   @click="handleAuthorClick(article.author.website)">
@@ -54,58 +54,58 @@
                 {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
               </time>
               </span>
-            </div>
-            <div v-else class="post-footer">
-              <div class="flex flex-row items-center">
-                <ob-skeleton :circle="true" class="mr-2" height="28px" width="28px" />
-                <span class="text-ob-dim mt-1">
+              </div>
+              <div v-else class="post-footer">
+                <div class="flex flex-row items-center">
+                  <ob-skeleton :circle="true" class="mr-2" height="28px" width="28px" />
+                  <span class="text-ob-dim mt-1">
                   <ob-skeleton height="20px" width="150px" />
                 </span>
+                </div>
               </div>
-            </div>
-            <div v-if="wordNum !== '' && readTime !== ''" class="post-stats">
+              <div v-if="wordNum !== '' && readTime !== ''" class="post-stats">
               <span>
                 <svg-icon icon-class="text-outline" style="stroke: white" />
                 <span class="pl-2 opacity-70">
                   {{ wordNum }}
                 </span>
               </span>
-              <span>
+                <span>
                 <svg-icon icon-class="clock-outline" style="stroke: white" />
                 <span class="pl-2 opacity-70">
                   {{ readTime }}
                 </span>
               </span>
-            </div>
-            <div v-else class="post-stats">
+              </div>
+              <div v-else class="post-stats">
               <span>
                 <svg-icon icon-class="clock" />
                 <span class="pl-2">
                   <ob-skeleton height="16px" width="40px" />
                 </span>
               </span>
-              <span>
+                <span>
                 <svg-icon icon-class="text" />
                 <span class="pl-2">
                   <ob-skeleton height="16px" width="40px" />
                 </span>
               </span>
+              </div>
             </div>
           </div>
-        </div>
-        <template v-if="article.articleContent">
-          <div class="post-html">
-            <div ref="articleRef" class="markdown-body" v-html="article.articleContent" />
+          <template v-if="article.articleContent">
+            <div class="post-html">
+              <div ref="articleRef" class="markdown-body" v-html="article.articleContent" />
+            </div>
+          </template>
+          <div v-else class="post-html post-skeleton">
+            <ob-skeleton :count="1" class="mb-6" height="36px" tag="div" width="150px" />
+            <br />
+            <ob-skeleton :count="35" class="mr-2" height="16px" tag="div" width="100px" />
+            <br />
+            <br />
+            <ob-skeleton :count="25" class="mr-2" height="16px" tag="div" width="100px" />
           </div>
-        </template>
-        <div v-else class="post-html post-skeleton">
-          <ob-skeleton :count="1" class="mb-6" height="36px" tag="div" width="150px" />
-          <br />
-          <ob-skeleton :count="35" class="mr-2" height="16px" tag="div" width="100px" />
-          <br />
-          <br />
-          <ob-skeleton :count="25" class="mr-2" height="16px" tag="div" width="100px" />
-        </div>
         </div>
         <div class="flex flex-col lg:flex-row justify-start items-end my-8 my-gap">
           <div v-if="preArticleCard" class="w-full h-full self-stretch mr-0 lg:mr-4">
@@ -141,7 +141,18 @@
 
 <script lang="ts" setup>
 import { Navigator, Profile, Sidebar } from '@/components/Sidebar'
-import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, onServerPrefetch, provide, reactive, ref, toRefs } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onMounted,
+  onServerPrefetch,
+  onUnmounted,
+  provide,
+  reactive,
+  ref,
+  toRefs
+} from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
@@ -156,9 +167,10 @@ import Prism from 'prismjs'
 import tocbot from 'tocbot'
 import emitter from '@/utils/mitt'
 import v3ImgPreviewPkg from 'v3-img-preview'
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
+
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
 
 const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
 const commonStore = useCommonStore()
@@ -168,8 +180,9 @@ const router = useRouter()
 const { t, d } = useI18n()
 
 // Avoid skeletons in SSR HTML: default loading=false when SSR renders
-const loading = ref(import.meta.env.SSR ? false : true)
+const loading = ref(!import.meta.env.SSR)
 const articleRef = ref<HTMLElement | null>(null)
+
 interface ReactiveData {
   articleId: string | number | undefined
   article: any
@@ -182,6 +195,7 @@ interface ReactiveData {
   haveMore: boolean
   isReload: boolean
 }
+
 const reactiveData = reactive<ReactiveData>({
   articleId: undefined,
   article: {},
@@ -429,7 +443,17 @@ const deleteHTMLTag = (content: any) => {
     .replace(/&npsp;/gi, '')
 }
 
-const { article, wordNum, readTime, comments, images, preArticleCard, nextArticleCard, haveMore, isReload } = toRefs(reactiveData)
+const {
+  article,
+  wordNum,
+  readTime,
+  comments,
+  images,
+  preArticleCard,
+  nextArticleCard,
+  haveMore,
+  isReload
+} = toRefs(reactiveData)
 const isMobile = computed(() => commonStore.isMobile)
 
 // SEO head tags
