@@ -54,12 +54,27 @@ import api from '@/api/api'
 
 defineOptions({ name: 'FriendLink' })
 
+type FriendLinkItem = {
+  id: number | string
+  linkAvatar: string
+  linkAddress: string
+  linkName: string
+  linkIntro: string
+  [key: string]: unknown
+}
+
+type CommentItem = {
+  id: number | string
+  replyDTOs?: unknown[]
+  [key: string]: unknown
+}
+
 const { t } = useI18n()
 const commentStore = useCommentStore()
 
 const reactiveData = reactive({
-  links: [] as any[],
-  comments: [] as any[],
+  links: [] as FriendLinkItem[],
+  comments: [] as CommentItem[],
   haveMore: false,
   isReload: false
 })
@@ -101,7 +116,8 @@ emitter.on('friendLinkLoadMore', () => {
 
 const fetchLinks = () => {
   api.getFriendLink().then(({ data }) => {
-    reactiveData.links = data.data
+    const records = Array.isArray(data?.data) ? (data.data as FriendLinkItem[]) : []
+    reactiveData.links = records
   })
 }
 
@@ -113,7 +129,7 @@ const fetchComments = () => {
     size: pageInfo.size
   }
   api.getComments(params).then(({ data }) => {
-    const records = Array.isArray(data?.data?.records) ? data.data.records : []
+    const records = Array.isArray(data?.data?.records) ? (data.data.records as CommentItem[]) : []
     if (reactiveData.isReload) {
       reactiveData.comments = records
       reactiveData.isReload = false
@@ -128,7 +144,8 @@ const fetchComments = () => {
 
 const fetchReplies = (index: number) => {
   api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-    reactiveData.comments[index].replyDTOs = data.data
+    const replies = Array.isArray(data?.data) ? data.data : []
+    reactiveData.comments[index].replyDTOs = replies
   })
 }
 

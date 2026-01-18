@@ -47,8 +47,8 @@
                     @click="handleAuthorClick(article.author.website)">
                     {{ article.author.nickname }}
                   </strong>
-                  <time :datetime="new Date(article.createTime).toISOString()" class="opacity-70">
-                    {{ t('settings.shared-on') }} {{ d(new Date(article.createTime), 'short') }}
+                  <time :datetime="toIso(article.createTime)" class="opacity-70">
+                    {{ t('settings.shared-on') }} {{ formatDate(article.createTime) }}
                   </time>
                 </span>
               </div>
@@ -122,7 +122,7 @@
           <Sticky :stickyTop="32" dynamicElClass="#sticky-sidebar" endingElId="footer">
             <div id="sticky-sidebar">
               <transition mode="out-in" name="fade-slide-y">
-                <div class="sidebar-box mb-4">
+                <div v-show="!!article.articleContent" class="sidebar-box mb-4">
                   <SubTitle :title="'titles.toc'" icon="toc" />
                   <div id="toc1"></div>
                 </div>
@@ -148,9 +148,9 @@ import {
   provide,
   reactive,
   ref,
-  toRefs
+  toRef
 } from 'vue'
-import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteUpdate, useRoute, useRouter, type RouteLocationNormalizedLoaded } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
 import { Comment } from '@/components/Comment'
@@ -167,9 +167,55 @@ import v3ImgPreviewPkg from 'v3-img-preview'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
-const { v3ImgPreviewFn } = v3ImgPreviewPkg as any
+type ImgPreviewFn = (options: { images: string[]; index: number }) => void
+type TagInfo = {
+  id: string | number
+  tagName?: string | null
+}
+type AuthorInfo = {
+  avatar?: string
+  nickname?: string
+  website?: string
+}
+type ArticleCardData = {
+  id?: string | number
+  articleTitle?: string
+  articleContent?: string
+  articleCover?: string
+  createTime?: string | number | Date
+  updateTime?: string | number | Date
+  status?: number
+}
+type ArticleDetail = ArticleCardData & {
+  categoryName?: string
+  tags?: TagInfo[]
+  author?: AuthorInfo
+  preArticleCard?: ArticleCardData | null
+  nextArticleCard?: ArticleCardData | null
+}
+type CommentRecord = {
+  id: string | number
+  replyDTOs?: unknown[]
+}
+type ReactiveData = {
+  articleId: string | number | undefined
+  article: ArticleDetail
+  wordNum: string
+  readTime: string
+  comments: CommentRecord[]
+  images: string[]
+  preArticleCard: ArticleCardData | null
+  nextArticleCard: ArticleCardData | null
+  haveMore: boolean
+  isReload: boolean
+}
+type NotifyFn = (options: { title: string; message: string; type: 'error' | 'warning' | 'success' | 'info' }) => void
 
-const proxy: any = getCurrentInstance()?.appContext.config.globalProperties
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as { v3ImgPreviewFn: ImgPreviewFn }
+
+defineOptions({ name: 'ArticleDetail' })
+
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
 const commonStore = useCommonStore()
 const commentStore = useCommentStore()
 const route = useRoute()
@@ -179,19 +225,6 @@ const { t, d } = useI18n()
 // Avoid skeletons in SSR HTML: default loading=false when SSR renders
 const loading = ref(!import.meta.env.SSR)
 const articleRef = ref<HTMLElement | null>(null)
-
-interface ReactiveData {
-  articleId: string | number | undefined
-  article: any
-  wordNum: string
-  readTime: string
-  comments: any[]
-  images: string[]
-  preArticleCard: any | null
-  nextArticleCard: any | null
-  haveMore: boolean
-  isReload: boolean
-}
 
 const reactiveData = reactive<ReactiveData>({
   articleId: undefined,
@@ -211,10 +244,22 @@ const pageInfo = reactive({
 })
 commentStore.type = 1
 
+const article = toRef(reactiveData, 'article')
+const wordNum = toRef(reactiveData, 'wordNum')
+const readTime = toRef(reactiveData, 'readTime')
+const preArticleCard = toRef(reactiveData, 'preArticleCard')
+const nextArticleCard = toRef(reactiveData, 'nextArticleCard')
+
+const getArticleIdFromParam = (param: unknown): string | number | undefined => {
+  if (typeof param === 'string' || typeof param === 'number') return param
+  if (Array.isArray(param) && param.length > 0) return param[0]
+  return undefined
+}
+
 // SSR: prefetch and render article HTML (no top-level await -> no async setup)
 onServerPrefetch(async () => {
   try {
-    reactiveData.articleId = route.params.articleId as any
+    reactiveData.articleId = getArticleIdFromParam(route.params.articleId)
     const API_BASE = import.meta.env.VITE_API_BASE as string
     const resp = await fetch(`${API_BASE}/articles/${reactiveData.articleId}`, {
       headers: { accept: 'application/json' }
@@ -222,7 +267,7 @@ onServerPrefetch(async () => {
     const raw = await resp.text()
     const j = JSON.parse(raw)
     if (j && j.data) {
-      const a = j.data
+      const a = j.data as ArticleDetail
       const { default: MarkdownIt } = await import('markdown-it')
       const mdSSR = new MarkdownIt({ html: true })
       a.articleContent = mdSSR.render(a.articleContent || '')
@@ -252,16 +297,16 @@ onServerPrefetch(async () => {
       }
       loading.value = false
     }
-  } catch (_) {
+  } catch {
     // ignore SSR failure; client will refetch on mounted
   }
 })
 
 onMounted(() => {
-  reactiveData.articleId = route.params.articleId as any
+  reactiveData.articleId = getArticleIdFromParam(route.params.articleId)
   toPageTop()
   // If SSR already populated the article, avoid refetch (prevents flicker)
-  if (!reactiveData.article || !(reactiveData.article as any).id) {
+  if (!reactiveData.article.id) {
     fetchArticle()
   } else {
     loading.value = false
@@ -275,19 +320,19 @@ onMounted(() => {
 
 onUnmounted(() => {
   commonStore.resetHeaderImage()
-  reactiveData.article = ''
+  reactiveData.article = {}
   tocbot.destroy()
 })
 
-onBeforeRouteUpdate((to: any) => {
-  reactiveData.article = ''
+onBeforeRouteUpdate((to: RouteLocationNormalizedLoaded) => {
+  reactiveData.article = {}
   reactiveData.readTime = ''
   reactiveData.wordNum = ''
   reactiveData.comments = []
   reactiveData.images = []
   reactiveData.preArticleCard = null
   reactiveData.nextArticleCard = null
-  reactiveData.articleId = to.params.articleId as any
+  reactiveData.articleId = getArticleIdFromParam(to.params.articleId)
   pageInfo.current = 1
   reactiveData.isReload = true
   toPageTop()
@@ -309,15 +354,17 @@ emitter.on('articleFetchComment', () => {
   reactiveData.isReload = true
   fetchComments()
 })
-emitter.on('articleFetchReplies', (index) => {
+emitter.on('articleFetchReplies', (payload: unknown) => {
+  const index = typeof payload === 'number' ? payload : Number(payload)
+  if (!Number.isFinite(index)) return
   fetchReplies(index)
 })
 emitter.on('articleLoadMore', () => {
   fetchComments()
 })
 
-const handlePreview = (index: any) => {
-  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(index) })
+const handlePreview = (image: string) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(image) })
 }
 
 const initTocbot = () => {
@@ -345,8 +392,8 @@ const initTocbot = () => {
   const imgs = articleRef.value.getElementsByTagName('img')
   for (let i = 0; i < imgs.length; i++) {
     reactiveData.images.push(imgs[i].src)
-    imgs[i].addEventListener('click', function (e: any) {
-      handlePreview(e.target.currentSrc)
+    imgs[i].addEventListener('click', () => {
+      handlePreview(imgs[i].currentSrc)
     })
   }
 }
@@ -355,7 +402,7 @@ const fetchArticle = () => {
   loading.value = true
   api.getArticeById(reactiveData.articleId).then(({ data }) => {
     if (data.code === 52003) {
-      proxy.$notify({
+      proxy?.$notify?.({
         title: 'Error',
         message: t('errors.article_password_failed'),
         type: 'error'
@@ -368,34 +415,36 @@ const fetchArticle = () => {
       return
     }
     commonStore.setHeaderImage(data.data.articleCover)
-    const a = data.data
-    a.articleContent = markdownToHtml(a.articleContent)
+    const a = data.data as ArticleDetail
+    a.articleContent = markdownToHtml(a.articleContent || '')
     reactiveData.article = a
-    reactiveData.wordNum = Math.round(deleteHTMLTag(a.articleContent).length / 100) / 10 + 'k'
-    reactiveData.readTime = Math.round(deleteHTMLTag(a.articleContent).length / 400) + 'mins'
+    reactiveData.wordNum = Math.round(deleteHTMLTag(a.articleContent || '').length / 100) / 10 + 'k'
+    reactiveData.readTime = Math.round(deleteHTMLTag(a.articleContent || '').length / 400) + 'mins'
     loading.value = false
     nextTick(() => {
       Prism.highlightAll()
       initTocbot()
     })
     if (data.data.preArticleCard) {
-      new Promise((resolve) => {
-        data.data.preArticleCard.articleContent = markdownToHtml(data.data.preArticleCard.articleContent)
+      new Promise<ArticleCardData>((resolve) => {
+        const preArticleCard = data.data.preArticleCard as ArticleCardData
+        preArticleCard.articleContent = markdownToHtml(preArticleCard.articleContent || '')
           .replace(/<\/?[^>]*>/g, '')
           .replace(/[|]*\n/, '')
           .replace(/&npsp;/gi, '')
-        resolve(data.data.preArticleCard)
-      }).then((preArticleCard: any) => {
+        resolve(preArticleCard)
+      }).then((preArticleCard) => {
         reactiveData.preArticleCard = preArticleCard
       })
     }
     if (data.data.nextArticleCard) {
-      new Promise((resolve) => {
-        data.data.nextArticleCard.articleContent = markdownToHtml(data.data.nextArticleCard.articleContent)
+      new Promise<ArticleCardData>((resolve) => {
+        const nextArticleCard = data.data.nextArticleCard as ArticleCardData
+        nextArticleCard.articleContent = markdownToHtml(nextArticleCard.articleContent || '')
           .replace(/<\/?[^>]*>/g, '')
           .replace(/[|]*\n/, '')
           .replace(/&npsp;/gi, '')
-        resolve(data.data.nextArticleCard)
+        resolve(nextArticleCard)
       }).then((nextArticleCard) => {
         reactiveData.nextArticleCard = nextArticleCard
       })
@@ -424,15 +473,23 @@ const fetchComments = () => {
   })
 }
 
-const fetchReplies = (index: any) => {
+const fetchReplies = (index: number) => {
   api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
     reactiveData.comments[index].replyDTOs = data.data
   })
 }
 
-const handleAuthorClick = (link: string) => {
-  if (link === '') link = window.location.href
-  window.location.href = link
+const handleAuthorClick = (link?: string | null) => {
+  const target = link && link !== '' ? link : window.location.href
+  window.location.href = target
+}
+
+const toIso = (value?: string | number | Date) => {
+  return value ? new Date(value).toISOString() : ''
+}
+
+const formatDate = (value?: string | number | Date) => {
+  return value ? d(new Date(value), 'short') : ''
 }
 
 const toPageTop = () => {
@@ -441,22 +498,20 @@ const toPageTop = () => {
   })
 }
 
-const deleteHTMLTag = (content: any) => {
-  return content
+const deleteHTMLTag = (content: string) => {
+  return String(content)
     .replace(/<\/?[^>]*>/g, '')
     .replace(/[|]*\n/, '')
     .replace(/&npsp;/gi, '')
 }
 
-const { article, wordNum, readTime, comments, images, preArticleCard, nextArticleCard, haveMore, isReload } =
-  toRefs(reactiveData)
 const isMobile = computed(() => commonStore.isMobile)
 
 // SEO head tags
 const ORIGIN = typeof window !== 'undefined' ? window.location.origin : 'https://www.devillusion.asia'
 const canonicalUrl = computed(() => `${ORIGIN}/articles/${reactiveData.articleId ?? ''}`)
 const plainText = computed(() => {
-  const raw = (reactiveData.article as any)?.articleContent || ''
+  const raw = reactiveData.article.articleContent || ''
   return String(raw)
     .replace(/```[\s\S]*?```/g, '')
     .replace(/[#>*_`~\-\[\]\(\)!]/g, '')
@@ -464,9 +519,9 @@ const plainText = computed(() => {
     .replace(/\s+/g, ' ')
     .trim()
 })
-const headTitle = computed(() => (reactiveData.article as any)?.articleTitle || 'Article')
+const headTitle = computed(() => reactiveData.article.articleTitle || 'Article')
 const headDesc = computed(() => (plainText.value || headTitle.value).slice(0, 160))
-const headImage = computed(() => (reactiveData.article as any)?.articleCover || `${ORIGIN}/favicon.ico`)
+const headImage = computed(() => reactiveData.article.articleCover || `${ORIGIN}/favicon.ico`)
 
 useHead(() => ({
   title: headTitle.value,
@@ -490,11 +545,10 @@ useHead(() => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
         headline: headTitle.value,
-        datePublished: (reactiveData.article as any)?.createTime || undefined,
-        dateModified:
-          (reactiveData.article as any)?.updateTime || (reactiveData.article as any)?.createTime || undefined,
-        author: (reactiveData.article as any)?.author?.nickname
-          ? { '@type': 'Person', name: (reactiveData.article as any).author.nickname }
+        datePublished: reactiveData.article.createTime || undefined,
+        dateModified: reactiveData.article.updateTime || reactiveData.article.createTime || undefined,
+        author: reactiveData.article.author?.nickname
+          ? { '@type': 'Person', name: reactiveData.article.author.nickname }
           : undefined,
         image: headImage.value,
         mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl.value }

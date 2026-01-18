@@ -124,7 +124,9 @@ emitter.on('talkFetchComment', () => {
   fetchComments()
 })
 
-emitter.on('talkFetchReplies', (index: number) => {
+emitter.on('talkFetchReplies', (payload: unknown) => {
+  const index = typeof payload === 'number' ? payload : Number(payload)
+  if (!Number.isFinite(index)) return
   fetchReplies(index)
 })
 

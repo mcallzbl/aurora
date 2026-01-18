@@ -28,11 +28,33 @@
 import { onMounted, onServerPrefetch, reactive, toRefs } from 'vue'
 import { ArticleCard } from '@/components/ArticleCard'
 import Paginator from '@/components/Paginator.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, type LocationQueryValue } from 'vue-router'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
 defineOptions({ name: 'ArticleList' })
+
+type RouteValue = LocationQueryValue | LocationQueryValue[] | undefined
+type ArticleRecord = {
+  id: number | string
+  articleContent: string
+  [key: string]: unknown
+}
+
+const normalizeRouteValue = (value: RouteValue): string => {
+  if (Array.isArray(value)) {
+    return value[0] ?? ''
+  }
+  return value ?? ''
+}
+
+const sanitizeArticleContent = (item: ArticleRecord) => {
+  const content = typeof item.articleContent === 'string' ? item.articleContent : String(item.articleContent ?? '')
+  item.articleContent = markdownToHtml(content)
+    .replace(/<\/?[^>]*>/g, '')
+    .replace(/[|]*\n/, '')
+    .replace(/&npsp;/gi, '')
+}
 
 const route = useRoute()
 const pagination = reactive({
@@ -41,40 +63,35 @@ const pagination = reactive({
   current: 1
 })
 const reactiveData = reactive({
-  articles: [] as any,
-  tagName: '' as any,
+  articles: [] as ArticleRecord[],
+  tagName: '',
   haveArticles: false
 })
 const { articles, tagName, haveArticles } = toRefs(reactiveData)
 
 onMounted(() => {
-  reactiveData.tagName = route.query.tagName
+  reactiveData.tagName = normalizeRouteValue(route.query.tagName)
   fetchArticles()
 })
 
 // SSR prefetch so tag list pages render with content during SSG
 onServerPrefetch(async () => {
   try {
-    reactiveData.tagName = route.query.tagName as any
-    const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api'
+    reactiveData.tagName = normalizeRouteValue(route.query.tagName)
+    const API_BASE = import.meta.env.VITE_API_BASE || '/api'
     const params = new URLSearchParams({
-      tagId: String(route.params.tagId ?? ''),
+      tagId: normalizeRouteValue(route.params.tagId),
       current: String(pagination.current),
       size: String(pagination.size)
     })
     const resp = await fetch(`${API_BASE}/articles/tagId?${params.toString()}`)
-    const j = await resp.json()
+    const j = (await resp.json()) as { data?: { records?: ArticleRecord[]; count?: number } }
     const records = Array.isArray(j?.data?.records) ? j.data.records : []
-    records.forEach((item: any) => {
-      item.articleContent = markdownToHtml(item.articleContent)
-        .replace(/<\/?[^>]*>/g, '')
-        .replace(/[|]*\n/, '')
-        .replace(/&npsp;/gi, '')
-    })
+    records.forEach(sanitizeArticleContent)
     reactiveData.articles = records
     pagination.total = typeof j?.data?.count === 'number' ? j.data.count : records.length
     reactiveData.haveArticles = true
-  } catch (_) {
+  } catch {
     // ignore SSR failure; client will refetch
   }
 })
@@ -82,18 +99,14 @@ onServerPrefetch(async () => {
 const fetchArticles = async () => {
   reactiveData.haveArticles = false
   const { data } = await api.getArticlesByTagId({
-    tagId: route.params.tagId,
+    tagId: normalizeRouteValue(route.params.tagId),
     current: pagination.current,
     size: pagination.size
   })
-  data.data.records.forEach((item: any) => {
-    item.articleContent = markdownToHtml(item.articleContent)
-      .replace(/<\/?[^>]*>/g, '')
-      .replace(/[|]*\n/, '')
-      .replace(/&npsp;/gi, '')
-  })
-  reactiveData.articles = data.data.records
-  pagination.total = data.data.count
+  const records = Array.isArray(data?.data?.records) ? (data.data.records as ArticleRecord[]) : []
+  records.forEach(sanitizeArticleContent)
+  reactiveData.articles = records
+  pagination.total = typeof data?.data?.count === 'number' ? data.data.count : records.length
   reactiveData.haveArticles = true
 }
 

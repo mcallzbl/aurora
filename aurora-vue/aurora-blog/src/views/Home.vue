@@ -83,7 +83,21 @@ import Paginator from '@/components/Paginator.vue'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
 
-defineOptions({ name: 'Home' })
+defineOptions({ name: 'HomeView' })
+
+type ArticleRecord = {
+  id: number | string
+  articleContent: string
+  [key: string]: unknown
+}
+
+const sanitizeArticleContent = (item: ArticleRecord) => {
+  const content = typeof item.articleContent === 'string' ? item.articleContent : String(item.articleContent ?? '')
+  item.articleContent = markdownToHtml(content)
+    .replace(/<\/?[^>]*>/g, '')
+    .replace(/[|]*\n/, '')
+    .replace(/&npsp;/gi, '')
+}
 
 const appStore = useAppStore()
 const userStore = useUserStore()
@@ -125,18 +139,12 @@ onMounted(() => {
 
 const fetchTopAndFeatured = () => {
   api.getTopAndFeaturedArticles().then(({ data }) => {
-    data.data.topArticle.articleContent = markdownToHtml(data.data.topArticle.articleContent)
-      .replace(/<\/?[^>]*>/g, '')
-      .replace(/[|]*\n/, '')
-      .replace(/&npsp;/gi, '')
-    data.data.featuredArticles.forEach((item: any) => {
-      item.articleContent = markdownToHtml(item.articleContent)
-        .replace(/<\/?[^>]*>/g, '')
-        .replace(/[|]*\n/, '')
-        .replace(/&npsp;/gi, '')
-    })
-    articleStore.topArticle = data.data.topArticle
-    articleStore.featuredArticles = data.data.featuredArticles
+    const topArticle = data.data.topArticle as ArticleRecord
+    const featuredArticles = data.data.featuredArticles as ArticleRecord[]
+    sanitizeArticleContent(topArticle)
+    featuredArticles.forEach(sanitizeArticleContent)
+    articleStore.topArticle = topArticle
+    articleStore.featuredArticles = featuredArticles
   })
 }
 
@@ -153,13 +161,9 @@ const fetchArticles = () => {
       })
       .then(({ data }) => {
         if (data.flag) {
-          data.data.records.forEach((item: any) => {
-            item.articleContent = markdownToHtml(item.articleContent)
-              .replace(/<\/?[^>]*>/g, '')
-              .replace(/[|]*\n/, '')
-              .replace(/&npsp;/gi, '')
-          })
-          articleStore.articles = data.data.records
+          const records = data.data.records as ArticleRecord[]
+          records.forEach(sanitizeArticleContent)
+          articleStore.articles = records
           pagination.total = data.data.count
           reactiveData.haveArticles = true
         }
@@ -169,7 +173,7 @@ const fetchArticles = () => {
   }
 }
 
-const fetchArticlesByCategoryId = (categoryId: any) => {
+const fetchArticlesByCategoryId = (categoryId: number) => {
   reactiveData.haveArticles = false
   api
     .getArticlesByCategoryId({
@@ -178,13 +182,9 @@ const fetchArticlesByCategoryId = (categoryId: any) => {
       categoryId: categoryId
     })
     .then(({ data }) => {
-      data.data.records.forEach((item: any) => {
-        item.articleContent = markdownToHtml(item.articleContent)
-          .replace(/<\/?[^>]*>/g, '')
-          .replace(/[|]*\n/, '')
-          .replace(/&npsp;/gi, '')
-      })
-      articleStore.articles = data.data.records
+      const records = data.data.records as ArticleRecord[]
+      records.forEach(sanitizeArticleContent)
+      articleStore.articles = records
       pagination.total = data.data.count
       reactiveData.haveArticles = true
     })
@@ -202,7 +202,7 @@ const expandHandler = () => {
   tabClass.value['expanded-tab'] = !tabClass.value['expanded-tab']
 }
 
-const handleTabChange = (categoryId: any) => {
+const handleTabChange = (categoryId: number) => {
   userStore.tab = categoryId
   userStore.page = 1
   pagination.current = 1
@@ -222,7 +222,7 @@ const toArticleOffset = () => {
   })
 }
 
-const activeTabStyle = (catagoryId: any) => {
+const activeTabStyle = (catagoryId: number) => {
   if (catagoryId === activeTab.value) return { background: appStore.themeConfig.header_gradient_css }
   return {}
 }

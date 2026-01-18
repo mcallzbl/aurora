@@ -32,13 +32,19 @@ import { useCommentStore } from '@/stores/comment'
 import api from '@/api/api'
 import emitter from '@/utils/mitt'
 
-defineOptions({ name: 'Message' })
+defineOptions({ name: 'MessageBoard' })
+
+type CommentItem = {
+  id: number | string
+  replyDTOs?: unknown[]
+  [key: string]: unknown
+}
 
 const { t } = useI18n()
 const commentStore = useCommentStore()
 
 const reactiveData = reactive({
-  comments: [] as any[],
+  comments: [] as CommentItem[],
   haveMore: false,
   isReload: false
 })
@@ -100,7 +106,8 @@ const fetchComments = () => {
 
 const fetchReplies = (index: number) => {
   api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
-    reactiveData.comments[index].replyDTOs = data.data
+    const replies = Array.isArray(data?.data) ? data.data : []
+    reactiveData.comments[index].replyDTOs = replies
   })
 }
 </script>
