@@ -12,6 +12,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   // Single source of truth for API base used by dev proxy, SSR/SSG fetching, and app env
   const API_TARGET = env.VITE_API_BASE || 'https://www.devillusion.asia/api'
+  type TagRecord = { id: string | number; tagName?: string | null }
+  type ArticleRecord = { id: string | number; status?: number | null }
   
   return {
   plugins: [
@@ -71,10 +73,16 @@ export default defineConfig(({ mode }) => {
         // Tag -> Article list pages
         const res = await fetch(`${API_BASE}/tags/all`)
         const json = await res.json()
-        const tags = Array.isArray(json?.data) ? json.data : []
-        const tagRoutes = tags.map((t: any) => `/article-list/${encodeURIComponent(t.id)}?tagName=${encodeURIComponent(t.tagName || '')}`)
+        const tags = Array.isArray(json?.data) ? (json.data as TagRecord[]) : []
+        const tagRoutes = tags
+          .map((tag) => {
+            if (tag?.id === undefined || tag?.id === null) return ''
+            const safeName = tag?.tagName ?? ''
+            return `/article-list/${encodeURIComponent(String(tag.id))}?tagName=${encodeURIComponent(String(safeName))}`
+          })
+          .filter((route) => route !== '')
         results.push(...tagRoutes)
-      } catch (e) {
+      } catch {
         console.warn('[ssg] fetch tags failed, skipping tag routes')
       }
 
@@ -85,14 +93,14 @@ export default defineConfig(({ mode }) => {
         while (true) {
           const resp = await fetch(`${API_BASE}/articles/all?current=${current}&size=${size}`)
           const j = await resp.json()
-          const rec = Array.isArray(j?.data?.records) ? j.data.records : []
+          const rec = Array.isArray(j?.data?.records) ? (j.data.records as ArticleRecord[]) : []
           if (rec.length === 0) break
-          const published = rec.filter((a: any) => a && a.status !== 2)
-          results.push(...published.map((a: any) => `/articles/${encodeURIComponent(a.id)}`))
+          const published = rec.filter((article) => article && article.status !== 2)
+          results.push(...published.map((article) => `/articles/${encodeURIComponent(String(article.id))}`))
           if (rec.length < size) break
           current += 1
         }
-      } catch (e) {
+      } catch {
         console.warn('[ssg] fetch articles failed, skipping article routes')
       }
       return results
