@@ -7,10 +7,6 @@ const routes: RouteRecordRaw[] = [
     meta: { hidden: true },
     component: () => import('../views/login/Login.vue'),
   },
-  {
-    path: '/',
-    redirect: '/login',
-  },
 ]
 
 const createAppRouter = () =>

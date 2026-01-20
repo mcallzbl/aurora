@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { generateMenu } from '@/router/menu'
 import axios from 'axios'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
@@ -110,8 +111,11 @@ const onSubmit = async () => {
       if (token) {
         sessionStorage.setItem('token', token)
       }
-      ElMessage.success('登录成功')
-      await router.push({ path: '/' })
+      const menuReady = await generateMenu()
+      if (menuReady) {
+        ElMessage.success('登录成功')
+        await router.push({ path: '/' })
+      }
       return
     }
     ElMessage.error(data.message || '登录失败')

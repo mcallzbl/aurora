@@ -37,3 +37,5 @@ __screenshots__/
 
 dist**.tar.gz
 /public/BingSiteAuth.xml
+
+AGENTS.md
