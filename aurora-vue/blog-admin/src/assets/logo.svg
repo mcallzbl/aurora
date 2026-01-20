@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="mcallzbl logo cyan accent">
+  <!-- M 主体（深灰） -->
+  <path d="M20 180 L50 40 L80 140 L110 40 L140 180" fill="none" stroke="#1f2937" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Z 交叉（荧光青绿强调） -->
+  <path d="M40 70 L160 70 L40 130 L160 130" fill="none" stroke="#00f0c6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

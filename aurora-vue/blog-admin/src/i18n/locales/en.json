@@ -1,0 +1,50 @@
+{
+  "common": {
+    "hello": "Hello",
+    "welcome": "Welcome",
+    "language": "Language",
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation successful"
+  },
+  "about": {
+    "eyebrow": "About this project",
+    "intro": "A Vue 3 starter focused on performance and polish, with clear hierarchy, lightweight motion, and consistent brand tone.",
+    "story": "We refined the common page structure into a reusable skeleton that helps you prototype quickly and scale confidently.",
+    "mission": "The goal is to keep every screen warm: visually restrained yet distinct, interactive without being flashy.",
+    "highlights": {
+      "fast": "Fast startup with a smooth developer experience.",
+      "modern": "Modern frontend engineering, clean and maintainable.",
+      "beautiful": "Detailed visual craft that builds trust."
+    },
+    "stack": "Stack: Vue 3 · Vite · TypeScript · Vue Router · Pinia"
+  },
+  "home": {
+    "title": "Modern Vue Application",
+    "subtitle": "High-performance modern application built with Vue 3 + TypeScript + Vite, featuring multi-language support",
+    "getStarted": "Get Started",
+    "features": {
+      "fast": {
+        "title": "Lightning Fast",
+        "description": "Built with Vite for lightning-fast hot reload and build speeds"
+      },
+      "modern": {
+        "title": "Modern Tech Stack",
+        "description": "Vue 3 Composition API + TypeScript + Latest ES standards"
+      },
+      "beautiful": {
+        "title": "Beautiful Design",
+        "description": "Responsive design, beautiful interface, excellent user experience"
+      }
+    }
+  }
+}

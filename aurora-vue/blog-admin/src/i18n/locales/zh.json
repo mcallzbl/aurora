@@ -1,0 +1,50 @@
+{
+  "common": {
+    "hello": "你好",
+    "welcome": "欢迎",
+    "language": "语言",
+    "home": "首页",
+    "about": "关于",
+    "contact": "联系"
+  },
+  "navigation": {
+    "home": "首页",
+    "about": "关于"
+  },
+  "messages": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "操作成功"
+  },
+  "about": {
+    "eyebrow": "关于这个项目",
+    "intro": "这是一套以性能与审美并重的Vue 3模板，强调清晰的层级、轻盈的动效与一致的品牌质感。",
+    "story": "我们把常用的页面结构打磨成可复用的骨架，既能快速搭建原型，也能为后续的业务扩展留足空间。",
+    "mission": "目标是让每个屏幕都带着一点温度：视觉上克制但不平淡，交互上顺滑但不浮夸。",
+    "highlights": {
+      "fast": "快速启动，开发体验丝滑顺畅。",
+      "modern": "现代前端工程化，结构清晰易维护。",
+      "beautiful": "精致视觉细节，营造可信赖感。"
+    },
+    "stack": "技术栈：Vue 3 · Vite · TypeScript · Vue Router · Pinia"
+  },
+  "home": {
+    "title": "现代化Vue应用",
+    "subtitle": "基于Vue 3 + TypeScript + Vite构建的高性能现代化应用，支持多语言切换",
+    "getStarted": "开始探索",
+    "features": {
+      "fast": {
+        "title": "极速开发",
+        "description": "基于Vite构建工具，提供闪电般的热重载和构建速度"
+      },
+      "modern": {
+        "title": "现代技术栈",
+        "description": "Vue 3 Composition API + TypeScript + 最新ES标准"
+      },
+      "beautiful": {
+        "title": "精美设计",
+        "description": "响应式设计，精美界面，用户体验极佳"
+      }
+    }
+  }
+}

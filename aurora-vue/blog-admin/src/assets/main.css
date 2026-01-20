@@ -1,0 +1,51 @@
+@import './base.css';
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-serif: 'Fraunces', 'Times New Roman', serif;
+  --ink-900: #1f1b16;
+  --ink-700: #3e342b;
+  --ink-500: #5f5347;
+  --surface-0: #f7f2ec;
+  --surface-1: rgba(255, 255, 255, 0.88);
+  --surface-2: rgba(255, 255, 255, 0.76);
+  --surface-3: #fff8f1;
+  --accent-1: #f2a35c;
+  --accent-2: #3f9f93;
+  --accent-3: #d97a5e;
+  --border-soft: rgba(71, 59, 47, 0.15);
+  --shadow-soft: 0 30px 70px rgba(28, 21, 14, 0.15);
+  --shadow-card: 0 16px 34px rgba(28, 21, 14, 0.12);
+  --ring: 0 0 0 1px rgba(255, 255, 255, 0.65) inset;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(1200px 520px at 8% -10%, rgba(245, 191, 140, 0.35), transparent 60%),
+    radial-gradient(900px 540px at 92% 0%, rgba(98, 195, 186, 0.28), transparent 55%),
+    radial-gradient(700px 480px at 50% 110%, rgba(233, 179, 146, 0.25), transparent 60%),
+    linear-gradient(180deg, #faf6f1 0%, #eef3f6 100%);
+  color: var(--ink-900);
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: clamp(1.5rem, 3vw, 3.5rem);
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(63, 159, 147, 0.25);
+}
