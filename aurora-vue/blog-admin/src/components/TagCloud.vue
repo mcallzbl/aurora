@@ -1,101 +1,233 @@
 <template>
-  <div class="tag-cloud">
-    <span
-      v-for="tag in computedTags"
-      :key="tag.id"
+  <div ref="wrapperRef" class="tag-cloud" @dblclick="toggleMotion">
+    <p
+      v-for="(tag, index) in data"
+      :key="tag.id ?? tag.name ?? index"
+      :ref="(el) => setTagRef(el, index)"
       class="tag-item"
-      :style="{ fontSize: tag.fontSize + 'px' }"
+      @click="emit('clickTag', tag)"
     >
       {{ tag.name }}
-    </span>
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import {
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+  type ComponentPublicInstance,
+} from 'vue'
 
-interface Tag {
-  id: number
+interface TagItem {
+  id?: number | string
   name: string
-  count?: number
 }
 
-interface Props {
-  data: Tag[]
+interface TagCloudOptions {
+  radius: number
+  maxFont: number
+  color: string | null
+  rotateAngleXbase: number
+  rotateAngleYbase: number
+  hover: boolean
 }
 
-const props = defineProps<Props>()
+const props = defineProps<{
+  data: TagItem[]
+  config?: Partial<TagCloudOptions> | null
+}>()
 
-const computedTags = computed(() => {
-  if (!props.data || props.data.length === 0) return []
+const emit = defineEmits<{
+  (event: 'clickTag', tag: TagItem): void
+}>()
 
-  // 计算标签的字体大小，基于标签的数量或者随机大小
-  const minSize = 14
-  const maxSize = 32
+const option = reactive<TagCloudOptions>({
+  radius: 120,
+  maxFont: 24,
+  color: null,
+  rotateAngleXbase: 500,
+  rotateAngleYbase: 500,
+  hover: false,
+})
 
-  return props.data.map((tag) => {
-    // 如果有 count 字段，根据 count 计算大小；否则随机生成
-    let fontSize = minSize
-    if (tag.count !== undefined) {
-      const counts = props.data.map((t) => t.count || 0)
-      const minCount = Math.min(...counts)
-      const maxCount = Math.max(...counts)
+const wrapperRef = ref<HTMLDivElement | null>(null)
+const tagRefs = ref<HTMLElement[]>([])
+const tagList = ref<Array<{ x: number; y: number; z: number; el: HTMLElement }>>([])
+const running = ref(true)
 
-      if (maxCount > minCount) {
-        fontSize = minSize + ((tag.count - minCount) / (maxCount - minCount)) * (maxSize - minSize)
-      }
-    } else {
-      fontSize = minSize + Math.random() * (maxSize - minSize)
+let timer: number | null = null
+let rotateAngleX = Math.PI / option.rotateAngleXbase
+let rotateAngleY = Math.PI / option.rotateAngleYbase
+
+const setTagRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  if (!el || !(el instanceof HTMLElement)) return
+  tagRefs.value[index] = el
+}
+
+const stopTimer = () => {
+  if (timer) {
+    window.clearInterval(timer)
+    timer = null
+  }
+}
+
+const startTimer = () => {
+  stopTimer()
+  timer = window.setInterval(() => {
+    tagList.value.forEach((tag) => {
+      rotateX(tag)
+      rotateY(tag)
+      setPosition(tag)
+    })
+  }, 20)
+}
+
+const toggleMotion = () => {
+  running.value = !running.value
+  if (running.value) {
+    startTimer()
+  } else {
+    stopTimer()
+  }
+}
+
+const setPosition = (tag: { x: number; y: number; z: number; el: HTMLElement }) => {
+  const wrapper = wrapperRef.value
+  if (!wrapper) return
+  const { offsetWidth, offsetHeight } = wrapper
+  tag.el.style.transform = `translate(${tag.x + offsetWidth / 2 - tag.el.offsetWidth / 2}px, ${
+    tag.y + offsetHeight / 2 - tag.el.offsetHeight / 2
+  }px)`
+  tag.el.style.opacity = `${tag.z / option.radius / 2 + 0.7}`
+  tag.el.style.fontSize = `${(tag.z / option.radius / 2 + 0.5) * option.maxFont}px`
+}
+
+const rotateX = (tag: { x: number; y: number; z: number }) => {
+  const cos = Math.cos(rotateAngleX)
+  const sin = Math.sin(rotateAngleX)
+  const y = tag.y * cos - tag.z * sin
+  const z = tag.y * sin + tag.z * cos
+  tag.y = y
+  tag.z = z
+}
+
+const rotateY = (tag: { x: number; y: number; z: number }) => {
+  const cos = Math.cos(rotateAngleY)
+  const sin = Math.sin(rotateAngleY)
+  const x = tag.z * sin + tag.x * cos
+  const z = tag.z * cos - tag.x * sin
+  tag.x = x
+  tag.z = z
+}
+
+const initTags = async () => {
+  stopTimer()
+  tagList.value = []
+  await nextTick()
+  const wrapper = wrapperRef.value
+  if (!wrapper || props.data.length === 0) return
+
+  rotateAngleX = Math.PI / option.rotateAngleXbase
+  rotateAngleY = Math.PI / option.rotateAngleYbase
+
+  if (option.hover) {
+    wrapper.onmousemove = (event) => {
+      const rect = wrapper.getBoundingClientRect()
+      rotateAngleY = (event.clientX - rect.left - rect.width / 2) / 10000
+      rotateAngleX = -(event.clientY - rect.top - rect.height / 2) / 10000
     }
+  } else {
+    wrapper.onmousemove = null
+  }
 
-    return {
-      ...tag,
-      fontSize: Math.round(fontSize),
-    }
-  })
+  const total = props.data.length
+  for (let i = 0; i < total; i += 1) {
+    const phi = Math.acos((2 * (i + 1) - 1) / total - 1)
+    const theta = phi * Math.sqrt(total * Math.PI)
+    const x = option.radius * Math.sin(phi) * Math.cos(theta)
+    const y = option.radius * Math.sin(phi) * Math.sin(theta)
+    const z = option.radius * Math.cos(phi)
+    const el = tagRefs.value[i]
+    if (!el) continue
+    el.style.color = option.color || randomColor()
+    tagList.value.push({ x, y, z, el })
+  }
+
+  if (running.value) {
+    startTimer()
+  }
+}
+
+const randomColor = () => {
+  const r = Math.round(255 * Math.random())
+  const g = Math.round(255 * Math.random())
+  const b = Math.round(255 * Math.random())
+  return `rgb(${r},${g},${b})`
+}
+
+watch(
+  () => props.config,
+  (value) => {
+    Object.assign(option, {
+      radius: 120,
+      maxFont: 24,
+      color: null,
+      rotateAngleXbase: 500,
+      rotateAngleYbase: 500,
+      hover: false,
+      ...(value ?? {}),
+    })
+    initTags()
+  },
+  { deep: true, immediate: true },
+)
+
+watch(
+  () => props.data,
+  () => {
+    tagRefs.value = []
+    initTags()
+  },
+  { deep: true },
+)
+
+onMounted(() => {
+  initTags()
+})
+
+onBeforeUnmount(() => {
+  stopTimer()
+  if (wrapperRef.value) {
+    wrapperRef.value.onmousemove = null
+  }
 })
 </script>
 
 <style scoped>
 .tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  width: min(100%, 320px);
+  height: min(100%, 320px);
+  margin: 0 auto;
 }
 
 .tag-item {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  text-decoration: none;
+  line-height: 1.1;
+  text-align: center;
+  padding: 4px 9px;
   border-radius: 6px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.tag-item:nth-child(2n) {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.tag-item:nth-child(3n) {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.tag-item:nth-child(4n) {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.tag-item:nth-child(5n) {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.tag-item:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  user-select: none;
+  transition: color 0.2s ease;
 }
 </style>

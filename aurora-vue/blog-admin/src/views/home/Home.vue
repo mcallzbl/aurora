@@ -47,7 +47,7 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="panel-row">
+    <el-row :gutter="20" class="panel-row panel-row-equal">
       <el-col :xs="24" :md="16">
         <el-card class="panel-card" v-loading="loading || !mapLoaded">
           <div class="panel-title">用户地域分布</div>
@@ -66,7 +66,7 @@
         <el-card class="panel-card" v-loading="loading">
           <div class="panel-title">文章标签统计</div>
           <div class="panel-chart tag-cloud-container">
-            <TagCloud :data="tagData" />
+            <TagCloud :data="tagData" :config="tagCloudConfig" />
           </div>
         </el-card>
       </el-col>
@@ -181,6 +181,10 @@ const mapLoaded = ref(false)
 const userAreaType = ref(1)
 const tagData = ref<Array<{ id: number; name: string }>>([])
 const chinaProvinces = ref<Set<string>>(new Set())
+const tagCloudConfig = {
+  hover: true,
+  radius: 130,
+}
 
 const stats = reactive({
   viewsCount: 0,
@@ -592,6 +596,25 @@ onMounted(async () => {
   box-shadow: var(--shadow-card);
 }
 
+.panel-row-equal {
+  align-items: stretch;
+}
+
+.panel-row-equal :deep(.el-col) {
+  display: flex;
+}
+
+.panel-row-equal :deep(.el-card) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-row-equal .panel-chart {
+  flex: 1;
+  min-height: 260px;
+}
+
 .panel-title {
   font-size: 0.95rem;
   color: var(--ink-700);
@@ -621,7 +644,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: auto;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
