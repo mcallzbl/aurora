@@ -8,7 +8,8 @@
         v-for="item in statusOptions"
         :key="item.key"
         :class="['status-item', { active: activeStatus === item.key }]"
-        @click="changeStatus(item.key)">
+        @click="changeStatus(item.key)"
+      >
         {{ item.label }}
       </span>
     </div>
@@ -19,7 +20,8 @@
         type="danger"
         size="small"
         :disabled="selectedIds.length === 0"
-        @click="showDeleteDialog = true">
+        @click="showDeleteDialog = true"
+      >
         批量删除
       </el-button>
       <el-button
@@ -27,7 +29,8 @@
         type="danger"
         size="small"
         :disabled="selectedIds.length === 0"
-        @click="showPermanentDeleteDialog = true">
+        @click="showPermanentDeleteDialog = true"
+      >
         批量删除
       </el-button>
       <el-button
@@ -35,7 +38,8 @@
         size="small"
         :disabled="selectedIds.length === 0"
         style="margin-right: 1rem"
-        @click="showExportDialog = true">
+        @click="showExportDialog = true"
+      >
         批量导出
       </el-button>
       <el-upload
@@ -44,7 +48,8 @@
         :limit="9"
         :show-file-list="false"
         :headers="uploadHeaders"
-        :on-success="handleUploadSuccess">
+        :on-success="handleUploadSuccess"
+      >
         <el-button type="primary" size="small"> 批量导入 </el-button>
       </el-upload>
 
@@ -54,9 +59,15 @@
           clearable
           placeholder="请选择文章类型"
           size="small"
-          style="margin-right: 1rem; width: 180px">
+          style="margin-right: 1rem; width: 180px"
+        >
           <el-option label="全部" :value="null" />
-          <el-option v-for="item in articleTypes" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option
+            v-for="item in articleTypes"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
         <el-select
           v-model="queryParams.categoryId"
@@ -64,9 +75,15 @@
           filterable
           placeholder="请选择分类"
           size="small"
-          style="margin-right: 1rem; width: 180px">
+          style="margin-right: 1rem; width: 180px"
+        >
           <el-option label="全部" :value="null" />
-          <el-option v-for="item in categories" :key="item.id" :label="item.categoryName" :value="item.id" />
+          <el-option
+            v-for="item in categories"
+            :key="item.id"
+            :label="item.categoryName"
+            :value="item.id"
+          />
         </el-select>
         <el-select
           v-model="queryParams.tagId"
@@ -74,7 +91,8 @@
           filterable
           placeholder="请选择标签"
           size="small"
-          style="margin-right: 1rem; width: 180px">
+          style="margin-right: 1rem; width: 180px"
+        >
           <el-option label="全部" :value="null" />
           <el-option v-for="item in tags" :key="item.id" :label="item.tagName" :value="item.id" />
         </el-select>
@@ -84,12 +102,20 @@
           size="small"
           placeholder="请输入文章名"
           style="width: 200px"
-          @keyup.enter="handleSearch" />
-        <el-button type="primary" size="small" style="margin-left: 1rem" @click="handleSearch"> 搜索 </el-button>
+          @keyup.enter="handleSearch"
+        />
+        <el-button type="primary" size="small" style="margin-left: 1rem" @click="handleSearch">
+          搜索
+        </el-button>
       </div>
     </div>
 
-    <el-table border :data="articleList" v-loading="loading" @selection-change="handleSelectionChange">
+    <el-table
+      border
+      :data="articleList"
+      v-loading="loading"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" />
       <el-table-column prop="articleCover" label="文章封面" width="180" align="center">
         <template #default="{ row }">
@@ -105,7 +131,11 @@
       <el-table-column prop="categoryName" label="分类" width="110" align="center" />
       <el-table-column prop="tagDTOs" label="标签" width="170" align="center">
         <template #default="{ row }">
-          <el-tag v-for="item of row.tagDTOs" :key="item.tagId" style="margin-right: 0.2rem; margin-top: 0.2rem">
+          <el-tag
+            v-for="item of row.tagDTOs"
+            :key="item.tagId"
+            style="margin-right: 0.2rem; margin-top: 0.2rem"
+          >
             {{ item.tagName }}
           </el-tag>
         </template>
@@ -134,7 +164,8 @@
             :active-value="1"
             :inactive-value="0"
             :disabled="row.isDelete === 1"
-            @change="handleToggleTopOrFeatured(row)" />
+            @change="handleToggleTopOrFeatured(row)"
+          />
         </template>
       </el-table-column>
       <el-table-column prop="isFeatured" label="推荐" width="80" align="center">
@@ -144,24 +175,35 @@
             :active-value="1"
             :inactive-value="0"
             :disabled="row.isDelete === 1"
-            @change="handleToggleTopOrFeatured(row)" />
+            @change="handleToggleTopOrFeatured(row)"
+          />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="150">
         <template #default="{ row }">
-          <el-button v-if="row.isDelete === 0" type="primary" size="small" @click="handleEdit(row.id)">
+          <el-button
+            v-if="row.isDelete === 0"
+            type="primary"
+            size="small"
+            @click="handleEdit(row.id)"
+          >
             编辑
           </el-button>
           <el-popconfirm
             v-if="row.isDelete === 0"
             title="确定删除吗？"
             @confirm="handleDeleteArticle(row.id)"
-            style="margin-left: 10px">
+            style="margin-left: 10px"
+          >
             <template #reference>
               <el-button size="small" type="danger"> 删除 </el-button>
             </template>
           </el-popconfirm>
-          <el-popconfirm v-if="row.isDelete === 1" title="确定恢复吗？" @confirm="handleDeleteArticle(row.id)">
+          <el-popconfirm
+            v-if="row.isDelete === 1"
+            title="确定恢复吗？"
+            @confirm="handleDeleteArticle(row.id)"
+          >
             <template #reference>
               <el-button size="small" type="success"> 恢复 </el-button>
             </template>
@@ -170,7 +212,8 @@
             v-if="row.isDelete === 1"
             title="确定彻底删除吗？"
             @confirm="handlePermanentDelete(row.id)"
-            style="margin-left: 10px">
+            style="margin-left: 10px"
+          >
             <template #reference>
               <el-button size="small" type="danger"> 删除 </el-button>
             </template>
@@ -188,7 +231,8 @@
       :page-sizes="[10, 20, 50, 100]"
       layout="total, sizes, prev, pager, next, jumper"
       @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
+      @current-change="handleCurrentChange"
+    />
 
     <el-dialog v-model="showDeleteDialog" title="提示" width="30%">
       <div style="font-size: 1rem">是否删除选中项？</div>
@@ -444,7 +488,7 @@ const handleBatchDelete = async () => {
         message: data.message || '操作失败',
       })
     }
-  } catch  {
+  } catch {
     ElNotification.error({
       title: '失败',
       message: '操作失败',
@@ -471,7 +515,7 @@ const handlePermanentDelete = async (id: number) => {
         message: data.message || '删除失败',
       })
     }
-  } catch  {
+  } catch {
     ElNotification.error({
       title: '失败',
       message: '删除失败',
@@ -496,7 +540,7 @@ const handleBatchPermanentDelete = async () => {
         message: data.message || '删除失败',
       })
     }
-  } catch  {
+  } catch {
     ElNotification.error({
       title: '失败',
       message: '删除失败',
@@ -508,7 +552,10 @@ const handleBatchPermanentDelete = async () => {
 
 const handleExport = async () => {
   try {
-    const { data } = await axios.post<ExportResponse>('/api/admin/articles/export', selectedIds.value)
+    const { data } = await axios.post<ExportResponse>(
+      '/api/admin/articles/export',
+      selectedIds.value,
+    )
     if (data.flag) {
       ElNotification.success({
         title: '成功',
@@ -524,7 +571,7 @@ const handleExport = async () => {
         message: data.message || '导出失败',
       })
     }
-  } catch  {
+  } catch {
     ElNotification.error({
       title: '失败',
       message: '导出失败',
@@ -540,9 +587,12 @@ const downloadFile = (url: string) => {
   iframe.style.height = '0'
   iframe.src = url
   document.body.appendChild(iframe)
-  setTimeout(() => {
-    iframe.remove()
-  }, 5 * 60 * 1000)
+  setTimeout(
+    () => {
+      iframe.remove()
+    },
+    5 * 60 * 1000,
+  )
 }
 
 const handleUploadSuccess = (response: CommonResponse) => {
@@ -578,7 +628,7 @@ const handleToggleTopOrFeatured = async (article: Article) => {
         message: data.message || '修改失败',
       })
     }
-  } catch  {
+  } catch {
     ElNotification.error({
       title: '失败',
       message: '修改失败',
@@ -623,7 +673,7 @@ watch(
   () => {
     pagination.current = 1
     fetchArticles()
-  }
+  },
 )
 
 watch(
@@ -631,7 +681,7 @@ watch(
   () => {
     pagination.current = 1
     fetchArticles()
-  }
+  },
 )
 
 watch(
@@ -639,7 +689,7 @@ watch(
   () => {
     pagination.current = 1
     fetchArticles()
-  }
+  },
 )
 
 onMounted(() => {
