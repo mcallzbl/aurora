@@ -58,6 +58,7 @@ import { useRouter } from 'vue-router'
 import { generateMenu } from '@/router/menu'
 import axios from 'axios'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { useAppStore } from '@/stores/app'
 
 interface LoginForm {
   username: string
@@ -79,6 +80,7 @@ defineOptions({
 })
 
 const router = useRouter()
+const appStore = useAppStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const loginForm = reactive<LoginForm>({
@@ -108,9 +110,9 @@ const onSubmit = async () => {
     const { data } = await axios.post<LoginResponse>('/api/users/login', params)
     if (data.flag) {
       const token = typeof data.data === 'string' ? data.data : data.data?.token
-      if (token) {
-        sessionStorage.setItem('token', token)
-      }
+      const userPayload =
+        typeof data.data === 'string' ? { token } : { ...(data.data ?? {}), token }
+      appStore.login(userPayload)
       const menuReady = await generateMenu()
       if (menuReady) {
         ElMessage.success('登录成功')

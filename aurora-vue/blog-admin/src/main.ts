@@ -7,11 +7,14 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { generateMenu } from './router/menu'
 import i18n from './i18n'
 import ElementPlus, { ElMessage } from 'element-plus'
 import axios, { AxiosHeaders } from 'axios'
 import NProgress from 'nprogress'
 import dayjs from 'dayjs'
+import { persistedStatePlugin } from './stores/plugins/persistedState'
+import { useMenuStore } from './stores/menu'
 
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -33,8 +36,10 @@ use([
 ])
 
 const app = createApp(App)
+const pinia = createPinia()
+pinia.use(persistedStatePlugin)
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(i18n)
 app.use(ElementPlus)
@@ -61,7 +66,7 @@ NProgress.configure({
   minimum: 0.3,
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   NProgress.start()
   if (to.path === '/login') {
     return true
@@ -69,6 +74,14 @@ router.beforeEach((to) => {
   const token = sessionStorage.getItem('token')
   if (!token) {
     return { path: '/login' }
+  }
+  const menuStore = useMenuStore()
+  if (!menuStore.menus.length) {
+    const menuReady = await generateMenu()
+    if (!menuReady) {
+      return false
+    }
+    return to.fullPath
   }
   return true
 })
