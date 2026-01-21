@@ -32,6 +32,19 @@ const normalizeIcon = (icon?: string) => {
   return icon.startsWith('iconfont') ? icon : `iconfont ${icon}`
 }
 
+const normalizeRoutePath = (path: string) => {
+  if (!path.includes('*') || path.includes(':pathMatch')) {
+    return path
+  }
+  if (path === '*') {
+    return '/:pathMatch(.*)*'
+  }
+  if (path.endsWith('/*')) {
+    return path.replace(/\/\*$/, '/:id')
+  }
+  return path.replace(/\*$/, ':pathMatch(.*)*')
+}
+
 const resolveViewComponent = (component?: string) => {
   if (!component) {
     return { component: undefined, viewPath: undefined }
@@ -67,7 +80,7 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
 
   if (children && children.length) {
     return {
-      path: item.path,
+      path: normalizeRoutePath(item.path),
       name: item.name,
       component: resolvedComponent,
       redirect: item.redirect,
@@ -83,7 +96,7 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
   }
 
   return {
-    path: item.path,
+    path: normalizeRoutePath(item.path),
     name: item.name,
     component: resolvedComponent,
     meta: {
