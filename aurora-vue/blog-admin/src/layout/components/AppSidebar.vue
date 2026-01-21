@@ -126,6 +126,7 @@ const singleMenuPath = (routeItem: RouteRecordRaw) => {
   border-right: none;
   height: 100%;
   overflow-y: auto;
+  transition: width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .side-nav-menu:not(.el-menu--collapse) {

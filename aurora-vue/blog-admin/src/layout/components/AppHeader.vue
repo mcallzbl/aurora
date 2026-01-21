@@ -1,10 +1,16 @@
 <template>
   <div class="header-shell">
     <div class="nav-bar">
-      <button class="hamburger" type="button" @click="toggleCollapse" aria-label="Toggle sidebar">
-        <span />
-        <span />
-        <span />
+      <button
+        class="hamburger"
+        :class="{ collapsed: isCollapsed }"
+        type="button"
+        @click="toggleCollapse"
+        aria-label="Toggle sidebar"
+      >
+        <el-icon class="hamburger-icon">
+          <component :is="isCollapsed ? Expand : Fold" />
+        </el-icon>
       </button>
 
       <el-breadcrumb>
@@ -15,7 +21,11 @@
       </el-breadcrumb>
 
       <div class="right-menu">
-        <button class="text-button" type="button" @click="toggleFullscreen">全屏</button>
+        <button class="icon-button" type="button" @click="toggleFullscreen" aria-label="Toggle fullscreen">
+          <el-icon class="icon-button__icon">
+            <component :is="isFullscreen ? Close : FullScreen" />
+          </el-icon>
+        </button>
         <el-dropdown @command="handleCommand">
           <span class="user-trigger">
             <el-avatar :size="36" :src="avatarUrl">
@@ -53,9 +63,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+import { Close, Expand, Fold, FullScreen } from '@element-plus/icons-vue'
 import { resetRouter } from '@/router'
 import { useAppStore, type TabItem } from '@/stores/app'
 
@@ -76,6 +87,8 @@ const appStore = useAppStore()
 const tabs = computed(() => appStore.tabs)
 const avatarUrl = computed(() => appStore.userInfo?.avatar || '')
 const avatarFallback = computed(() => (appStore.userInfo?.nickname || 'A').slice(0, 1))
+const isCollapsed = computed(() => appStore.collapse)
+const isFullscreen = ref(false)
 
 const buildTab = (): TabItem => {
   const label =
@@ -148,6 +161,19 @@ const toggleFullscreen = () => {
   }
 }
 
+const syncFullscreen = () => {
+  isFullscreen.value = Boolean(document.fullscreenElement)
+}
+
+onMounted(() => {
+  syncFullscreen()
+  document.addEventListener('fullscreenchange', syncFullscreen)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('fullscreenchange', syncFullscreen)
+})
+
 watch(
   () => route.path,
   () => {
@@ -178,22 +204,46 @@ watch(
 }
 
 .hamburger {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  gap: 4px;
-  border: none;
-  background: transparent;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(242, 247, 255, 0.7));
+  border-radius: 14px;
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  box-shadow:
+    0 10px 22px rgba(31, 24, 16, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
-.hamburger span {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: var(--ink-700);
-  border-radius: 999px;
+.hamburger:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 16px 28px rgba(31, 24, 16, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.hamburger:active {
+  transform: translateY(0);
+  box-shadow:
+    0 8px 18px rgba(31, 24, 16, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.hamburger-icon {
+  font-size: 1.35rem;
+  color: #0f172a;
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.hamburger.collapsed .hamburger-icon {
+  transform: rotate(-90deg);
+  color: #0f766e;
 }
 
 .right-menu {
@@ -203,14 +253,33 @@ watch(
   gap: 0.75rem;
 }
 
-.text-button {
-  border: 1px solid var(--border-soft);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 0.4rem 0.75rem;
-  border-radius: 999px;
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  display: grid;
+  place-items: center;
   cursor: pointer;
-  font-weight: 600;
-  color: var(--ink-700);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow:
+    0 10px 20px rgba(31, 24, 16, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.icon-button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 24px rgba(31, 24, 16, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.icon-button__icon {
+  font-size: 1.2rem;
+  color: #0f172a;
 }
 
 .user-trigger {

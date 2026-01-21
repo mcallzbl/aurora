@@ -43,6 +43,10 @@ const isCollapsed = computed(() => appStore.collapse)
   overflow: hidden;
 }
 
+.layout-shell :deep(.el-aside) {
+  transition: width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .main-container {
   height: 100%;
   overflow: hidden;
