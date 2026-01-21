@@ -20,7 +20,7 @@ import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { BarChart, LineChart, MapChart, PieChart } from 'echarts/charts'
-import { LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
+import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
 
 import { MdEditor } from 'md-editor-v3'
 
@@ -30,6 +30,7 @@ use([
   LineChart,
   PieChart,
   MapChart,
+  GridComponent,
   TooltipComponent,
   LegendComponent,
   TitleComponent,
