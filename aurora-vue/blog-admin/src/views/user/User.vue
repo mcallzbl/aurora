@@ -87,9 +87,8 @@
       </el-table-column>
     </el-table>
 
-    <el-pagination
+    <AppPagination
       class="pagination-container"
-      background
       v-model:current-page="pagination.current"
       v-model:page-size="pagination.size"
       :total="pagination.total"
@@ -109,7 +108,7 @@
         </el-form-item>
         <el-form-item label="角色">
           <el-checkbox-group v-model="roleIds">
-            <el-checkbox v-for="item in userRoles" :key="item.id" :label="item.id">
+            <el-checkbox v-for="item in userRoles" :key="item.id" :value="item.id">
               {{ item.roleName }}
             </el-checkbox>
           </el-checkbox-group>
@@ -129,6 +128,7 @@ import { useRoute } from 'vue-router'
 import { ElNotification } from 'element-plus'
 import axios from 'axios'
 import { useAppStore } from '@/stores/app'
+import AppPagination from '@/components/AppPagination.vue'
 
 defineOptions({
   name: 'UserView',

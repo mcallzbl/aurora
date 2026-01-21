@@ -1,89 +1,78 @@
 <template>
-  <el-card class="talk-list-card">
-    <div class="page-title">{{ pageTitle }}</div>
+  <div class="talk-page">
+    <el-card class="talk-list-card">
+      <div class="page-title">{{ pageTitle }}</div>
 
-    <div class="status-menu">
-      <span class="menu-label">状态</span>
-      <button
-        v-for="item in statusOptions"
-        :key="String(item.value)"
-        type="button"
-        class="status-button"
-        :class="{ active: activeStatus === item.value }"
-        @click="changeStatus(item.value)"
-      >
-        {{ item.label }}
-      </button>
-    </div>
+      <AppStatusFilter v-model="activeStatus" :options="statusOptions" @change="changeStatus" />
 
-    <el-empty v-if="!talks.length && !loading" description="暂无说说" />
+      <el-empty v-if="!talks.length && !loading" description="暂无说说" />
 
-    <div v-else class="talk-list" v-loading="loading">
-      <div v-for="item in talks" :key="item.id" class="talk-item">
-        <el-avatar :src="item.avatar" :size="40" class="user-avatar" />
-        <div class="talk-body">
-          <div class="talk-header">
-            <div class="talk-title">
-              <span class="nickname">{{ item.nickname }}</span>
-              <span v-if="item.isTop === 1" class="flag">
-                <el-icon><Top /></el-icon>
-                置顶
-              </span>
-              <span v-if="item.status === 2" class="flag flag--secret">
-                <el-icon><Lock /></el-icon>
-                私密
-              </span>
+      <div v-else class="talk-list" v-loading="loading">
+        <div v-for="item in talks" :key="item.id" class="talk-item">
+          <el-avatar :src="item.avatar" :size="40" class="user-avatar" />
+          <div class="talk-body">
+            <div class="talk-header">
+              <div class="talk-title">
+                <span class="nickname">{{ item.nickname }}</span>
+                <span v-if="item.isTop === 1" class="flag">
+                  <el-icon><Top /></el-icon>
+                  置顶
+                </span>
+                <span v-if="item.status === 2" class="flag flag--secret">
+                  <el-icon><Lock /></el-icon>
+                  私密
+                </span>
+              </div>
+              <el-dropdown @command="handleCommand">
+                <button class="more-button" type="button" aria-label="更多操作">
+                  <el-icon><MoreFilled /></el-icon>
+                </button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item :command="`edit:${item.id}`">
+                      <el-icon><Edit /></el-icon>
+                      编辑
+                    </el-dropdown-item>
+                    <el-dropdown-item :command="`delete:${item.id}`" divided>
+                      <el-icon><Delete /></el-icon>
+                      删除
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
-            <el-dropdown @command="handleCommand">
-              <button class="more-button" type="button" aria-label="更多操作">
-                <el-icon><MoreFilled /></el-icon>
-              </button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item :command="`edit:${item.id}`">
-                    <el-icon><Edit /></el-icon>
-                    编辑
-                  </el-dropdown-item>
-                  <el-dropdown-item :command="`delete:${item.id}`" divided>
-                    <el-icon><Delete /></el-icon>
-                    删除
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+
+            <div class="talk-meta">{{ formatDate(item.createTime) }}</div>
+            <div class="talk-content" v-html="item.content" />
+
+            <el-row v-if="item.imgs?.length" :gutter="8" class="talk-images">
+              <el-col v-for="(img, index) in item.imgs" :key="index" :xs="12" :sm="8" :md="6">
+                <el-image class="talk-image" :src="img" :preview-src-list="item.imgs" fit="cover" />
+              </el-col>
+            </el-row>
           </div>
-
-          <div class="talk-meta">{{ formatDate(item.createTime) }}</div>
-          <div class="talk-content" v-html="item.content" />
-
-          <el-row v-if="item.imgs?.length" :gutter="8" class="talk-images">
-            <el-col v-for="(img, index) in item.imgs" :key="index" :xs="12" :sm="8" :md="6">
-              <el-image class="talk-image" :src="img" :preview-src-list="item.imgs" fit="cover" />
-            </el-col>
-          </el-row>
         </div>
       </div>
-    </div>
 
-    <el-pagination
-      class="pagination-container"
-      background
-      :current-page="pagination.current"
-      :page-size="pagination.size"
-      :total="pagination.total"
-      layout="prev, pager, next"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-    />
-  </el-card>
+      <AppPagination
+        class="pagination-container"
+        v-model:current-page="pagination.current"
+        v-model:page-size="pagination.size"
+        :total="pagination.total"
+        layout="prev, pager, next"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+      />
+    </el-card>
 
-  <el-dialog v-model="showDeleteDialog" title="提示" width="30%">
-    <div style="font-size: 1rem">是否删除该说说？</div>
-    <template #footer>
-      <el-button @click="showDeleteDialog = false">取消</el-button>
-      <el-button type="primary" @click="confirmDelete">确定</el-button>
-    </template>
-  </el-dialog>
+    <el-dialog v-model="showDeleteDialog" title="提示" width="30%">
+      <div style="font-size: 1rem">是否删除该说说？</div>
+      <template #footer>
+        <el-button @click="showDeleteDialog = false">取消</el-button>
+        <el-button type="primary" @click="confirmDelete">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -93,6 +82,8 @@ import axios from 'axios'
 import { ElNotification } from 'element-plus'
 import { Delete, Edit, Lock, MoreFilled, Top } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
+import AppPagination from '@/components/AppPagination.vue'
+import AppStatusFilter from '@/components/AppStatusFilter.vue'
 
 defineOptions({
   name: 'TalkList',
@@ -126,7 +117,7 @@ const pageTitle = computed(() => (route.name ? String(route.name) : '说说列�
 
 const loading = ref(false)
 const talks = ref<Talk[]>([])
-const activeStatus = ref<number | null>(null)
+const activeStatus = ref<string | number | null>(null)
 const showDeleteDialog = ref(false)
 const pendingDeleteId = ref<number | null>(null)
 
@@ -196,7 +187,7 @@ const confirmDelete = async () => {
         title: '成功',
         message: data.message || '删除成功',
       })
-      fetchTalks()
+      await fetchTalks()
     } else {
       ElNotification.error({
         title: '失败',
@@ -208,7 +199,7 @@ const confirmDelete = async () => {
   }
 }
 
-const changeStatus = (status: number | null) => {
+const changeStatus = (status: string | number | null) => {
   activeStatus.value = status
   pagination.current = 1
   fetchTalks()
@@ -244,43 +235,6 @@ onMounted(() => {
   font-weight: 600;
   color: var(--ink-900);
   margin-bottom: 1.5rem;
-}
-
-.status-menu {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-soft);
-  color: var(--ink-500);
-  font-size: 0.9rem;
-}
-
-.menu-label {
-  font-weight: 600;
-  color: var(--ink-700);
-}
-
-.status-button {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: var(--ink-500);
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  transition: all 0.2s ease;
-}
-
-.status-button:hover {
-  background: var(--surface-2);
-  color: var(--ink-900);
-}
-
-.status-button.active {
-  background: rgba(63, 159, 147, 0.2);
-  color: #0f766e;
-  font-weight: 600;
 }
 
 .talk-list {

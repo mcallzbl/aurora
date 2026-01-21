@@ -2,19 +2,17 @@
   <el-card class="article-list-container">
     <div class="page-title">{{ route.name }}</div>
 
-    <div class="status-menu">
-      <span class="menu-label">状态</span>
-      <span
-        v-for="item in statusOptions"
-        :key="item.key"
-        :class="['status-item', { active: activeStatus === item.key }]"
-        @click="changeStatus(item.key)"
-      >
-        {{ item.label }}
-      </span>
-    </div>
+    <AppStatusFilter v-model="activeStatus" :options="statusOptions" @change="changeStatus" />
 
     <div class="operation-container">
+      <el-checkbox
+        class="select-all"
+        :model-value="isAllSelected"
+        :indeterminate="isIndeterminate"
+        @change="handleToggleSelectAll"
+      >
+        全选
+      </el-checkbox>
       <el-button
         v-if="queryParams.isDelete === 0"
         type="danger"
@@ -110,121 +108,123 @@
       </div>
     </div>
 
-    <el-table
-      border
-      :data="articleList"
-      v-loading="loading"
-      @selection-change="handleSelectionChange"
-    >
-      <el-table-column type="selection" width="55" />
-      <el-table-column prop="articleCover" label="文章封面" width="180" align="center">
-        <template #default="{ row }">
-          <div class="cover-container">
-            <el-image class="article-cover" fit="cover" :src="row.articleCover || defaultCover" />
-            <i v-if="row.status === 1" class="status-icon public-icon" />
-            <i v-if="row.status === 2" class="status-icon private-icon" />
-            <i v-if="row.status === 3" class="status-icon draft-icon" />
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="articleTitle" label="标题" align="center" />
-      <el-table-column prop="categoryName" label="分类" width="110" align="center" />
-      <el-table-column prop="tagDTOs" label="标签" width="170" align="center">
-        <template #default="{ row }">
-          <el-tag
-            v-for="item of row.tagDTOs"
-            :key="item.tagId"
-            style="margin-right: 0.2rem; margin-top: 0.2rem"
-          >
-            {{ item.tagName }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="viewsCount" label="浏览量" width="70" align="center">
-        <template #default="{ row }">
-          <span>{{ row.viewsCount ?? 0 }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="type" label="类型" width="80" align="center">
-        <template #default="{ row }">
-          <el-tag :type="getArticleTypeInfo(row.type).tagType">
-            {{ getArticleTypeInfo(row.type).name }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="createTime" label="发表时间" width="150" align="center">
-        <template #default="{ row }">
-          {{ formatDate(row.createTime) }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="isTop" label="置顶" width="80" align="center">
-        <template #default="{ row }">
-          <el-switch
-            v-model="row.isTop"
-            :active-value="1"
-            :inactive-value="0"
-            :disabled="row.isDelete === 1"
-            @change="handleToggleTopOrFeatured(row)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="isFeatured" label="推荐" width="80" align="center">
-        <template #default="{ row }">
-          <el-switch
-            v-model="row.isFeatured"
-            :active-value="1"
-            :inactive-value="0"
-            :disabled="row.isDelete === 1"
-            @change="handleToggleTopOrFeatured(row)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="150">
-        <template #default="{ row }">
-          <el-button
-            v-if="row.isDelete === 0"
-            type="primary"
-            size="small"
-            @click="handleEdit(row.id)"
-          >
-            编辑
-          </el-button>
-          <el-popconfirm
-            v-if="row.isDelete === 0"
-            title="确定删除吗？"
-            @confirm="handleDeleteArticle(row.id)"
-            style="margin-left: 10px"
-          >
-            <template #reference>
-              <el-button size="small" type="danger"> 删除 </el-button>
-            </template>
-          </el-popconfirm>
-          <el-popconfirm
-            v-if="row.isDelete === 1"
-            title="确定恢复吗？"
-            @confirm="handleDeleteArticle(row.id)"
-          >
-            <template #reference>
-              <el-button size="small" type="success"> 恢复 </el-button>
-            </template>
-          </el-popconfirm>
-          <el-popconfirm
-            v-if="row.isDelete === 1"
-            title="确定彻底删除吗？"
-            @confirm="handlePermanentDelete(row.id)"
-            style="margin-left: 10px"
-          >
-            <template #reference>
-              <el-button size="small" type="danger"> 删除 </el-button>
-            </template>
-          </el-popconfirm>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-empty v-if="!articleList.length && !loading" description="暂无文章" />
 
-    <el-pagination
+    <div v-else class="article-list" v-loading="loading">
+      <el-checkbox-group v-model="selectedIds" class="article-group">
+        <div v-for="article in articleList" :key="article.id" class="article-item">
+          <div class="article-select">
+            <el-checkbox :label="article.id" />
+          </div>
+
+          <div class="article-cover-wrapper">
+            <el-image
+              class="article-cover"
+              fit="cover"
+              :src="article.articleCover || defaultCover"
+            />
+            <div class="article-flags">
+              <span v-if="article.isTop === 1" class="flag flag--top">置顶</span>
+              <span v-if="article.isFeatured === 1" class="flag flag--featured">推荐</span>
+            </div>
+          </div>
+
+          <div class="article-body">
+            <div class="article-header">
+              <div class="article-title-row">
+                <span class="article-title">{{ article.articleTitle || '未命名文章' }}</span>
+                <el-tag size="small" :type="getArticleTypeInfo(article.type).tagType">
+                  {{ getArticleTypeInfo(article.type).name }}
+                </el-tag>
+                <el-tag v-if="article.status === 1" size="small" type="success">公开</el-tag>
+                <el-tag v-else-if="article.status === 2" size="small" type="warning">私密</el-tag>
+                <el-tag v-else size="small" type="info">草稿</el-tag>
+                <el-tag v-if="article.isDelete === 1" size="small" type="danger">回收站</el-tag>
+              </div>
+              <div class="article-right">
+                <div class="article-controls">
+                  <div class="control-item">
+                    <span>置顶</span>
+                    <TopSwitch
+                      v-model="article.isTop"
+                      :disabled="article.isDelete === 1"
+                      @change="handleToggleTopOrFeatured(article)"
+                    />
+                  </div>
+                  <div class="control-item">
+                    <span>推荐</span>
+                    <el-switch
+                      v-model="article.isFeatured"
+                      :active-value="1"
+                      :inactive-value="0"
+                      :disabled="article.isDelete === 1"
+                      @change="handleToggleTopOrFeatured(article)"
+                    />
+                  </div>
+                </div>
+                <div class="article-actions">
+                  <el-button
+                    v-if="article.isDelete === 0"
+                    type="primary"
+                    size="small"
+                    @click="handleEdit(article.id)"
+                  >
+                    编辑
+                  </el-button>
+                  <el-popconfirm
+                    v-if="article.isDelete === 0"
+                    title="确定删除吗？"
+                    @confirm="handleDeleteArticle(article.id)"
+                  >
+                    <template #reference>
+                      <el-button size="small" type="danger">删除</el-button>
+                    </template>
+                  </el-popconfirm>
+                  <el-popconfirm
+                    v-if="article.isDelete === 1"
+                    title="确定恢复吗？"
+                    @confirm="handleDeleteArticle(article.id)"
+                  >
+                    <template #reference>
+                      <el-button size="small" type="success">恢复</el-button>
+                    </template>
+                  </el-popconfirm>
+                  <el-popconfirm
+                    v-if="article.isDelete === 1"
+                    title="确定彻底删除吗？"
+                    @confirm="handlePermanentDelete(article.id)"
+                  >
+                    <template #reference>
+                      <el-button size="small" type="danger">删除</el-button>
+                    </template>
+                  </el-popconfirm>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="article.tagDTOs?.length" class="article-tags">
+              <el-tag
+                v-for="item of article.tagDTOs"
+                :key="item.tagId"
+                size="small"
+                style="margin-right: 0.3rem; margin-top: 0.3rem"
+              >
+                {{ item.tagName }}
+              </el-tag>
+            </div>
+
+            <div class="article-meta">
+              <span>{{ article.categoryName || '未分类' }}</span>
+              <span>浏览量 {{ article.viewsCount ?? 0 }}</span>
+              <span>发表时间 {{ formatDate(article.createTime) }}</span>
+            </div>
+          </div>
+        </div>
+      </el-checkbox-group>
+    </div>
+
+    <AppPagination
       class="pagination-container"
-      background
       v-model:current-page="pagination.current"
       v-model:page-size="pagination.size"
       :total="pagination.total"
@@ -265,6 +265,9 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElNotification } from 'element-plus'
 import axios from 'axios'
+import AppPagination from '@/components/AppPagination.vue'
+import AppStatusFilter from '@/components/AppStatusFilter.vue'
+import TopSwitch from '@/components/TopSwitch.vue'
 
 defineOptions({
   name: 'ArticleList',
@@ -330,7 +333,7 @@ const selectedIds = ref<number[]>([])
 const categories = ref<Category[]>([])
 const tags = ref<Tag[]>([])
 
-const activeStatus = ref('all')
+const activeStatus = ref<string | number | null>('all')
 const showDeleteDialog = ref(false)
 const showPermanentDeleteDialog = ref(false)
 const showExportDialog = ref(false)
@@ -348,11 +351,11 @@ const articleTypes = [
 ]
 
 const statusOptions = [
-  { key: 'all', label: '全部' },
-  { key: 'public', label: '公开' },
-  { key: 'private', label: '私密' },
-  { key: 'draft', label: '草稿箱' },
-  { key: 'delete', label: '回收站' },
+  { value: 'all', label: '全部' },
+  { value: 'public', label: '公开' },
+  { value: 'private', label: '私密' },
+  { value: 'draft', label: '草稿箱' },
+  { value: 'delete', label: '回收站' },
 ]
 
 const queryParams = reactive({
@@ -391,7 +394,7 @@ const formatDate = (dateStr: string) => {
   })
 }
 
-const changeStatus = (status: string) => {
+const changeStatus = (status: string | number | null) => {
   activeStatus.value = status
   pagination.current = 1
 
@@ -426,8 +429,16 @@ const handleSearch = () => {
   fetchArticles()
 }
 
-const handleSelectionChange = (articles: Article[]) => {
-  selectedIds.value = articles.map((item) => item.id)
+const isAllSelected = computed(() => {
+  return articleList.value.length > 0 && selectedIds.value.length === articleList.value.length
+})
+
+const isIndeterminate = computed(() => {
+  return selectedIds.value.length > 0 && selectedIds.value.length < articleList.value.length
+})
+
+const handleToggleSelectAll = (value: boolean) => {
+  selectedIds.value = value ? articleList.value.map((item) => item.id) : []
 }
 
 const handleSizeChange = () => {
@@ -655,6 +666,7 @@ const fetchArticles = async () => {
     })
     articleList.value = data.data.records
     pagination.total = data.data.count
+    selectedIds.value = []
   } finally {
     loading.value = false
   }
@@ -716,83 +728,198 @@ onMounted(() => {
   margin-bottom: 1.5rem;
 }
 
-.status-menu {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  font-size: 14px;
-  color: var(--ink-500);
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-soft);
-}
-
-.menu-label {
-  font-weight: 500;
-  color: var(--ink-700);
-}
-
-.status-item {
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-}
-
-.status-item:hover {
-  color: var(--ink-900);
-  background: var(--surface-2);
-}
-
-.status-item.active {
-  color: var(--primary);
-  font-weight: 600;
-}
-
 .operation-container {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+}
+
+.select-all {
+  margin-right: 0.25rem;
 }
 
 .search-container {
   margin-left: auto;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-.cover-container {
+.article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.article-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.article-item {
+  display: grid;
+  grid-template-columns: auto 160px 1fr;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.article-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 26px rgba(15, 23, 42, 0.1);
+}
+
+.article-select {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.35rem;
+}
+
+.article-group :deep(.el-checkbox__label) {
+  display: none;
+}
+
+.article-cover-wrapper {
   position: relative;
-  width: 100%;
-  height: 90px;
+  width: 160px;
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .article-cover {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
   object-fit: cover;
 }
 
-.article-cover::after {
-  content: '';
-  background: rgba(0, 0, 0, 0.3);
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-radius: 8px;
-}
-
-.status-icon {
+.article-flags {
   position: absolute;
   right: 0.5rem;
   bottom: 0.5rem;
-  color: #fff;
-  font-size: 1.25rem;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.flag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(251, 146, 60, 0.15);
+  color: #c2410c;
+}
+
+.flag--top {
+  background: rgba(59, 130, 246, 0.15);
+  color: #1d4ed8;
+}
+
+.flag--featured {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.article-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+  color: var(--ink-800);
+}
+
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.article-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.article-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.article-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000 !important;
+  -webkit-text-fill-color: #000;
+  text-shadow: none;
+  opacity: 1;
+  position: relative;
   z-index: 1;
+  line-height: 1.5;
+  word-break: break-word;
+  max-width: 420px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.article-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--ink-500);
+}
+
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.article-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.control-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-600);
+  font-size: 0.85rem;
 }
 
 .pagination-container {
@@ -801,19 +928,32 @@ onMounted(() => {
   justify-content: center;
 }
 
-:deep(.el-table) {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-:deep(.el-table th) {
-  background: var(--surface-2);
-  color: var(--ink-700);
-  font-weight: 600;
-}
-
 :deep(.el-pagination) {
   --el-pagination-button-bg-color: var(--surface-1);
   --el-pagination-hover-color: var(--primary);
+}
+
+@media (max-width: 900px) {
+  .article-item {
+    grid-template-columns: 1fr;
+  }
+
+  .article-select {
+    justify-content: flex-end;
+  }
+
+  .article-cover-wrapper {
+    width: 100%;
+    height: 180px;
+  }
+
+  .article-title {
+    max-width: 100%;
+  }
+
+  .article-right {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 </style>

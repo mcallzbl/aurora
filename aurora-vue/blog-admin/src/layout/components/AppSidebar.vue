@@ -127,6 +127,8 @@ const singleMenuPath = (routeItem: RouteRecordRaw) => {
   height: 100%;
   overflow-y: auto;
   transition: width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(71, 85, 105, 0.9) rgba(2, 6, 23, 0.6);
 }
 
 .side-nav-menu:not(.el-menu--collapse) {
@@ -135,6 +137,25 @@ const singleMenuPath = (routeItem: RouteRecordRaw) => {
 
 .side-nav-menu i {
   margin-right: 0.75rem;
+}
+
+:deep(.side-nav-menu::-webkit-scrollbar) {
+  width: 6px;
+}
+
+:deep(.side-nav-menu::-webkit-scrollbar-track) {
+  background: rgba(2, 6, 23, 0.6);
+  border-radius: 999px;
+}
+
+:deep(.side-nav-menu::-webkit-scrollbar-thumb) {
+  background: linear-gradient(180deg, rgba(100, 116, 139, 0.9), rgba(51, 65, 85, 0.95));
+  border-radius: 999px;
+  border: 1px solid rgba(2, 6, 23, 0.45);
+}
+
+:deep(.side-nav-menu::-webkit-scrollbar-thumb:hover) {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.95), rgba(71, 85, 105, 1));
 }
 
 @media (max-width: 900px) {
