@@ -4,7 +4,7 @@
       <AppSidebar />
     </el-aside>
     <el-container class="main-container">
-      <el-header height="84px" class="header-shell">
+      <el-header class="header-shell">
         <AppHeader :key="route.fullPath" />
       </el-header>
       <el-main class="main-content">
@@ -36,16 +36,30 @@ const isCollapsed = computed(() => appStore.collapse)
 
 <style scoped>
 .layout-shell {
-  min-height: 100vh;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.main-container {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .header-shell {
   padding: 0;
+  height: auto !important;
 }
 
 .main-content {
   background: #f7f9fb;
   padding: 1.25rem;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .fade-transform-enter-active,

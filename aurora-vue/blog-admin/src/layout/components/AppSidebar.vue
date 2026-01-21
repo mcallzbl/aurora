@@ -89,11 +89,14 @@ const visibleMenus = computed(
 .side-nav {
   background: #1e293b;
   border-right: 1px solid rgba(15, 23, 42, 0.4);
+  height: 100%;
+  overflow: hidden;
 }
 
 .side-nav-menu {
   border-right: none;
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .side-nav-menu:not(.el-menu--collapse) {
@@ -106,7 +109,7 @@ const visibleMenus = computed(
 
 @media (max-width: 900px) {
   .side-nav-menu {
-    min-height: auto;
+    height: auto;
   }
 }
 </style>

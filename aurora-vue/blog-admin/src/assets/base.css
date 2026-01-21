@@ -7,8 +7,13 @@
   padding: 0;
 }
 
+html,
+body,
+#app {
+  height: 100%;
+}
+
 body {
-  min-height: 100vh;
   color: var(--ink-900);
   background: var(--surface-0);
   line-height: 1.6;
@@ -17,6 +22,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
 }
 
 img {
