@@ -91,7 +91,7 @@
     </el-card>
 
     <el-dialog v-model="showRoleDialog" width="30%">
-      <template #title>
+      <template #header>
         <div class="dialog-title">{{ roleDialogTitle }}</div>
       </template>
       <el-form label-width="80px" size="default" :model="roleForm">
@@ -115,7 +115,7 @@
     </el-dialog>
 
     <el-dialog v-model="showResourceDialog" width="30%" top="9vh">
-      <template #title>
+      <template #header>
         <div class="dialog-title">修改资源权限</div>
       </template>
       <el-form label-width="80px" size="default" :model="roleForm">
@@ -345,7 +345,7 @@ const saveOrUpdateRoleMenu = async () => {
     ElMessage.error('角色名不能为空')
     return
   }
-  roleForm.resourceIds = null
+  roleForm.resourceIds = []
   const checkedKeys = menuTreeRef.value?.getCheckedKeys?.() || []
   const halfCheckedKeys = menuTreeRef.value?.getHalfCheckedKeys?.() || []
   roleForm.menuIds = [...checkedKeys, ...halfCheckedKeys]
@@ -366,7 +366,7 @@ const saveOrUpdateRoleMenu = async () => {
 }
 
 const saveOrUpdateRoleResource = async () => {
-  roleForm.menuIds = null
+  roleForm.menuIds = []
   roleForm.resourceIds = resourceTreeRef.value?.getCheckedKeys?.() || []
   const { data } = await axios.post<CommonResponse>('/api/admin/role', roleForm)
   if (data.flag) {

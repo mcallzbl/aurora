@@ -1,130 +1,132 @@
 <template>
-  <el-card class="resource-card">
-    <div class="page-title">{{ pageTitle }}</div>
+  <div class="resource-page">
+    <el-card class="resource-card">
+      <div class="page-title">{{ pageTitle }}</div>
 
-    <div class="operation-container">
-      <el-button type="primary" size="small" @click="openModuleEditor(null)">
-        <el-icon><Plus /></el-icon>
-        新增模块
-      </el-button>
-      <div class="search-container">
-        <el-input
-          v-model="keywords"
-          clearable
-          size="small"
-          placeholder="请输入资源名"
-          style="width: 200px"
-          @keyup.enter="fetchResources"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" size="small" style="margin-left: 1rem" @click="fetchResources">
-          <el-icon><Search /></el-icon>
-          搜索
+      <div class="operation-container">
+        <el-button type="primary" size="small" @click="openModuleEditor(null)">
+          <el-icon><Plus /></el-icon>
+          新增模块
         </el-button>
-      </div>
-    </div>
-
-    <el-empty v-if="!resources.length && !loading" description="暂无资源" />
-
-    <el-table
-      v-else
-      v-loading="loading"
-      :data="resources"
-      row-key="id"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-    >
-      <el-table-column prop="resourceName" label="资源名" width="220" />
-      <el-table-column prop="url" label="资源路径" width="300" />
-      <el-table-column label="请求方式" align="center" width="150">
-        <template #default="{ row }">
-          <el-tag v-if="getRequestMethod(row)" :type="tagType(getRequestMethod(row))">
-            {{ getRequestMethod(row) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="isAnonymous" label="匿名访问" align="center" width="120">
-        <template #default="{ row }">
-          <el-switch
-            v-if="row.url"
-            v-model="row.isAnonymous"
-            :active-value="1"
-            :inactive-value="0"
-            @change="handleToggleAnonymous(row, $event)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" align="center" width="160">
-        <template #default="{ row }">
-          <el-icon style="margin-right: 6px"><Clock /></el-icon>
-          {{ formatDate(row.createTime) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="200">
-        <template #default="{ row }">
-          <el-button
-            v-if="row.children"
-            type="primary"
-            text
+        <div class="search-container">
+          <el-input
+            v-model="keywords"
+            clearable
             size="small"
-            @click="openAddResource(row)"
+            placeholder="请输入资源名"
+            style="width: 200px"
+            @keyup.enter="fetchResources"
           >
-            新增
-          </el-button>
-          <el-button type="primary" text size="small" @click="openEditResource(row)"
-            >修改</el-button
-          >
-          <el-popconfirm title="确定删除吗？" @confirm="deleteResource(row.id)">
-            <template #reference>
-              <el-button size="small" type="danger" text style="margin-left: 0.5rem"
-                >删除</el-button
-              >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
             </template>
-          </el-popconfirm>
-        </template>
-      </el-table-column>
-    </el-table>
-  </el-card>
+          </el-input>
+          <el-button type="primary" size="small" style="margin-left: 1rem" @click="fetchResources">
+            <el-icon><Search /></el-icon>
+            搜索
+          </el-button>
+        </div>
+      </div>
 
-  <el-dialog v-model="showModuleDialog" width="30%">
-    <template #title>
-      <div class="dialog-title">{{ moduleDialogTitle }}</div>
-    </template>
-    <el-form label-width="80px" size="default" :model="resourceForm">
-      <el-form-item label="模块名">
-        <el-input v-model="resourceForm.resourceName" style="width: 220px" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="showModuleDialog = false">取消</el-button>
-      <el-button type="primary" @click="submitResource">确定</el-button>
-    </template>
-  </el-dialog>
+      <el-empty v-if="!resources.length && !loading" description="暂无资源" />
 
-  <el-dialog v-model="showResourceDialog" width="30%">
-    <template #title>
-      <div class="dialog-title">{{ resourceDialogTitle }}</div>
-    </template>
-    <el-form label-width="80px" size="default" :model="resourceForm">
-      <el-form-item label="资源名">
-        <el-input v-model="resourceForm.resourceName" style="width: 220px" />
-      </el-form-item>
-      <el-form-item label="资源路径">
-        <el-input v-model="resourceForm.url" style="width: 220px" />
-      </el-form-item>
-      <el-form-item label="请求方式">
-        <el-radio-group v-model="resourceForm.requestMethod">
-          <el-radio v-for="item in requestMethods" :key="item" :value="item">{{ item }}</el-radio>
-        </el-radio-group>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="showResourceDialog = false">取消</el-button>
-      <el-button type="primary" @click="submitResource">确定</el-button>
-    </template>
-  </el-dialog>
+      <el-table
+        v-else
+        v-loading="loading"
+        :data="resources"
+        row-key="id"
+        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      >
+        <el-table-column prop="resourceName" label="资源名" width="220" />
+        <el-table-column prop="url" label="资源路径" width="300" />
+        <el-table-column label="请求方式" align="center" width="150">
+          <template #default="{ row }">
+            <el-tag v-if="getRequestMethod(row)" :type="tagType(getRequestMethod(row))">
+              {{ getRequestMethod(row) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="isAnonymous" label="匿名访问" align="center" width="120">
+          <template #default="{ row }">
+            <el-switch
+              v-if="row.url"
+              v-model="row.isAnonymous"
+              :active-value="1"
+              :inactive-value="0"
+              @change="handleToggleAnonymous(row, $event)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" align="center" width="160">
+          <template #default="{ row }">
+            <el-icon style="margin-right: 6px"><Clock /></el-icon>
+            {{ formatDate(row.createTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="200">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.children"
+              type="primary"
+              text
+              size="small"
+              @click="openAddResource(row)"
+            >
+              新增
+            </el-button>
+            <el-button type="primary" text size="small" @click="openEditResource(row)"
+              >修改</el-button
+            >
+            <el-popconfirm title="确定删除吗？" @confirm="deleteResource(row.id)">
+              <template #reference>
+                <el-button size="small" type="danger" text style="margin-left: 0.5rem"
+                  >删除</el-button
+                >
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog v-model="showModuleDialog" width="30%">
+      <template #header>
+        <div class="dialog-title">{{ moduleDialogTitle }}</div>
+      </template>
+      <el-form label-width="80px" size="default" :model="resourceForm">
+        <el-form-item label="模块名">
+          <el-input v-model="resourceForm.resourceName" style="width: 220px" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showModuleDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitResource">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="showResourceDialog" width="30%">
+      <template #header>
+        <div class="dialog-title">{{ resourceDialogTitle }}</div>
+      </template>
+      <el-form label-width="80px" size="default" :model="resourceForm">
+        <el-form-item label="资源名">
+          <el-input v-model="resourceForm.resourceName" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="资源路径">
+          <el-input v-model="resourceForm.url" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="请求方式">
+          <el-radio-group v-model="resourceForm.requestMethod">
+            <el-radio v-for="item in requestMethods" :key="item" :value="item">{{ item }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showResourceDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitResource">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">

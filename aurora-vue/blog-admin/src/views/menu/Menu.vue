@@ -85,7 +85,7 @@
   </el-card>
 
   <el-dialog v-model="showEditorDialog" width="30%" top="12vh">
-    <template #title>
+    <template #header>
       <div class="dialog-title">{{ dialogTitle }}</div>
     </template>
     <el-form label-width="80px" size="default" :model="menuForm">

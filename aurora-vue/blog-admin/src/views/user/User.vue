@@ -99,7 +99,7 @@
     />
 
     <el-dialog v-model="isEdit" width="30%">
-      <template #title>
+      <template #header>
         <div class="dialog-title">修改用户</div>
       </template>
       <el-form label-width="60px" size="default" :model="userForm">
