@@ -21,7 +21,12 @@
       </el-breadcrumb>
 
       <div class="right-menu">
-        <button class="icon-button" type="button" @click="toggleFullscreen" aria-label="Toggle fullscreen">
+        <button
+          class="icon-button"
+          type="button"
+          @click="toggleFullscreen"
+          aria-label="Toggle fullscreen"
+        >
           <el-icon class="icon-button__icon">
             <component :is="isFullscreen ? Close : FullScreen" />
           </el-icon>
@@ -238,7 +243,9 @@ watch(
 .hamburger-icon {
   font-size: 1.35rem;
   color: #0f172a;
-  transition: transform 0.25s ease, color 0.2s ease;
+  transition:
+    transform 0.25s ease,
+    color 0.2s ease;
 }
 
 .hamburger.collapsed .hamburger-icon {
