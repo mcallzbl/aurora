@@ -64,13 +64,23 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="200">
         <template #default="{ row }">
-          <el-button v-if="row.children" type="primary" text size="small" @click="openAddResource(row)">
+          <el-button
+            v-if="row.children"
+            type="primary"
+            text
+            size="small"
+            @click="openAddResource(row)"
+          >
             新增
           </el-button>
-          <el-button type="primary" text size="small" @click="openEditResource(row)">修改</el-button>
+          <el-button type="primary" text size="small" @click="openEditResource(row)"
+            >修改</el-button
+          >
           <el-popconfirm title="确定删除吗？" @confirm="deleteResource(row.id)">
             <template #reference>
-              <el-button size="small" type="danger" text style="margin-left: 0.5rem">删除</el-button>
+              <el-button size="small" type="danger" text style="margin-left: 0.5rem"
+                >删除</el-button
+              >
             </template>
           </el-popconfirm>
         </template>
@@ -106,7 +116,7 @@
       </el-form-item>
       <el-form-item label="请求方式">
         <el-radio-group v-model="resourceForm.requestMethod">
-          <el-radio v-for="item in requestMethods" :key="item" :label="item">{{ item }}</el-radio>
+          <el-radio v-for="item in requestMethods" :key="item" :value="item">{{ item }}</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>

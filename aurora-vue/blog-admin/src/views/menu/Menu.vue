@@ -60,13 +60,23 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="200">
         <template #default="{ row }">
-          <el-button v-if="row.children" type="primary" text size="small" @click="openEditor(row, 'child')">
+          <el-button
+            v-if="row.children"
+            type="primary"
+            text
+            size="small"
+            @click="openEditor(row, 'child')"
+          >
             新增
           </el-button>
-          <el-button type="primary" text size="small" @click="openEditor(row, 'edit')">修改</el-button>
+          <el-button type="primary" text size="small" @click="openEditor(row, 'edit')"
+            >修改</el-button
+          >
           <el-popconfirm title="确定删除吗？" @confirm="deleteMenu(row.id)">
             <template #reference>
-              <el-button size="small" type="danger" text style="margin-left: 0.5rem">删除</el-button>
+              <el-button size="small" type="danger" text style="margin-left: 0.5rem"
+                >删除</el-button
+              >
             </template>
           </el-popconfirm>
         </template>
@@ -81,8 +91,8 @@
     <el-form label-width="80px" size="default" :model="menuForm">
       <el-form-item label="菜单类型" v-if="showTypeToggle">
         <el-radio-group v-model="isCatalog">
-          <el-radio :label="true">目录</el-radio>
-          <el-radio :label="false">一级菜单</el-radio>
+          <el-radio :value="true">目录</el-radio>
+          <el-radio :value="false">一级菜单</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="菜单名称">
@@ -118,8 +128,8 @@
       </el-form-item>
       <el-form-item label="显示状态">
         <el-radio-group v-model="menuForm.isHidden">
-          <el-radio :label="0">显示</el-radio>
-          <el-radio :label="1">隐藏</el-radio>
+          <el-radio :value="0">显示</el-radio>
+          <el-radio :value="1">隐藏</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
