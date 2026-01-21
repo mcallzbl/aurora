@@ -46,14 +46,41 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <el-row :gutter="20" class="panel-row">
+      <el-col :xs="24" :md="16">
+        <el-card class="panel-card" v-loading="loading || !mapLoaded">
+          <div class="panel-title">用户地域分布</div>
+          <div class="area-toggle">
+            <el-radio-group v-model="userAreaType" size="small">
+              <el-radio :value="1">用户</el-radio>
+              <el-radio :value="2">游客</el-radio>
+            </el-radio-group>
+          </div>
+          <div v-if="mapLoaded" class="panel-chart">
+            <VChart :option="userAreaMapOption" autoresize />
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :md="8">
+        <el-card class="panel-card" v-loading="loading">
+          <div class="panel-title">文章标签统计</div>
+          <div class="panel-chart tag-cloud-container">
+            <TagCloud :data="tagData" />
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import axios from 'axios'
-import type { EChartsOption } from 'echarts'
+import type { EChartsOption, TooltipComponentFormatterCallbackParams } from 'echarts'
+import * as echarts from 'echarts'
 import dayjs from 'dayjs'
+import TagCloud from '@/components/TagCloud.vue'
 
 defineOptions({
   name: 'HomeDashboard',
@@ -79,6 +106,16 @@ interface ArticleStatisticsDTO {
   count: number
 }
 
+interface TagDTO {
+  id: number
+  tagName: string
+}
+
+interface UserAreaDTO {
+  name: string
+  value: number
+}
+
 interface DashboardData {
   viewsCount: number
   messageCount: number
@@ -88,10 +125,15 @@ interface DashboardData {
   categoryDTOs?: CategoryDTO[]
   articleRankDTOs?: ArticleRankDTO[]
   articleStatisticsDTOs?: ArticleStatisticsDTO[]
+  tagDTOs?: TagDTO[]
 }
 
 interface DashboardResponse {
   data: DashboardData
+}
+
+interface UserAreaResponse {
+  data: UserAreaDTO[]
 }
 
 type LineChartOption = EChartsOption & {
@@ -135,6 +177,11 @@ type PieChartOption = EChartsOption & {
 }
 
 const loading = ref(true)
+const mapLoaded = ref(false)
+const userAreaType = ref(1)
+const tagData = ref<Array<{ id: number; name: string }>>([])
+const chinaProvinces = ref<Set<string>>(new Set())
+
 const stats = reactive({
   viewsCount: 0,
   messageCount: 0,
@@ -178,13 +225,34 @@ const categoryOption = ref<PieChartOption>({
   ],
 })
 
+const pickFormatterTarget = (params: TooltipComponentFormatterCallbackParams) => {
+  return Array.isArray(params) ? params[0] : params
+}
+
+const formatContributionTooltip = (params: TooltipComponentFormatterCallbackParams) => {
+  const target = pickFormatterTarget(params)
+  const data = target?.data
+  if (Array.isArray(data) && data.length >= 2) {
+    const date = data[0]
+    const count = Number(data[1] ?? 0)
+    return `${date}<br/>发布文章: ${count} 篇`
+  }
+  return ''
+}
+
+const formatMapTooltip = (params: TooltipComponentFormatterCallbackParams) => {
+  const target = pickFormatterTarget(params)
+  const name = target?.name ?? ''
+  const seriesName = target?.seriesName ?? ''
+  const rawValue = target?.value
+  const value = Array.isArray(rawValue) ? Number(rawValue[0] ?? 0) : Number(rawValue ?? 0)
+  return `${seriesName}<br />${name}：${value}`
+}
+
 const articleContributionOption = ref<EChartsOption>({
   tooltip: {
     position: 'top',
-    formatter: (params: { data: [string, number] }) => {
-      const [date, count] = params.data
-      return `${date}<br/>发布文章: ${count} 篇`
-    },
+    formatter: formatContributionTooltip,
   },
   visualMap: {
     min: 0,
@@ -252,6 +320,52 @@ const articleContributionOption = ref<EChartsOption>({
   ],
 })
 
+const userAreaMapOption = ref<EChartsOption>({
+  tooltip: {
+    formatter: formatMapTooltip,
+  },
+  visualMap: {
+    min: 0,
+    max: 1000,
+    right: 26,
+    bottom: 40,
+    showLabel: true,
+    pieces: [
+      { gt: 100, label: '100人以上', color: '#ED5351' },
+      { gte: 51, lte: 100, label: '51-100人', color: '#59D9A5' },
+      { gte: 21, lte: 50, label: '21-50人', color: '#F6C021' },
+      { gt: 0, lte: 20, label: '1-20人', color: '#6DCAEC' },
+    ],
+    show: true,
+  },
+  geo: {
+    map: 'china',
+    zoom: 1.2,
+    layoutCenter: ['50%', '50%'],
+    itemStyle: {
+      borderColor: 'rgba(0, 0, 0, 0.2)',
+      areaColor: '#f3f3f3',
+    },
+    emphasis: {
+      itemStyle: {
+        areaColor: '#F5DEB3',
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
+        borderWidth: 0,
+      },
+    },
+  },
+  series: [
+    {
+      name: '用户人数',
+      type: 'map',
+      map: 'china',
+      geoIndex: 0,
+      data: [],
+    },
+  ],
+})
+
 const applyChartData = (data: DashboardData) => {
   const viewDays = data.uniqueViewDTOs?.map((item) => item.day) ?? []
   const viewValues = data.uniqueViewDTOs?.map((item) => item.viewsCount) ?? []
@@ -310,6 +424,87 @@ const applyChartData = (data: DashboardData) => {
   if (seriesArray?.[0]) {
     seriesArray[0].data = contributionData
   }
+
+  // 处理标签数据
+  if (data.tagDTOs) {
+    tagData.value = data.tagDTOs.map((item) => ({
+      id: item.id,
+      name: item.tagName,
+    }))
+  }
+}
+
+const fetchUserArea = async () => {
+  try {
+    const { data } = await axios.get<UserAreaResponse>('/api/admin/users/area', {
+      params: {
+        type: userAreaType.value,
+      },
+    })
+
+    console.log('后端返回的原始数据:', data.data)
+    console.log('地图中的省份列表:', Array.from(chinaProvinces.value))
+
+    // 将后端返回的省份名称转换为地图中的完整名称
+    const processedData = data.data
+      .map((item) => {
+        // 先尝试直接匹配
+        if (chinaProvinces.value.has(item.name)) {
+          return item
+        }
+
+        // 如果直接匹配失败,尝试模糊匹配
+        // 在地图省份列表中查找包含后端返回名称的省份
+        const matchedProvince = Array.from(chinaProvinces.value).find((province) =>
+          province.includes(item.name),
+        )
+
+        if (matchedProvince) {
+          return {
+            name: matchedProvince,
+            value: item.value,
+          }
+        }
+
+        // 如果还是找不到,返回null
+        return null
+      })
+      .filter((item): item is UserAreaDTO => item !== null)
+
+    console.log('处理后的有效数据:', processedData)
+
+    const mapSeries = userAreaMapOption.value.series as Array<{
+      name?: string
+      type?: string
+      data?: UserAreaDTO[]
+    }>
+    if (mapSeries?.[0]) {
+      mapSeries[0].data = processedData
+    }
+  } catch (error) {
+    console.error('Failed to fetch user area data:', error)
+  }
+}
+
+const loadChinaMap = async () => {
+  try {
+    const response = await fetch('/china.json')
+    const chinaMapData = await response.json()
+
+    // 从地图数据中提取所有省份名称
+    if (chinaMapData.features && Array.isArray(chinaMapData.features)) {
+      chinaMapData.features.forEach((feature: { properties?: { name?: string } }) => {
+        if (feature.properties?.name) {
+          chinaProvinces.value.add(feature.properties.name)
+        }
+      })
+    }
+
+    echarts.registerMap('china', chinaMapData)
+    mapLoaded.value = true
+  } catch (error) {
+    console.error('Failed to load china map:', error)
+  }
 }
 
 const fetchDashboard = async () => {
@@ -327,8 +522,14 @@ const fetchDashboard = async () => {
   }
 }
 
-onMounted(() => {
+watch(userAreaType, () => {
+  fetchUserArea()
+})
+
+onMounted(async () => {
+  await loadChinaMap()
   fetchDashboard()
+  fetchUserArea()
 })
 </script>
 
@@ -408,6 +609,19 @@ onMounted(() => {
 
 .panel-row {
   margin-top: 0.2rem;
+}
+
+.area-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.tag-cloud-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
 }
 
 @media (max-width: 768px) {

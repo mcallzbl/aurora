@@ -9,9 +9,11 @@
       </el-header>
       <el-main class="main-content">
         <div class="fade-transform-box">
-          <transition name="fade-transform" mode="out-in">
-            <RouterView :key="route.fullPath" />
-          </transition>
+          <RouterView :key="route.fullPath" v-slot="{ Component }">
+            <transition name="fade-transform" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </RouterView>
         </div>
       </el-main>
     </el-container>
