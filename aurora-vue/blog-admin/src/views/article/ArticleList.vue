@@ -61,7 +61,7 @@
           size="small"
           style="margin-right: 1rem; width: 180px"
         >
-          <el-option label="全部" :value="null" />
+          <el-option label="全部" :value="''" />
           <el-option
             v-for="item in articleTypes"
             :key="item.value"
@@ -77,7 +77,7 @@
           size="small"
           style="margin-right: 1rem; width: 180px"
         >
-          <el-option label="全部" :value="null" />
+          <el-option label="全部" :value="''" />
           <el-option
             v-for="item in categories"
             :key="item.id"
@@ -93,7 +93,7 @@
           size="small"
           style="margin-right: 1rem; width: 180px"
         >
-          <el-option label="全部" :value="null" />
+          <el-option label="全部" :value="''" />
           <el-option v-for="item in tags" :key="item.id" :label="item.tagName" :value="item.id" />
         </el-select>
         <el-input
@@ -357,9 +357,9 @@ const statusOptions = [
 
 const queryParams = reactive({
   keywords: null as string | null,
-  type: null as number | null,
-  categoryId: null as number | null,
-  tagId: null as number | null,
+  type: '' as number | '' | null,
+  categoryId: '' as number | '' | null,
+  tagId: '' as number | '' | null,
   status: null as number | null,
   isDelete: 0,
 })
@@ -636,6 +636,8 @@ const handleToggleTopOrFeatured = async (article: Article) => {
   }
 }
 
+const normalizeSelectValue = <T,>(value: T | '' | null) => (value === '' ? null : value)
+
 const fetchArticles = async () => {
   loading.value = true
   try {
@@ -644,10 +646,10 @@ const fetchArticles = async () => {
         current: pagination.current,
         size: pagination.size,
         keywords: queryParams.keywords,
-        categoryId: queryParams.categoryId,
+        categoryId: normalizeSelectValue(queryParams.categoryId),
         status: queryParams.status,
-        tagId: queryParams.tagId,
-        type: queryParams.type,
+        tagId: normalizeSelectValue(queryParams.tagId),
+        type: normalizeSelectValue(queryParams.type),
         isDelete: queryParams.isDelete,
       },
     })
@@ -660,12 +662,12 @@ const fetchArticles = async () => {
 
 const fetchCategories = async () => {
   const { data } = await axios.get<{ data: Category[] }>('/api/admin/categories/search')
-  categories.value = data.data
+  categories.value = (data.data || []).filter((item) => item.id != null)
 }
 
 const fetchTags = async () => {
   const { data } = await axios.get<{ data: Tag[] }>('/api/admin/tags/search')
-  tags.value = data.data
+  tags.value = (data.data || []).filter((item) => item.id != null)
 }
 
 watch(
