@@ -1,7 +1,7 @@
-import './assets/main.css'
 import 'element-plus/dist/index.css'
 import 'nprogress/nprogress.css'
 import 'md-editor-v3/lib/style.css'
+import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -15,6 +15,7 @@ import NProgress from 'nprogress'
 import dayjs from 'dayjs'
 import { persistedStatePlugin } from './stores/plugins/persistedState'
 import { useMenuStore } from './stores/menu'
+import { useThemeStore } from './stores/theme'
 
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -54,6 +55,8 @@ app.use(pinia)
 app.use(router)
 app.use(i18n)
 app.use(ElementPlus)
+
+useThemeStore().syncTheme()
 
 app.component('VChart', VChart)
 app.component('MdEditor', MdEditor)

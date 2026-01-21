@@ -80,8 +80,8 @@ const handleClick = (value: StatusValue) => {
 }
 
 .status-button.active {
-  background: rgba(63, 159, 147, 0.2);
-  color: #0f766e;
+  background: var(--accent-primary-soft);
+  color: var(--accent-primary-strong);
   font-weight: 600;
 }
 </style>

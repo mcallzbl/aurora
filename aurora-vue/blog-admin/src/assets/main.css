@@ -4,6 +4,10 @@
 :root {
   --font-sans: 'Space Grotesk', 'Segoe UI', sans-serif;
   --font-serif: 'Fraunces', 'Times New Roman', serif;
+  --accent-primary: #3f9f93;
+  --accent-primary-strong: #2f857a;
+  --accent-primary-soft: rgba(63, 159, 147, 0.2);
+  --primary: var(--accent-primary);
   --ink-900: #1f1b16;
   --ink-700: #3e342b;
   --ink-500: #5f5347;
@@ -12,16 +16,47 @@
   --surface-2: rgba(255, 255, 255, 0.76);
   --surface-3: #fff8f1;
   --accent-1: #f2a35c;
-  --accent-2: #3f9f93;
+  --accent-2: var(--accent-primary);
   --accent-3: #d97a5e;
   --border-soft: rgba(71, 59, 47, 0.15);
   --shadow-soft: 0 30px 70px rgba(28, 21, 14, 0.15);
   --shadow-card: 0 16px 34px rgba(28, 21, 14, 0.12);
   --ring: 0 0 0 1px rgba(255, 255, 255, 0.65) inset;
+  --el-color-primary: var(--accent-primary);
+  --el-color-primary-dark-2: color-mix(in srgb, var(--accent-primary), #000 20%);
+  --el-color-primary-light-3: color-mix(in srgb, var(--accent-primary), #fff 30%);
+  --el-color-primary-light-5: color-mix(in srgb, var(--accent-primary), #fff 50%);
+  --el-color-primary-light-7: color-mix(in srgb, var(--accent-primary), #fff 70%);
+  --el-color-primary-light-8: color-mix(in srgb, var(--accent-primary), #fff 80%);
+  --el-color-primary-light-9: color-mix(in srgb, var(--accent-primary), #fff 90%);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+:root[data-theme='dark'] {
+  --accent-primary: #45c4b8;
+  --accent-primary-strong: #34a69b;
+  --accent-primary-soft: rgba(69, 196, 184, 0.2);
+  --ink-900: #e2e8f0;
+  --ink-700: #cbd5f5;
+  --ink-500: #94a3b8;
+  --surface-0: #0b0f14;
+  --surface-1: rgba(15, 23, 42, 0.88);
+  --surface-2: rgba(15, 23, 42, 0.72);
+  --surface-3: rgba(30, 41, 59, 0.85);
+  --border-soft: rgba(148, 163, 184, 0.2);
+  --shadow-soft: 0 30px 70px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 16px 34px rgba(0, 0, 0, 0.35);
+  --ring: 0 0 0 1px rgba(148, 163, 184, 0.2) inset;
+  --el-color-primary: var(--accent-primary);
+  --el-color-primary-dark-2: color-mix(in srgb, var(--accent-primary), #000 25%);
+  --el-color-primary-light-3: color-mix(in srgb, var(--accent-primary), #fff 25%);
+  --el-color-primary-light-5: color-mix(in srgb, var(--accent-primary), #fff 45%);
+  --el-color-primary-light-7: color-mix(in srgb, var(--accent-primary), #fff 65%);
+  --el-color-primary-light-8: color-mix(in srgb, var(--accent-primary), #fff 75%);
+  --el-color-primary-light-9: color-mix(in srgb, var(--accent-primary), #fff 85%);
 }
 
 body {
@@ -31,6 +66,14 @@ body {
     radial-gradient(700px 480px at 50% 110%, rgba(233, 179, 146, 0.25), transparent 60%),
     linear-gradient(180deg, #faf6f1 0%, #eef3f6 100%);
   color: var(--ink-900);
+}
+
+html[data-theme='dark'] body {
+  background:
+    radial-gradient(1200px 520px at 8% -10%, rgba(69, 196, 184, 0.2), transparent 60%),
+    radial-gradient(900px 540px at 92% 0%, rgba(59, 130, 246, 0.16), transparent 55%),
+    radial-gradient(700px 480px at 50% 110%, rgba(148, 163, 184, 0.15), transparent 60%),
+    linear-gradient(180deg, #0b0f14 0%, #0f172a 100%);
 }
 
 #app {

@@ -54,7 +54,10 @@ const { currentPage, pageSize, total, pageSizes, layout, hideOnSinglePage } = to
 
 <style scoped>
 .app-pagination {
-  --el-pagination-button-bg-color: var(--surface-1);
-  --el-pagination-hover-color: var(--primary);
+  --el-pagination-bg-color: var(--surface-1);
+  --el-pagination-text-color: var(--ink-700);
+  --el-pagination-button-color: var(--ink-700);
+  --el-pagination-button-bg-color: var(--surface-2);
+  --el-pagination-hover-color: var(--accent-primary);
 }
 </style>

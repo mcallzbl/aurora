@@ -23,6 +23,17 @@
       <div class="right-menu">
         <button
           class="icon-button"
+          :class="{ 'is-active': isDark }"
+          type="button"
+          @click="toggleTheme"
+          aria-label="Toggle theme"
+        >
+          <el-icon class="icon-button__icon">
+            <component :is="isDark ? Moon : Sunny" />
+          </el-icon>
+        </button>
+        <button
+          class="icon-button"
           type="button"
           @click="toggleFullscreen"
           aria-label="Toggle fullscreen"
@@ -71,9 +82,10 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import { Close, Expand, Fold, FullScreen } from '@element-plus/icons-vue'
+import { Close, Expand, Fold, FullScreen, Moon, Sunny } from '@element-plus/icons-vue'
 import { resetRouter } from '@/router'
 import { useAppStore, type TabItem } from '@/stores/app'
+import { useThemeStore } from '@/stores/theme'
 
 interface BreadcrumbItem {
   path: string
@@ -88,12 +100,14 @@ defineOptions({
 const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
+const themeStore = useThemeStore()
 
 const tabs = computed(() => appStore.tabs)
 const avatarUrl = computed(() => appStore.userInfo?.avatar || '')
 const avatarFallback = computed(() => (appStore.userInfo?.nickname || 'A').slice(0, 1))
 const isCollapsed = computed(() => appStore.collapse)
 const isFullscreen = ref(false)
+const isDark = computed(() => themeStore.mode === 'dark')
 
 const buildTab = (): TabItem => {
   const label =
@@ -164,6 +178,10 @@ const toggleFullscreen = () => {
   } else {
     document.documentElement.requestFullscreen().catch(() => {})
   }
+}
+
+const toggleTheme = () => {
+  themeStore.toggleMode()
 }
 
 const syncFullscreen = () => {
@@ -282,6 +300,18 @@ watch(
   box-shadow:
     0 14px 24px rgba(31, 24, 16, 0.14),
     inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.icon-button.is-active {
+  border-color: rgba(63, 159, 147, 0.35);
+  background: var(--accent-primary-soft);
+  box-shadow:
+    0 12px 24px rgba(15, 118, 110, 0.18),
+    inset 0 0 0 1px rgba(63, 159, 147, 0.35);
+}
+
+.icon-button.is-active .icon-button__icon {
+  color: var(--accent-primary-strong);
 }
 
 .icon-button__icon {

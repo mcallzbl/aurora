@@ -5,6 +5,7 @@ type PersistPaths = string[] | true
 const defaultKey = (storeId: string) => `pinia:${storeId}`
 const persistMap: Record<string, PersistPaths> = {
   app: ['collapse', 'tabs', 'userInfo', 'pageState'],
+  theme: ['mode'],
 }
 
 const pickState = (state: Record<string, unknown>, paths: string[]) => {
