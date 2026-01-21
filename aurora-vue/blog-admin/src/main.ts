@@ -19,21 +19,31 @@ import { useMenuStore } from './stores/menu'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { BarChart, LineChart, MapChart, PieChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
+import { BarChart, HeatmapChart, LineChart, MapChart, PieChart } from 'echarts/charts'
+import {
+  CalendarComponent,
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  TooltipComponent,
+  VisualMapComponent,
+} from 'echarts/components'
 
 import { MdEditor } from 'md-editor-v3'
 
 use([
   CanvasRenderer,
   BarChart,
+  HeatmapChart,
   LineChart,
   PieChart,
   MapChart,
+  CalendarComponent,
   GridComponent,
   TooltipComponent,
   LegendComponent,
   TitleComponent,
+  VisualMapComponent,
 ])
 
 const app = createApp(App)

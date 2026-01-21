@@ -21,6 +21,13 @@
       </div>
     </el-card>
 
+    <el-card class="panel-card" v-loading="loading">
+      <div class="panel-title">文章贡献统计</div>
+      <div class="panel-chart contribution-chart">
+        <VChart :option="articleContributionOption" autoresize />
+      </div>
+    </el-card>
+
     <el-row :gutter="20" class="panel-row">
       <el-col :xs="24" :md="16">
         <el-card class="panel-card" v-loading="loading">
@@ -46,6 +53,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import axios from 'axios'
 import type { EChartsOption } from 'echarts'
+import dayjs from 'dayjs'
 
 defineOptions({
   name: 'HomeDashboard',
@@ -66,6 +74,11 @@ interface ArticleRankDTO {
   viewsCount: number
 }
 
+interface ArticleStatisticsDTO {
+  date: string
+  count: number
+}
+
 interface DashboardData {
   viewsCount: number
   messageCount: number
@@ -74,6 +87,7 @@ interface DashboardData {
   uniqueViewDTOs?: UniqueViewDTO[]
   categoryDTOs?: CategoryDTO[]
   articleRankDTOs?: ArticleRankDTO[]
+  articleStatisticsDTOs?: ArticleStatisticsDTO[]
 }
 
 interface DashboardResponse {
@@ -164,6 +178,80 @@ const categoryOption = ref<PieChartOption>({
   ],
 })
 
+const articleContributionOption = ref<EChartsOption>({
+  tooltip: {
+    position: 'top',
+    formatter: (params: { data: [string, number] }) => {
+      const [date, count] = params.data
+      return `${date}<br/>发布文章: ${count} 篇`
+    },
+  },
+  visualMap: {
+    min: 0,
+    max: 5,
+    type: 'piecewise',
+    orient: 'horizontal',
+    left: 'center',
+    bottom: 10,
+    pieces: [
+      { min: 0, max: 0, label: '无', color: '#d8e2dc' },
+      { min: 1, max: 1, label: '1篇', color: '#c6e48b' },
+      { min: 2, max: 2, label: '2篇', color: '#7bc96f' },
+      { min: 3, max: 3, label: '3篇', color: '#239a3b' },
+      { min: 4, label: '4篇+', color: '#196127' },
+    ],
+    textStyle: {
+      fontSize: 11,
+    },
+  },
+  calendar: {
+    top: 50,
+    left: 60,
+    right: 30,
+    bottom: 50,
+    cellSize: [13, 13],
+    range: [dayjs().subtract(1, 'year').format('YYYY-MM-DD'), dayjs().format('YYYY-MM-DD')],
+    itemStyle: {
+      borderWidth: 2,
+      borderColor: '#fff',
+      borderRadius: 2,
+    },
+    splitLine: {
+      show: false,
+    },
+    yearLabel: {
+      show: true,
+      position: 'top',
+      margin: 20,
+      color: '#6b7280',
+      fontSize: 14,
+      fontWeight: 600,
+    },
+    dayLabel: {
+      show: true,
+      firstDay: 0,
+      nameMap: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+      margin: 10,
+      color: '#6b7280',
+      fontSize: 11,
+    },
+    monthLabel: {
+      show: true,
+      nameMap: 'cn',
+      margin: 8,
+      color: '#6b7280',
+      fontSize: 11,
+    },
+  },
+  series: [
+    {
+      type: 'heatmap',
+      coordinateSystem: 'calendar',
+      data: [],
+    },
+  ],
+})
+
 const applyChartData = (data: DashboardData) => {
   const viewDays = data.uniqueViewDTOs?.map((item) => item.day) ?? []
   const viewValues = data.uniqueViewDTOs?.map((item) => item.viewsCount) ?? []
@@ -192,6 +280,35 @@ const applyChartData = (data: DashboardData) => {
   }
   if (categoryOption.value.legend) {
     categoryOption.value.legend.data = categoryData.map((item) => item.name)
+  }
+
+  // 处理文章贡献统计数据
+  // 生成完整一年的日期，包括没有数据的日期（值为0）
+  const startDate = dayjs().subtract(1, 'year')
+  const endDate = dayjs()
+  const dateMap = new Map<string, number>()
+
+  // 填充后端返回的数据
+  data.articleStatisticsDTOs?.forEach((item) => {
+    dateMap.set(item.date, item.count)
+  })
+
+  // 生成完整的365天数据
+  const contributionData: [string, number][] = []
+  let currentDate = startDate
+  while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+    const dateStr = currentDate.format('YYYY-MM-DD')
+    contributionData.push([dateStr, dateMap.get(dateStr) || 0])
+    currentDate = currentDate.add(1, 'day')
+  }
+
+  const seriesArray = articleContributionOption.value.series as Array<{
+    type?: string
+    coordinateSystem?: string
+    data?: [string, number][]
+  }>
+  if (seriesArray?.[0]) {
+    seriesArray[0].data = contributionData
   }
 }
 
@@ -285,6 +402,10 @@ onMounted(() => {
   height: 320px;
 }
 
+.contribution-chart {
+  height: 220px;
+}
+
 .panel-row {
   margin-top: 0.2rem;
 }
@@ -292,6 +413,10 @@ onMounted(() => {
 @media (max-width: 768px) {
   .panel-chart {
     height: 260px;
+  }
+
+  .contribution-chart {
+    height: 200px;
   }
 }
 </style>
