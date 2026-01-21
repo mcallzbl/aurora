@@ -10,7 +10,7 @@
       active-text-color="#5eead4"
     >
       <template v-for="routeItem in visibleMenus" :key="routeItem.path">
-        <el-sub-menu v-if="routeItem.children?.length" :index="routeItem.path">
+        <el-sub-menu v-if="isGroup(routeItem)" :index="routeItem.path">
           <template #title>
             <i v-if="routeItem.meta?.icon" :class="routeItem.meta.icon" />
             <span>{{ routeLabel(routeItem) }}</span>
@@ -24,9 +24,9 @@
             <span>{{ routeLabel(child) }}</span>
           </el-menu-item>
         </el-sub-menu>
-        <el-menu-item v-else :index="routeItem.path">
-          <i v-if="routeItem.meta?.icon" :class="routeItem.meta.icon" />
-          <span>{{ routeLabel(routeItem) }}</span>
+        <el-menu-item v-else :index="singleMenuPath(routeItem)">
+          <i v-if="singleMenuIcon(routeItem)" :class="singleMenuIcon(routeItem)" />
+          <span>{{ singleMenuLabel(routeItem) }}</span>
         </el-menu-item>
       </template>
     </el-menu>
@@ -60,6 +60,9 @@ const routeLabel = (item: RouteRecordRaw) => {
 }
 
 const resolveMenuPath = (path: string, parentPath: string) => {
+  if (!path) {
+    return parentPath
+  }
   if (path.startsWith('/')) {
     return path
   }
@@ -75,14 +78,40 @@ const normalizeRoute = (item: RouteRecordRaw): RouteRecordRaw | null => {
   if (children.length) {
     return { ...item, children: children as RouteRecordRaw[] }
   }
-  const route = { ...item } as RouteRecordRaw & { children?: RouteRecordRaw[] }
-  delete route.children
-  return route
+  return item
 }
 
 const visibleMenus = computed(
   () => menuStore.menus.map(normalizeRoute).filter(Boolean) as RouteRecordRaw[],
 )
+
+const isGroup = (routeItem: RouteRecordRaw) => {
+  return Boolean(routeItem.name) && (routeItem.children?.length ?? 0) > 0
+}
+
+const singleMenuItem = (routeItem: RouteRecordRaw): RouteRecordRaw => {
+  if (!routeItem.name && routeItem.children?.length) {
+    return routeItem.children[0] ?? routeItem
+  }
+  return routeItem
+}
+
+const singleMenuLabel = (routeItem: RouteRecordRaw) => {
+  return routeLabel(singleMenuItem(routeItem))
+}
+
+const singleMenuIcon = (routeItem: RouteRecordRaw) => {
+  const item = singleMenuItem(routeItem)
+  return (item.meta?.icon as string | undefined) || ''
+}
+
+const singleMenuPath = (routeItem: RouteRecordRaw) => {
+  const child = routeItem.children?.[0]
+  if (child) {
+    return resolveMenuPath(child.path, routeItem.path)
+  }
+  return routeItem.path
+}
 </script>
 
 <style scoped>

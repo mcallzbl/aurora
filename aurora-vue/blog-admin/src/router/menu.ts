@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import router from './index'
 import Layout from '@/layout/index.vue'
+import PlaceholderView from '@/views/_shared/PlaceholderView.vue'
 import { useMenuStore } from '@/stores/menu'
 
 interface RawMenu {
@@ -33,10 +34,10 @@ const normalizeIcon = (icon?: string) => {
 
 const resolveViewComponent = (component?: string) => {
   if (!component) {
-    return undefined
+    return { component: undefined, viewPath: undefined }
   }
   if (component === 'Layout') {
-    return Layout
+    return { component: Layout, viewPath: undefined }
   }
 
   const trimmed = component
@@ -47,18 +48,19 @@ const resolveViewComponent = (component?: string) => {
   const loader = viewModules[viewKey]
   if (!loader) {
     console.warn(`[menu] view not found: ${viewKey}`)
-    return undefined
+    return { component: PlaceholderView, viewPath: viewKey }
   }
-  return loader
+  return { component: loader, viewPath: undefined }
 }
 
 const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
   const children = item.children?.map(mapMenuToRoute).filter(Boolean) as
     | RouteRecordRaw[]
     | undefined
-  const component = resolveViewComponent(item.component) ?? (children?.length ? Layout : undefined)
+  const { component, viewPath } = resolveViewComponent(item.component)
+  const resolvedComponent = component ?? (children?.length ? Layout : undefined)
 
-  if (!component) {
+  if (!resolvedComponent) {
     console.warn('[menu] route skipped due to missing component:', item)
     return null
   }
@@ -67,13 +69,15 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
     return {
       path: item.path,
       name: item.name,
-      component,
+      component: resolvedComponent,
       redirect: item.redirect,
       children,
       meta: {
         ...(item.meta ?? {}),
+        title: item.name,
         icon: normalizeIcon(item.icon),
         hidden: item.hidden,
+        viewPath,
       },
     } satisfies RouteRecordRaw
   }
@@ -81,11 +85,13 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
   return {
     path: item.path,
     name: item.name,
-    component,
+    component: resolvedComponent,
     meta: {
       ...(item.meta ?? {}),
+      title: item.name,
       icon: normalizeIcon(item.icon),
       hidden: item.hidden,
+      viewPath,
     },
   } satisfies RouteRecordRaw
 }
