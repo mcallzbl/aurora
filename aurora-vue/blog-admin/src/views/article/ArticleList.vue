@@ -123,10 +123,6 @@
               fit="cover"
               :src="article.articleCover || defaultCover"
             />
-            <div class="article-flags">
-              <span v-if="article.isTop === 1" class="flag flag--top">置顶</span>
-              <span v-if="article.isFeatured === 1" class="flag flag--featured">推荐</span>
-            </div>
           </div>
 
           <div class="article-body">
