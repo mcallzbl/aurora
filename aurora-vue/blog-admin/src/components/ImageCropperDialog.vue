@@ -1,34 +1,36 @@
 <template>
   <el-dialog v-model="visible" :title="title" width="460px" @closed="handleClosed">
     <div class="cropper-body">
-      <div class="cropper-preview" :style="previewStyle" @pointerdown="handlePointerDown">
-        <img
-          v-if="imageUrl"
-          ref="imageEl"
-          :src="imageUrl"
-          class="cropper-image"
-          :style="imageStyle"
-          @load="handleImageLoad"
-          draggable="false"
+      <div ref="previewRef" class="cropper-preview" :style="previewStyle">
+        <Cropper
+          ref="cropperRef"
+          class="cropper-core"
+          :src="imageUrl || null"
+          :stencil-props="stencilProps"
+          image-restriction="stencil"
+          :move-image="false"
+          :resize-image="{ adjustStencil: false, wheel: { ratio: 0.2 }, touch: true }"
+          :auto-zoom="true"
         />
-        <div v-else class="cropper-placeholder">请选择图片</div>
+        <div v-if="!imageUrl" class="cropper-placeholder">请选择图片</div>
       </div>
 
       <div class="cropper-tools">
-        <span class="tool-label">缩放</span>
-        <el-slider v-model="zoom" :min="1" :max="3" :step="0.05" />
+        <span class="tool-label">拖动裁剪框选择区域，滚轮/触控缩放</span>
       </div>
     </div>
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :disabled="!imageReady" @click="handleConfirm">确定</el-button>
+      <el-button type="primary" :disabled="!imageUrl" @click="handleConfirm">确定</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
 
 const props = withDefaults(
   defineProps<{
@@ -51,132 +53,41 @@ const emit = defineEmits<{
 
 const visible = ref(false)
 const imageUrl = ref('')
-const imageEl = ref<HTMLImageElement | null>(null)
-const imageNatural = reactive({ width: 0, height: 0 })
-const baseScale = ref(1)
-const zoom = ref(1)
-const offset = reactive({ x: 0, y: 0 })
 const currentMime = ref('image/jpeg')
-
-const dragState = reactive({
-  active: false,
-  startX: 0,
-  startY: 0,
-  originX: 0,
-  originY: 0,
-  pointerId: -1,
-})
+const cropperRef = ref<InstanceType<typeof Cropper> | null>(null)
+const previewRef = ref<HTMLDivElement | null>(null)
+const previewWidthRaw = ref(0)
+let resizeObserver: ResizeObserver | null = null
 
 const ratioValue = computed(() => props.ratio[0] / props.ratio[1])
-const previewWidth = computed(() => props.size)
-const previewHeight = computed(() => Math.round(props.size / ratioValue.value))
-const imageReady = computed(() => imageNatural.width > 0 && imageNatural.height > 0)
-const displayScale = computed(() => baseScale.value * zoom.value)
-
+const previewWidth = computed(() =>
+  previewWidthRaw.value > 0 ? previewWidthRaw.value : props.size,
+)
 const previewStyle = computed(() => ({
-  width: `${previewWidth.value}px`,
-  height: `${previewHeight.value}px`,
+  height: `${Math.round(previewWidth.value / ratioValue.value)}px`,
 }))
 
-const imageStyle = computed(() => ({
-  width: `${imageNatural.width}px`,
-  height: `${imageNatural.height}px`,
-  transform: `translate(${offset.x}px, ${offset.y}px) scale(${displayScale.value})`,
-}))
-
-const clampOffset = () => {
-  const scaledWidth = imageNatural.width * displayScale.value
-  const scaledHeight = imageNatural.height * displayScale.value
-  const minX = previewWidth.value - scaledWidth
-  const minY = previewHeight.value - scaledHeight
-  offset.x = Math.min(0, Math.max(minX, offset.x))
-  offset.y = Math.min(0, Math.max(minY, offset.y))
-}
-
-const resetPosition = () => {
-  if (!imageReady.value) {
-    return
-  }
-  const scaleX = previewWidth.value / imageNatural.width
-  const scaleY = previewHeight.value / imageNatural.height
-  baseScale.value = Math.max(scaleX, scaleY)
-  zoom.value = 1
-  offset.x = (previewWidth.value - imageNatural.width * baseScale.value) / 2
-  offset.y = (previewHeight.value - imageNatural.height * baseScale.value) / 2
-  clampOffset()
-}
-
-const handleImageLoad = () => {
-  if (!imageEl.value) return
-  imageNatural.width = imageEl.value.naturalWidth
-  imageNatural.height = imageEl.value.naturalHeight
-  resetPosition()
-}
-
-const handlePointerDown = (event: PointerEvent) => {
-  if (!imageReady.value) {
-    return
-  }
-  dragState.active = true
-  dragState.pointerId = event.pointerId
-  dragState.startX = event.clientX
-  dragState.startY = event.clientY
-  dragState.originX = offset.x
-  dragState.originY = offset.y
-  window.addEventListener('pointermove', handlePointerMove)
-  window.addEventListener('pointerup', handlePointerUp)
-}
-
-const handlePointerMove = (event: PointerEvent) => {
-  if (!dragState.active || event.pointerId !== dragState.pointerId) {
-    return
-  }
-  offset.x = dragState.originX + (event.clientX - dragState.startX)
-  offset.y = dragState.originY + (event.clientY - dragState.startY)
-  clampOffset()
-}
-
-const handlePointerUp = (event: PointerEvent) => {
-  if (event.pointerId !== dragState.pointerId) {
-    return
-  }
-  dragState.active = false
-  dragState.pointerId = -1
-  window.removeEventListener('pointermove', handlePointerMove)
-  window.removeEventListener('pointerup', handlePointerUp)
-}
+const stencilProps = computed(() =>
+  props.fixedBox
+    ? {
+        aspectRatio: ratioValue.value,
+        movable: true,
+        resizable: false,
+        handlers: false,
+        lines: false,
+      }
+    : {},
+)
 
 const handleConfirm = async () => {
-  if (!imageReady.value || !imageEl.value) {
+  const result = cropperRef.value?.getResult?.()
+  const canvas = result?.canvas
+  if (!canvas) {
     return
   }
-  const canvas = document.createElement('canvas')
-  canvas.width = previewWidth.value
-  canvas.height = previewHeight.value
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    return
-  }
-  const sourceX = -offset.x / displayScale.value
-  const sourceY = -offset.y / displayScale.value
-  const sourceWidth = previewWidth.value / displayScale.value
-  const sourceHeight = previewHeight.value / displayScale.value
-
-  ctx.drawImage(
-    imageEl.value,
-    sourceX,
-    sourceY,
-    sourceWidth,
-    sourceHeight,
-    0,
-    0,
-    canvas.width,
-    canvas.height,
-  )
-
   const mime = currentMime.value || 'image/jpeg'
   const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((result) => resolve(result), mime, 0.92)
+    canvas.toBlob((value: Blob | null) => resolve(value), mime, 1)
   })
   if (!blob) {
     return
@@ -190,12 +101,12 @@ const handleClosed = () => {
     URL.revokeObjectURL(imageUrl.value)
   }
   imageUrl.value = ''
-  imageNatural.width = 0
-  imageNatural.height = 0
-  baseScale.value = 1
-  zoom.value = 1
-  offset.x = 0
-  offset.y = 0
+}
+
+const updatePreviewWidth = () => {
+  if (previewRef.value) {
+    previewWidthRaw.value = previewRef.value.clientWidth
+  }
 }
 
 const open = (file: File) => {
@@ -207,22 +118,27 @@ const open = (file: File) => {
   visible.value = true
 }
 
-watch(zoom, (next, prev) => {
-  if (!imageReady.value || prev === 0) {
-    return
+watch(
+  () => visible.value,
+  (next) => {
+    if (!next) return
+    nextTick(() => {
+      updatePreviewWidth()
+      cropperRef.value?.refresh?.()
+    })
+  },
+)
+
+onMounted(() => {
+  updatePreviewWidth()
+  if (previewRef.value) {
+    resizeObserver = new ResizeObserver(() => updatePreviewWidth())
+    resizeObserver.observe(previewRef.value)
   }
-  const ratio = next / prev
-  offset.x = (offset.x - previewWidth.value / 2) * ratio + previewWidth.value / 2
-  offset.y = (offset.y - previewHeight.value / 2) * ratio + previewHeight.value / 2
-  clampOffset()
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('pointermove', handlePointerMove)
-  window.removeEventListener('pointerup', handlePointerUp)
-  if (imageUrl.value) {
-    URL.revokeObjectURL(imageUrl.value)
-  }
+  resizeObserver?.disconnect()
 })
 
 defineExpose({
@@ -243,25 +159,21 @@ defineExpose({
   background: var(--surface-2);
   overflow: hidden;
   border: 1px solid var(--border-soft);
-  margin: 0 auto;
-  user-select: none;
-  touch-action: none;
+  width: 100%;
+}
+
+.cropper-core {
+  width: 100%;
+  height: 100%;
 }
 
 .cropper-placeholder {
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: center;
-  width: 100%;
-  height: 100%;
   color: var(--ink-500);
   font-size: 0.9rem;
-}
-
-.cropper-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
 }
 
 .cropper-tools {

@@ -136,21 +136,21 @@
         </el-form-item>
 
         <el-form-item label="上传封面">
-          <el-upload
-            class="upload-cover"
-            drag
-            :action="api.admin.article.images"
-            :headers="uploadHeaders"
-            :before-upload="handleBeforeUpload"
-            :on-success="handleUploadCover"
-            :show-file-list="false"
-          >
-            <template v-if="!article.articleCover">
-              <el-icon class="el-icon--upload"><i class="el-icon-upload" /></el-icon>
-              <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            </template>
-            <img v-else :src="article.articleCover" class="cover-preview" />
-          </el-upload>
+          <div class="upload-cover-shell" v-loading="coverUploading">
+            <el-upload
+              class="upload-cover"
+              drag
+              :headers="uploadHeaders"
+              :http-request="interceptCoverUpload"
+              :show-file-list="false"
+            >
+              <template v-if="!article.articleCover">
+                <el-icon class="el-icon--upload"><i class="el-icon-upload" /></el-icon>
+                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+              </template>
+              <img v-else :src="article.articleCover" class="cover-preview" />
+            </el-upload>
+          </div>
         </el-form-item>
 
         <el-form-item label="置顶">
@@ -187,6 +187,14 @@
         <el-button type="primary" @click="handlePublishArticle">发表</el-button>
       </template>
     </el-dialog>
+
+    <ImageCropperDialog
+      ref="coverCropper"
+      title="裁剪封面"
+      :ratio="COVER_RATIO"
+      :size="COVER_CROP_SIZE"
+      @confirm="handleCoverCropConfirm"
+    />
   </el-card>
 </template>
 
@@ -194,11 +202,13 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
+import type { UploadRequestOptions } from 'element-plus'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import { api, request, type ApiResponse } from '@/api'
+import { api, request } from '@/api'
 import dayjs from 'dayjs'
 import * as imageConversion from 'image-conversion'
+import ImageCropperDialog from '@/components/ImageCropperDialog.vue'
 
 defineOptions({
   name: 'ArticleEditor',
@@ -230,9 +240,9 @@ interface Article {
   password?: string
 }
 
-type UploadResponse = ApiResponse<string>
-
 const UPLOAD_SIZE = 1024 // 1MB
+const COVER_RATIO: [number, number] = [3, 2]
+const COVER_CROP_SIZE = 360
 
 const route = useRoute()
 const router = useRouter()
@@ -267,6 +277,9 @@ const article = reactive<Article>({
 const uploadHeaders = computed(() => ({
   Authorization: 'Bearer ' + sessionStorage.getItem('token'),
 }))
+
+const coverCropper = ref<{ open: (file: File) => void } | null>(null)
+const coverUploading = ref(false)
 
 const getTagClass = (item: Tag) => {
   const isSelected = article.tagNames.includes(item.tagName)
@@ -346,20 +359,40 @@ const handleRemoveTag = (tagName: string) => {
   }
 }
 
-const handleBeforeUpload = async (file: File): Promise<File | Blob> => {
-  if (file.size / 1024 < UPLOAD_SIZE) {
-    return file
-  }
-  return await imageConversion.compressAccurately(file, UPLOAD_SIZE)
-}
-
-const handleUploadCover = (response: UploadResponse) => {
-  if (response.flag && response.data) {
-    article.articleCover = response.data
+const interceptCoverUpload = (options: UploadRequestOptions) => {
+  const file = options.file as File
+  if (!file) {
     return
   }
-  if (!response.flag) {
-    ElMessage.error(response.message || '上传失败')
+  coverCropper.value?.open(file)
+  options.onSuccess?.({})
+}
+
+const handleCoverCropConfirm = async ({ blob, mime }: { blob: Blob; mime: string }) => {
+  try {
+    coverUploading.value = true
+    let uploadBlob = blob
+    if (uploadBlob.size / 1024 > UPLOAD_SIZE) {
+      uploadBlob = await imageConversion.compressAccurately(uploadBlob, UPLOAD_SIZE)
+    }
+    const ext = mime === 'image/png' ? 'png' : 'jpg'
+    const form = new FormData()
+    form.append('file', uploadBlob, `cover.${ext}`)
+    const result = await request.post<string>(
+      api.admin.article.images,
+      form,
+      { headers: uploadHeaders.value },
+      { silent: true },
+    )
+    if (!result.ok) {
+      ElMessage.error(result.message || '上传失败')
+      return
+    }
+    article.articleCover = result.data
+  } catch {
+    ElMessage.error('上传失败')
+  } finally {
+    coverUploading.value = false
   }
 }
 
@@ -605,6 +638,14 @@ onUnmounted(() => {
   margin-bottom: 1rem;
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.upload-cover-shell {
+  width: 100%;
+}
+
+.upload-cover-shell :deep(.el-loading-mask) {
+  border-radius: 12px;
 }
 
 .upload-cover {
