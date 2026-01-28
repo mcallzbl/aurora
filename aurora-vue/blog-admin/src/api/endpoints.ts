@@ -73,6 +73,11 @@ export const api = {
       run: '/api/admin/jobs/run',
       detail: (id: number | string) => `/api/admin/jobs/${id}`,
     },
+    jobLog: {
+      list: '/api/admin/jobLogs',
+      groups: '/api/admin/jobLogs/jobGroups',
+      clean: '/api/admin/jobLogs/clean',
+    },
     talk: {
       list: '/api/admin/talks',
       images: '/api/admin/talks/images',
