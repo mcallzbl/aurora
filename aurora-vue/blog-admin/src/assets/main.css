@@ -89,3 +89,16 @@ a {
 ::selection {
   background: rgba(63, 159, 147, 0.25);
 }
+
+.md-editor {
+  position: relative;
+  z-index: 0;
+}
+
+.md-editor .md-editor-preview,
+.md-editor .md-editor-preview-wrapper,
+.md-editor .md-editor-preview pre,
+.md-editor .md-editor-preview code {
+  position: relative;
+  z-index: 0;
+}
