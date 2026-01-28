@@ -13,7 +13,9 @@
       >
         保存草稿
       </el-button>
-      <el-button type="primary" size="large" @click="handleOpenPublishDialog"> 发布文章 </el-button>
+      <el-button type="primary" size="large" @click="handleOpenPublishDialog">
+        {{ publishButtonText }}
+      </el-button>
     </div>
 
     <MdEditor
@@ -25,7 +27,7 @@
       style="height: calc(100vh - 280px)"
     />
 
-    <el-dialog v-model="showPublishDialog" title="发布文章" width="40%" top="3vh">
+    <el-dialog v-model="showPublishDialog" :title="publishDialogTitle" width="40%" top="3vh">
       <el-form label-width="80px" size="default" :model="article">
         <el-form-item label="文章分类">
           <el-tag
@@ -184,7 +186,7 @@
 
       <template #footer>
         <el-button @click="showPublishDialog = false">取消</el-button>
-        <el-button type="primary" @click="handlePublishArticle">发表</el-button>
+        <el-button type="primary" @click="handlePublishArticle">{{ publishConfirmText }}</el-button>
       </template>
     </el-dialog>
 
@@ -249,6 +251,7 @@ const router = useRouter()
 
 const showPublishDialog = ref(false)
 const autoSave = ref(true)
+const initialSnapshot = ref<string | null>(null)
 const categoryName = ref('')
 const tagName = ref('')
 const categoryList = ref<Category[]>([])
@@ -277,6 +280,11 @@ const article = reactive<Article>({
 const uploadHeaders = computed(() => ({
   Authorization: 'Bearer ' + sessionStorage.getItem('token'),
 }))
+
+const isEditing = computed(() => article.id != null)
+const publishButtonText = computed(() => (isEditing.value ? '更新文章' : '发布文章'))
+const publishDialogTitle = computed(() => (isEditing.value ? '更新文章' : '发布文章'))
+const publishConfirmText = computed(() => (isEditing.value ? '更新' : '发表'))
 
 const coverCropper = ref<{ open: (file: File) => void } | null>(null)
 const coverUploading = ref(false)
@@ -511,12 +519,17 @@ const handlePublishArticle = async () => {
 }
 
 const handleAutoSave = () => {
-  if (
-    autoSave.value &&
-    article.articleTitle.trim() &&
-    article.articleContent.trim() &&
-    article.id != null
-  ) {
+  if (!autoSave.value) {
+    return
+  }
+
+  if (article.id != null) {
+    if (!article.articleTitle.trim() || !article.articleContent.trim()) {
+      return
+    }
+    if (initialSnapshot.value && buildSnapshot() === initialSnapshot.value) {
+      return
+    }
     request
       .post<null>(api.admin.article.list, article, undefined, { silent: true })
       .then((result) => {
@@ -525,6 +538,7 @@ const handleAutoSave = () => {
             title: '成功',
             message: '自动保存成功',
           })
+          initialSnapshot.value = buildSnapshot()
         } else {
           ElNotification.error({
             title: '失败',
@@ -532,12 +546,30 @@ const handleAutoSave = () => {
           })
         }
       })
+    return
   }
 
-  if (autoSave.value && article.id == null) {
+  if (article.id == null) {
     sessionStorage.setItem('article', JSON.stringify(article))
   }
 }
+
+const buildSnapshot = () =>
+  JSON.stringify({
+    id: article.id,
+    articleTitle: article.articleTitle,
+    articleContent: article.articleContent,
+    articleAbstract: article.articleAbstract,
+    articleCover: article.articleCover,
+    categoryName: article.categoryName,
+    tagNames: [...article.tagNames],
+    isTop: article.isTop,
+    isFeatured: article.isFeatured,
+    type: article.type,
+    status: article.status,
+    originalUrl: article.originalUrl,
+    password: article.password,
+  })
 
 const loadArticle = async () => {
   const articleId = route.params.id as string | undefined
@@ -547,6 +579,7 @@ const loadArticle = async () => {
       return
     }
     Object.assign(article, result.data)
+    initialSnapshot.value = buildSnapshot()
   } else {
     const savedArticle = sessionStorage.getItem('article')
     if (savedArticle) {
