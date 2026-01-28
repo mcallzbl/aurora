@@ -66,6 +66,9 @@ export const api = {
     exceptionLog: {
       list: '/api/admin/exception/logs',
     },
+    operationLog: {
+      list: '/api/admin/operation/logs',
+    },
     job: {
       list: '/api/admin/jobs',
       groups: '/api/admin/jobs/jobGroups',
