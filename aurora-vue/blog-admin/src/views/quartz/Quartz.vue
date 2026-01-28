@@ -123,14 +123,18 @@
         </el-table-column>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="{ row }">
-            <el-button size="small" type="text" @click="handleChange(row.id)">编辑</el-button>
+            <el-button size="small" class="link-button" @click="handleChange(row.id)"
+              >编辑</el-button
+            >
             <el-popconfirm title="确定删除吗？" @confirm="deleteJobs(row.id)">
               <template #reference>
-                <el-button size="small" type="text" style="margin-left: 10px">删除</el-button>
+                <el-button size="small" class="link-button" style="margin-left: 10px"
+                  >删除</el-button
+                >
               </template>
             </el-popconfirm>
             <el-dropdown size="small" @command="handleDropdownCommand">
-              <el-button size="small" type="text" style="margin-left: 9px">更多</el-button>
+              <el-button size="small" class="link-button" style="margin-left: 9px">更多</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item :command="{ action: 'handleRun', row }">

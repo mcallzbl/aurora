@@ -86,6 +86,23 @@ a {
   color: inherit;
 }
 
+.link-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent-primary-strong);
+  box-shadow: none;
+}
+
+.link-button:hover {
+  color: var(--accent-primary);
+}
+
+.link-button.is-disabled {
+  color: var(--ink-500);
+  cursor: not-allowed;
+}
+
 ::selection {
   background: rgba(63, 159, 147, 0.25);
 }

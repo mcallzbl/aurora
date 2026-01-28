@@ -78,5 +78,16 @@ export const api = {
       images: '/api/admin/talks/images',
       detail: (id: number | string) => `/api/admin/talks/${id}`,
     },
+    photo: {
+      albums: '/api/admin/photos/albums',
+      albumUpload: '/api/admin/photos/albums/upload',
+      albumDetail: (id: number | string) => `/api/admin/photos/albums/${id}`,
+      photos: '/api/admin/photos',
+      updateDelete: '/api/admin/photos/delete',
+      upload: '/api/admin/photos/upload',
+      albumInfo: (id: number | string) => `/api/admin/photos/albums/${id}/info`,
+      albumListInfo: '/api/admin/photos/albums/info',
+      moveAlbum: '/api/admin/photos/album',
+    },
   },
 } as const
