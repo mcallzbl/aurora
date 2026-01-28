@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElNotification } from 'element-plus'
 import { Clock, Delete, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -138,19 +138,7 @@ interface ExceptionLog {
   exceptionInfo?: string
 }
 
-interface ExceptionLogListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: ExceptionLog[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type ExceptionLogListData = PageData<ExceptionLog>
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -203,15 +191,18 @@ const tagType = (type: string) => {
 const fetchLogs = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<ExceptionLogListResponse>('/api/admin/exception/logs', {
+    const result = await request.get<ExceptionLogListData>(api.admin.exceptionLog.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
         keywords: keywords.value,
       },
     })
-    logs.value = data.data?.records ?? []
-    pagination.total = data.data?.count ?? 0
+    if (!result.ok) {
+      return
+    }
+    logs.value = result.data.records ?? []
+    pagination.total = result.data.count ?? 0
     selectedIds.value = []
   } finally {
     loading.value = false
@@ -251,21 +242,26 @@ const deleteLog = async (id: number | null) => {
     showDeleteDialog.value = false
     return
   }
-  const { data } = await axios.delete<CommonResponse>('/api/admin/exception/logs', {
-    data: payload,
-  })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchLogs()
-  } else {
+  const result = await request.delete<null>(
+    api.admin.exceptionLog.list,
+    {
+      data: payload,
+    },
+    { silent: true },
+  )
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '删除失败',
+      message: result.message || '删除失败',
     })
+    showDeleteDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchLogs()
   showDeleteDialog.value = false
 }
 

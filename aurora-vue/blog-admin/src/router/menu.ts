@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import { api, request } from '@/api'
 import router from './index'
 import Layout from '@/layout/index.vue'
 import PlaceholderView from '@/views/_shared/PlaceholderView.vue'
@@ -15,12 +15,6 @@ interface RawMenu {
   hidden?: boolean
   meta?: Record<string, unknown>
   children?: RawMenu[]
-}
-
-interface MenuResponse {
-  flag: boolean
-  message?: string
-  data?: RawMenu[]
 }
 
 const viewModules = import.meta.glob('/src/views/**/*.vue')
@@ -120,14 +114,16 @@ const addDynamicRoutes = (routes: RouteRecordRaw[]) => {
 
 export const generateMenu = async () => {
   try {
-    const { data } = await axios.get<MenuResponse>('/api/admin/user/menus')
-    if (!data.flag) {
-      ElMessage.error(data.message || '菜单加载失败')
+    const result = await request.get<RawMenu[]>(api.admin.menu.userMenus, undefined, {
+      silent: true,
+    })
+    if (!result.ok) {
+      ElMessage.error(result.message || '菜单加载失败')
       await router.push({ path: '/login' })
       return false
     }
 
-    const routes = (data.data ?? []).map(mapMenuToRoute).filter(Boolean) as RouteRecordRaw[]
+    const routes = (result.data ?? []).map(mapMenuToRoute).filter(Boolean) as RouteRecordRaw[]
 
     useMenuStore().setMenus(routes)
     addDynamicRoutes(routes)

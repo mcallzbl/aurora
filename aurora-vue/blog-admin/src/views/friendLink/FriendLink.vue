@@ -129,7 +129,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Clock, Delete, Plus, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -148,15 +148,6 @@ interface FriendLink {
   createTime: string
 }
 
-interface FriendLinkListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: FriendLink[]
-    count: number
-  }
-}
-
 interface FriendLinkForm {
   id: number | null
   linkName: string
@@ -165,10 +156,7 @@ interface FriendLinkForm {
   linkAddress: string
 }
 
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type FriendLinkListData = PageData<FriendLink>
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -212,15 +200,18 @@ const formatDate = (dateStr: string) => {
 const fetchLinks = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<FriendLinkListResponse>('/api/admin/links', {
+    const result = await request.get<FriendLinkListData>(api.admin.link.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
         keywords: keywords.value,
       },
     })
-    links.value = data.data?.records ?? []
-    pagination.total = data.data?.count ?? 0
+    if (!result.ok) {
+      return
+    }
+    links.value = result.data.records ?? []
+    pagination.total = result.data.count ?? 0
     selectedIds.value = []
   } finally {
     loading.value = false
@@ -290,19 +281,21 @@ const submitLink = async () => {
     ElMessage.error('友链地址不能为空')
     return
   }
-  const { data } = await axios.post<CommonResponse>('/api/admin/links', linkForm)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchLinks()
-  } else {
+  const result = await request.post<null>(api.admin.link.list, linkForm, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '操作失败',
+      message: result.message || '操作失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchLinks()
   showEditorDialog.value = false
 }
 
@@ -312,21 +305,25 @@ const deleteLink = async (id: number | null) => {
     showDeleteDialog.value = false
     return
   }
-  const { data } = await axios.delete<CommonResponse>('/api/admin/links', {
-    data: payload,
-  })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchLinks()
-  } else {
+  const result = await request.delete<null>(
+    api.admin.link.list,
+    {
+      data: payload,
+    },
+    { silent: true },
+  )
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '删除失败',
+      message: result.message || '删除失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchLinks()
   showDeleteDialog.value = false
 }
 

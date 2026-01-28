@@ -56,7 +56,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { generateMenu } from '@/router/menu'
-import axios from 'axios'
+import { api, request } from '@/api'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 
@@ -65,15 +65,11 @@ interface LoginForm {
   password: string
 }
 
-interface LoginResponse {
-  flag: boolean
-  message?: string
-  data?:
-    | {
-        token?: string
-      }
-    | string
-}
+type LoginData =
+  | {
+      token?: string
+    }
+  | string
 
 defineOptions({
   name: 'LoginView',
@@ -106,26 +102,24 @@ const onSubmit = async () => {
   params.append('password', loginForm.password)
 
   loading.value = true
-  try {
-    const { data } = await axios.post<LoginResponse>('/api/users/login', params)
-    if (data.flag) {
-      const token = typeof data.data === 'string' ? data.data : data.data?.token
-      const userPayload =
-        typeof data.data === 'string' ? { token } : { ...(data.data ?? {}), token }
-      appStore.login(userPayload)
-      const menuReady = await generateMenu()
-      if (menuReady) {
-        ElMessage.success('登录成功')
-        await router.push({ path: '/' })
-      }
-      return
-    }
-    ElMessage.error(data.message || '登录失败')
-  } catch {
-    ElMessage.error('登录失败')
-  } finally {
+  const result = await request.post<LoginData>(api.users.login, params, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
+    ElMessage.error(result.message || '登录失败')
     loading.value = false
+    return
   }
+  const token = typeof result.data === 'string' ? result.data : result.data?.token
+  const userPayload =
+    typeof result.data === 'string' ? { token } : { ...(result.data ?? {}), token }
+  appStore.login(userPayload)
+  const menuReady = await generateMenu()
+  if (menuReady) {
+    ElMessage.success('登录成功')
+    await router.push({ path: '/' })
+  }
+  loading.value = false
 }
 </script>
 

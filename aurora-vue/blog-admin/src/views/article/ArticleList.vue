@@ -41,7 +41,7 @@
         批量导出
       </el-button>
       <el-upload
-        action="/api/admin/articles/import"
+        :action="api.admin.article.import"
         multiple
         :limit="9"
         :show-file-list="false"
@@ -264,7 +264,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElNotification } from 'element-plus'
-import axios from 'axios'
+import { api, request, type ApiResponse, type PageData } from '@/api'
 import AppPagination from '@/components/AppPagination.vue'
 import AppStatusFilter from '@/components/AppStatusFilter.vue'
 import TopSwitch from '@/components/TopSwitch.vue'
@@ -303,26 +303,8 @@ interface Tag {
   tagName: string
 }
 
-interface ArticleListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: Article[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-  data?: unknown
-}
-
-interface ExportResponse {
-  flag: boolean
-  message?: string
-  data?: string[]
-}
+type ArticleListData = PageData<Article>
+type UploadResponse = ApiResponse<unknown>
 
 const route = useRoute()
 const router = useRouter()
@@ -459,19 +441,21 @@ const handleDeleteArticle = async (id: number) => {
       ids: [id],
       isDelete: queryParams.isDelete === 0 ? 1 : 0,
     }
-    const { data } = await axios.put<CommonResponse>('/api/admin/articles', params)
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '操作成功',
-      })
-      await fetchArticles()
-    } else {
+    const result = await request.put<null>(api.admin.article.list, params, undefined, {
+      silent: true,
+    })
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '操作失败',
+        message: result.message || '操作失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '操作成功',
+    })
+    await fetchArticles()
   } catch {
     ElNotification.error({
       title: '失败',
@@ -486,19 +470,21 @@ const handleBatchDelete = async () => {
       ids: selectedIds.value,
       isDelete: queryParams.isDelete === 0 ? 1 : 0,
     }
-    const { data } = await axios.put<CommonResponse>('/api/admin/articles', params)
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '操作成功',
-      })
-      await fetchArticles()
-    } else {
+    const result = await request.put<null>(api.admin.article.list, params, undefined, {
+      silent: true,
+    })
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '操作失败',
+        message: result.message || '操作失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '操作成功',
+    })
+    await fetchArticles()
   } catch {
     ElNotification.error({
       title: '失败',
@@ -511,21 +497,25 @@ const handleBatchDelete = async () => {
 
 const handlePermanentDelete = async (id: number) => {
   try {
-    const { data } = await axios.delete<CommonResponse>('/api/admin/articles/delete', {
-      data: [id],
-    })
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '删除成功',
-      })
-      await fetchArticles()
-    } else {
+    const result = await request.delete<null>(
+      api.admin.article.delete,
+      {
+        data: [id],
+      },
+      { silent: true },
+    )
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '删除失败',
+        message: result.message || '删除失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '删除成功',
+    })
+    await fetchArticles()
   } catch {
     ElNotification.error({
       title: '失败',
@@ -536,21 +526,25 @@ const handlePermanentDelete = async (id: number) => {
 
 const handleBatchPermanentDelete = async () => {
   try {
-    const { data } = await axios.delete<CommonResponse>('/api/admin/articles/delete', {
-      data: selectedIds.value,
-    })
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '删除成功',
-      })
-      await fetchArticles()
-    } else {
+    const result = await request.delete<null>(
+      api.admin.article.delete,
+      {
+        data: selectedIds.value,
+      },
+      { silent: true },
+    )
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '删除失败',
+        message: result.message || '删除失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '删除成功',
+    })
+    await fetchArticles()
   } catch {
     ElNotification.error({
       title: '失败',
@@ -563,25 +557,29 @@ const handleBatchPermanentDelete = async () => {
 
 const handleExport = async () => {
   try {
-    const { data } = await axios.post<ExportResponse>(
-      '/api/admin/articles/export',
+    const result = await request.post<string[]>(
+      api.admin.article.export,
       selectedIds.value,
+      undefined,
+      {
+        silent: true,
+      },
     )
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '导出成功',
-      })
-      data.data?.forEach((url) => {
-        downloadFile(url)
-      })
-      await fetchArticles()
-    } else {
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '导出失败',
+        message: result.message || '导出失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '导出成功',
+    })
+    result.data?.forEach((url) => {
+      downloadFile(url)
+    })
+    await fetchArticles()
   } catch {
     ElNotification.error({
       title: '失败',
@@ -606,7 +604,7 @@ const downloadFile = (url: string) => {
   )
 }
 
-const handleUploadSuccess = (response: CommonResponse) => {
+const handleUploadSuccess = (response: UploadResponse) => {
   if (response.flag) {
     ElNotification.success({
       title: '成功',
@@ -623,22 +621,27 @@ const handleUploadSuccess = (response: CommonResponse) => {
 
 const handleToggleTopOrFeatured = async (article: Article) => {
   try {
-    const { data } = await axios.put<CommonResponse>('/api/admin/articles/topAndFeatured', {
-      id: article.id,
-      isTop: article.isTop,
-      isFeatured: article.isFeatured,
-    })
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: '修改成功',
-      })
-    } else {
+    const result = await request.put<null>(
+      api.admin.article.topAndFeatured,
+      {
+        id: article.id,
+        isTop: article.isTop,
+        isFeatured: article.isFeatured,
+      },
+      undefined,
+      { silent: true },
+    )
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '修改失败',
+        message: result.message || '修改失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: '修改成功',
+    })
   } catch {
     ElNotification.error({
       title: '失败',
@@ -652,7 +655,7 @@ const normalizeSelectValue = <T,>(value: T | '' | null) => (value === '' ? null 
 const fetchArticles = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<ArticleListResponse>('/api/admin/articles', {
+    const result = await request.get<ArticleListData>(api.admin.article.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
@@ -664,8 +667,11 @@ const fetchArticles = async () => {
         isDelete: queryParams.isDelete,
       },
     })
-    articleList.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    articleList.value = result.data.records
+    pagination.total = result.data.count
     selectedIds.value = []
   } finally {
     loading.value = false
@@ -673,13 +679,19 @@ const fetchArticles = async () => {
 }
 
 const fetchCategories = async () => {
-  const { data } = await axios.get<{ data: Category[] }>('/api/admin/categories/search')
-  categories.value = (data.data || []).filter((item) => item.id != null)
+  const result = await request.get<Category[]>(api.admin.category.search)
+  if (!result.ok) {
+    return
+  }
+  categories.value = (result.data || []).filter((item) => item.id != null)
 }
 
 const fetchTags = async () => {
-  const { data } = await axios.get<{ data: Tag[] }>('/api/admin/tags/search')
-  tags.value = (data.data || []).filter((item) => item.id != null)
+  const result = await request.get<Tag[]>(api.admin.tag.search)
+  if (!result.ok) {
+    return
+  }
+  tags.value = (result.data || []).filter((item) => item.id != null)
 }
 
 watch(

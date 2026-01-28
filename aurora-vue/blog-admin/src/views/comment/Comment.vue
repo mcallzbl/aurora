@@ -183,7 +183,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElNotification } from 'element-plus'
 import { CircleCheck, Clock, Delete, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -205,19 +205,7 @@ interface CommentItem {
   type: number
 }
 
-interface CommentListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: CommentItem[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type CommentListData = PageData<CommentItem>
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -255,7 +243,7 @@ const formatDate = (dateStr: string) => {
 const fetchComments = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<CommentListResponse>('/api/admin/comments', {
+    const result = await request.get<CommentListData>(api.admin.comment.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
@@ -264,8 +252,11 @@ const fetchComments = async () => {
         isReview: activeReview.value,
       },
     })
-    comments.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    comments.value = result.data.records
+    pagination.total = result.data.count
     selectedIds.value = []
   } finally {
     loading.value = false
@@ -300,22 +291,27 @@ const changeReview = (review: number | null) => {
 const updateCommentReview = async (id: number | null) => {
   const ids = id ? [id] : selectedIds.value
   if (!ids.length) return
-  const { data } = await axios.put<CommonResponse>('/api/admin/comments/review', {
-    ids,
-    isReview: 1,
-  })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchComments()
-  } else {
+  const result = await request.put<null>(
+    api.admin.comment.review,
+    {
+      ids,
+      isReview: 1,
+    },
+    undefined,
+    { silent: true },
+  )
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '操作失败',
+      message: result.message || '操作失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchComments()
 }
 
 const deleteComments = async (id: number | null) => {
@@ -324,21 +320,26 @@ const deleteComments = async (id: number | null) => {
     showDeleteDialog.value = false
     return
   }
-  const { data } = await axios.delete<CommonResponse>('/api/admin/comments', {
-    data: ids,
-  })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchComments()
-  } else {
+  const result = await request.delete<null>(
+    api.admin.comment.list,
+    {
+      data: ids,
+    },
+    { silent: true },
+  )
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '删除失败',
+      message: result.message || '删除失败',
     })
+    showDeleteDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchComments()
   showDeleteDialog.value = false
 }
 

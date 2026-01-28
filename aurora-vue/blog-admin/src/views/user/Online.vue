@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElNotification } from 'element-plus'
 import { Clock, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -90,19 +90,7 @@ interface OnlineUser {
   lastLoginTime: string
 }
 
-interface OnlineUserListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: OnlineUser[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type OnlineUserListData = PageData<OnlineUser>
 
 const route = useRoute()
 const router = useRouter()
@@ -135,15 +123,18 @@ const formatDate = (dateStr: string) => {
 const fetchOnlineUsers = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<OnlineUserListResponse>('/api/admin/users/online', {
+    const result = await request.get<OnlineUserListData>(api.admin.user.online, {
       params: {
         current: pagination.current,
         size: pagination.size,
         keywords: keywords.value,
       },
     })
-    onlineUsers.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    onlineUsers.value = result.data.records
+    pagination.total = result.data.count
   } finally {
     loading.value = false
   }
@@ -168,23 +159,29 @@ const handleCurrentChange = (current: number) => {
 }
 
 const removeOnlineUser = async (user: OnlineUser) => {
-  const { data } = await axios.delete<CommonResponse>(`/api/admin/users/${user.userInfoId}/online`)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '下线成功',
-    })
-    if (user.userInfoId === appStore.userInfo?.id) {
-      sessionStorage.removeItem('token')
-      router.push({ path: '/login' })
-    }
-    await fetchOnlineUsers()
-  } else {
+  const result = await request.delete<null>(
+    api.admin.user.onlineDetail(user.userInfoId),
+    undefined,
+    {
+      silent: true,
+    },
+  )
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '下线失败',
+      message: result.message || '下线失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '下线成功',
+  })
+  if (user.userInfoId === appStore.userInfo?.id) {
+    sessionStorage.removeItem('token')
+    router.push({ path: '/login' })
+  }
+  await fetchOnlineUsers()
 }
 
 onMounted(() => {

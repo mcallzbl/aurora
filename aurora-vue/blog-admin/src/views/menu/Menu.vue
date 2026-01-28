@@ -143,7 +143,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Clock, Plus, Search } from '@element-plus/icons-vue'
 
@@ -162,17 +162,6 @@ interface MenuItem {
   isHidden: 0 | 1
   createTime?: string
   children?: MenuItem[]
-}
-
-interface MenuListResponse {
-  flag: boolean
-  message?: string
-  data: MenuItem[]
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
 }
 
 const route = useRoute()
@@ -221,12 +210,15 @@ const formatDate = (dateStr?: string) => {
 const fetchMenus = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<MenuListResponse>('/api/admin/menus', {
+    const result = await request.get<MenuItem[]>(api.admin.menu.list, {
       params: {
         keywords: keywords.value,
       },
     })
-    menus.value = data.data ?? []
+    if (!result.ok) {
+      return
+    }
+    menus.value = result.data ?? []
   } finally {
     loading.value = false
   }
@@ -282,30 +274,27 @@ const selectIcon = (icon: string) => {
 
 const handleToggleHidden = async (menu: MenuItem, value: number) => {
   const previous = value === 1 ? 0 : 1
-  try {
-    const { data } = await axios.put<CommonResponse>('/api/admin/menus/isHidden', {
+  const result = await request.put<null>(
+    api.admin.menu.hidden,
+    {
       id: menu.id,
       isHidden: value,
-    })
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: '修改成功',
-      })
-    } else {
-      menu.isHidden = previous
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '修改失败',
-      })
-    }
-  } catch {
+    },
+    undefined,
+    { silent: true },
+  )
+  if (!result.ok) {
     menu.isHidden = previous
     ElNotification.error({
       title: '失败',
-      message: '修改失败',
+      message: result.message || '修改失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: '修改成功',
+  })
 }
 
 const submitMenu = async () => {
@@ -325,36 +314,38 @@ const submitMenu = async () => {
     ElMessage.error('菜单访问路径不能为空')
     return
   }
-  const { data } = await axios.post<CommonResponse>('/api/admin/menus', menuForm)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: '操作成功',
-    })
-    await fetchMenus()
-  } else {
+  const result = await request.post<null>(api.admin.menu.list, menuForm, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '操作失败',
+      message: result.message || '操作失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: '操作成功',
+  })
+  await fetchMenus()
   showEditorDialog.value = false
 }
 
 const deleteMenu = async (id: number) => {
-  const { data } = await axios.delete<CommonResponse>(`/api/admin/menus/${id}`)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: '删除成功',
-    })
-    await fetchMenus()
-  } else {
+  const result = await request.delete<null>(api.admin.menu.detail(id), undefined, { silent: true })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '删除失败',
+      message: result.message || '删除失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: '删除成功',
+  })
+  await fetchMenus()
 }
 
 watch(

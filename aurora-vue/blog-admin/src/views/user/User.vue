@@ -126,7 +126,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElNotification } from 'element-plus'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { useAppStore } from '@/stores/app'
 import AppPagination from '@/components/AppPagination.vue'
 
@@ -156,19 +156,7 @@ type UserForm = User & {
   roleIds?: number[]
 }
 
-interface UserListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: User[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type UserListData = PageData<User>
 
 const appStore = useAppStore()
 const route = useRoute()
@@ -235,25 +223,27 @@ const handleCurrentChange = () => {
 }
 
 const handleToggleDisable = async (user: User) => {
-  try {
-    const { data } = await axios.put<CommonResponse>('/api/admin/users/disable', {
+  const result = await request.put<null>(
+    api.admin.user.disable,
+    {
       id: user.userInfoId,
       isDisable: user.isDisable,
-    })
-    if (!data.flag) {
-      throw new Error(data.message || '修改失败')
-    }
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '修改成功',
-    })
-  } catch {
+    },
+    undefined,
+    { silent: true },
+  )
+  if (!result.ok) {
     user.isDisable = user.isDisable === 1 ? 0 : 1
     ElNotification.error({
       title: '失败',
-      message: '修改失败',
+      message: result.message || '修改失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '修改成功',
+  })
 }
 
 const openEditDialog = (user: User) => {
@@ -264,34 +254,28 @@ const openEditDialog = (user: User) => {
 
 const handleEditUserRole = async () => {
   userForm.roleIds = roleIds.value
-  try {
-    const { data } = await axios.put<CommonResponse>('/api/admin/users/role', userForm)
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '修改成功',
-      })
-      await fetchUsers()
-    } else {
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '修改失败',
-      })
-    }
-  } catch {
+  const result = await request.put<null>(api.admin.user.roles, userForm, undefined, {
+    silent: true,
+  })
+  if (result.ok) {
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '修改成功',
+    })
+    await fetchUsers()
+  } else {
     ElNotification.error({
       title: '失败',
-      message: '修改失败',
+      message: result.message || '修改失败',
     })
-  } finally {
-    isEdit.value = false
   }
+  isEdit.value = false
 }
 
 const fetchUsers = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<UserListResponse>('/api/admin/users', {
+    const result = await request.get<UserListData>(api.admin.user.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
@@ -299,16 +283,22 @@ const fetchUsers = async () => {
         loginType: loginType.value,
       },
     })
-    userList.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    userList.value = result.data.records
+    pagination.total = result.data.count
   } finally {
     loading.value = false
   }
 }
 
 const fetchRoles = async () => {
-  const { data } = await axios.get<{ data: Role[] }>('/api/admin/users/role')
-  userRoles.value = data.data
+  const result = await request.get<Role[]>(api.admin.user.roles)
+  if (!result.ok) {
+    return
+  }
+  userRoles.value = result.data
 }
 
 watch(

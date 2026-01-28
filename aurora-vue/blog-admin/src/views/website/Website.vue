@@ -220,7 +220,7 @@
               <el-form-item label="微信收款码">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
+                  :action="api.admin.website.images"
                   accept="image/*"
                   :headers="uploadHeaders"
                   :show-file-list="false"
@@ -242,7 +242,7 @@
               <el-form-item label="支付宝收款码">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
+                  :action="api.admin.website.images"
                   accept="image/*"
                   :headers="uploadHeaders"
                   :show-file-list="false"
@@ -287,7 +287,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import axios from 'axios'
+import { api, request, type ApiResponse } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import type { UploadRequestOptions } from 'element-plus'
 import * as imageConversion from 'image-conversion'
@@ -331,17 +331,7 @@ interface WebsiteConfig {
   alipayQRCode?: string
 }
 
-interface WebsiteConfigResponse {
-  flag: boolean
-  message?: string
-  data: WebsiteConfig
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-  data?: string
-}
+type UploadResponse = ApiResponse<string>
 
 const UPLOAD_SIZE = 1024 // 1MB
 
@@ -366,8 +356,11 @@ const cropRatio = ref<[number, number]>([1, 1])
 const cropSize = ref(200)
 
 const fetchWebsiteConfig = async () => {
-  const { data } = await axios.get<WebsiteConfigResponse>('/api/admin/website/config')
-  Object.assign(websiteConfig, data.data)
+  const result = await request.get<WebsiteConfig>(api.admin.website.config)
+  if (!result.ok) {
+    return
+  }
+  Object.assign(websiteConfig, result.data)
 }
 
 const openCropper = (
@@ -406,11 +399,18 @@ const handleCropperConfirm = async ({ blob }: { blob: Blob; mime: string }) => {
     }
     const form = new FormData()
     form.append('file', uploadBlob, `${cropField.value || 'image'}.png`)
-    const { data } = await axios.post<CommonResponse>('/api/admin/config/images', form, {
-      headers: uploadHeaders.value,
-    })
-    if (data?.data) {
-      setConfigField(cropField.value, data.data)
+    const result = await request.post<string>(
+      api.admin.website.images,
+      form,
+      { headers: uploadHeaders.value },
+      { silent: true },
+    )
+    if (!result.ok) {
+      ElMessage.error(result.message || '上传失败')
+      return
+    }
+    if (result.data) {
+      setConfigField(cropField.value, result.data)
     }
   } catch {
     ElMessage.error('上传失败')
@@ -423,15 +423,19 @@ const handleCropperCancel = () => {
   cropField.value = null
 }
 
-const handleUploadSuccess = (response: CommonResponse, field: keyof WebsiteConfig) => {
-  if (response?.data) {
+const handleUploadSuccess = (response: UploadResponse, field: keyof WebsiteConfig) => {
+  if (response.flag && response.data) {
     setConfigField(field, response.data)
+    return
+  }
+  if (!response.flag) {
+    ElMessage.error(response.message || '上传失败')
   }
 }
 
-const handleWeiXinSuccess = (response: CommonResponse) =>
+const handleWeiXinSuccess = (response: UploadResponse) =>
   handleUploadSuccess(response, 'weiXinQRCode')
-const handleAlipaySuccess = (response: CommonResponse) =>
+const handleAlipaySuccess = (response: UploadResponse) =>
   handleUploadSuccess(response, 'alipayQRCode')
 
 const handleBeforeUpload = async (file: File): Promise<File | Blob> => {
@@ -442,18 +446,20 @@ const handleBeforeUpload = async (file: File): Promise<File | Blob> => {
 }
 
 const updateWebsiteConfig = async () => {
-  const { data } = await axios.put<CommonResponse>('/api/admin/website/config', websiteConfig)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '修改成功',
-    })
-  } else {
+  const result = await request.put<null>(api.admin.website.config, websiteConfig, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '修改失败',
+      message: result.message || '修改失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '修改成功',
+  })
 }
 
 onMounted(() => {

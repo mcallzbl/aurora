@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import axios from 'axios'
+import { api, request } from '@/api'
 import type { EChartsOption, TooltipComponentFormatterCallbackParams } from 'echarts'
 import * as echarts from 'echarts'
 import dayjs from 'dayjs'
@@ -126,14 +126,6 @@ interface DashboardData {
   articleRankDTOs?: ArticleRankDTO[]
   articleStatisticsDTOs?: ArticleStatisticsDTO[]
   tagDTOs?: TagDTO[]
-}
-
-interface DashboardResponse {
-  data: DashboardData
-}
-
-interface UserAreaResponse {
-  data: UserAreaDTO[]
 }
 
 type LineChartOption = EChartsOption & {
@@ -440,17 +432,20 @@ const applyChartData = (data: DashboardData) => {
 
 const fetchUserArea = async () => {
   try {
-    const { data } = await axios.get<UserAreaResponse>('/api/admin/users/area', {
+    const result = await request.get<UserAreaDTO[]>(api.admin.user.area, {
       params: {
         type: userAreaType.value,
       },
     })
+    if (!result.ok) {
+      return
+    }
 
-    console.log('后端返回的原始数据:', data.data)
+    console.log('后端返回的原始数据:', result.data)
     console.log('地图中的省份列表:', Array.from(chinaProvinces.value))
 
     // 将后端返回的省份名称转换为地图中的完整名称
-    const processedData = data.data
+    const processedData = result.data
       .map((item) => {
         // 先尝试直接匹配
         if (chinaProvinces.value.has(item.name)) {
@@ -513,14 +508,17 @@ const loadChinaMap = async () => {
 
 const fetchDashboard = async () => {
   try {
-    const { data } = await axios.get<DashboardResponse>('/api/admin')
+    const result = await request.get<DashboardData>(api.admin.dashboard)
+    if (!result.ok) {
+      return
+    }
     Object.assign(stats, {
-      viewsCount: data.data.viewsCount,
-      messageCount: data.data.messageCount,
-      userCount: data.data.userCount,
-      articleCount: data.data.articleCount,
+      viewsCount: result.data.viewsCount,
+      messageCount: result.data.messageCount,
+      userCount: result.data.userCount,
+      articleCount: result.data.articleCount,
     })
-    applyChartData(data.data)
+    applyChartData(result.data)
   } finally {
     loading.value = false
   }

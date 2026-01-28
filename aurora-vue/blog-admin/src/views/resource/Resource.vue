@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Clock, Plus, Search } from '@element-plus/icons-vue'
 
@@ -150,17 +150,6 @@ interface ResourceItem {
   parentId?: number | null
   createTime?: string
   children?: ResourceItem[]
-}
-
-interface ResourceListResponse {
-  flag: boolean
-  message?: string
-  data: ResourceItem[]
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
 }
 
 interface ResourceForm {
@@ -222,12 +211,15 @@ const tagType = (type: string) => {
 const fetchResources = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<ResourceListResponse>('/api/admin/resources', {
+    const result = await request.get<ResourceItem[]>(api.admin.resource.list, {
       params: {
         keywords: keywords.value,
       },
     })
-    resources.value = data.data ?? []
+    if (!result.ok) {
+      return
+    }
+    resources.value = result.data ?? []
   } finally {
     loading.value = false
   }
@@ -302,63 +294,63 @@ const submitResource = async () => {
         parentId: resourceForm.parentId,
         isAnonymous: resourceForm.isAnonymous,
       }
-  const { data } = await axios.post<CommonResponse>('/api/admin/resources', payload)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchResources()
-  } else {
+  const result = await request.post<null>(api.admin.resource.list, payload, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '操作失败',
+      message: result.message || '操作失败',
     })
+    showModuleDialog.value = false
+    showResourceDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchResources()
   showModuleDialog.value = false
   showResourceDialog.value = false
 }
 
 const handleToggleAnonymous = async (resource: ResourceItem, value: number) => {
   const previous = value === 1 ? 0 : 1
-  try {
-    const { data } = await axios.post<CommonResponse>('/api/admin/resources', resource)
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '修改成功',
-      })
-      await fetchResources()
-    } else {
-      resource.isAnonymous = previous
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '修改失败',
-      })
-    }
-  } catch {
+  const result = await request.post<null>(api.admin.resource.list, resource, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     resource.isAnonymous = previous
     ElNotification.error({
       title: '失败',
-      message: '修改失败',
+      message: result.message || '修改失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '修改成功',
+  })
+  await fetchResources()
 }
 
 const deleteResource = async (id: number) => {
-  const { data } = await axios.delete<CommonResponse>(`/api/admin/resources/${id}`)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchResources()
-  } else {
+  const result = await request.delete<null>(api.admin.resource.detail(id), undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '删除失败',
+      message: result.message || '删除失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchResources()
 }
 
 onMounted(() => {

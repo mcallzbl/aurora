@@ -325,7 +325,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElNotification } from 'element-plus'
 import {
   CaretRight,
@@ -360,19 +360,7 @@ interface JobItem {
   nextValidTime?: string
 }
 
-interface JobListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: JobItem[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type JobListData = PageData<JobItem>
 
 const route = useRoute()
 const router = useRouter()
@@ -447,8 +435,11 @@ const handleCurrentChange = (current: number) => {
 }
 
 const listJobGroups = async () => {
-  const { data } = await axios.get<{ data: string[] }>('/api/admin/jobs/jobGroups')
-  jobGroups.value = data.data || []
+  const result = await request.get<string[]>(api.admin.job.groups)
+  if (!result.ok) {
+    return
+  }
+  jobGroups.value = result.data || []
 }
 
 const buildQueryParams = () => {
@@ -471,11 +462,14 @@ const buildQueryParams = () => {
 const listJobs = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<JobListResponse>('/api/admin/jobs', {
+    const result = await request.get<JobListData>(api.admin.job.list, {
       params: buildQueryParams(),
     })
-    jobs.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    jobs.value = result.data.records
+    pagination.total = result.data.count
   } finally {
     loading.value = false
   }
@@ -494,39 +488,31 @@ const selectionChange = (items: JobItem[]) => {
 }
 
 const changeStatus = async (item: JobItem) => {
-  const { data } = await axios.put<CommonResponse>('/api/admin/jobs/status', {
+  const result = await request.put<null>(api.admin.job.status, {
     id: item.id,
     status: item.status,
   })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: '修改成功',
-    })
-    listJobs()
-  } else {
-    ElNotification.error({
-      title: '失败',
-      message: '修改失败',
-    })
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: '修改成功',
+  })
+  listJobs()
 }
 
 const deleteJobs = async (id: number | null) => {
   const payload = id ? [id] : jobIds.value
-  const { data } = await axios.delete<CommonResponse>('/api/admin/jobs', { data: payload })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: '删除成功',
-    })
-    listJobs()
-  } else {
-    ElNotification.error({
-      title: '失败',
-      message: '删除失败',
-    })
+  const result = await request.delete<null>(api.admin.job.list, { data: payload })
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: '删除成功',
+  })
+  listJobs()
   showDeleteDialog.value = false
 }
 
@@ -554,8 +540,11 @@ const handleAdd = () => {
 const handleChange = async (jobId?: number) => {
   if (!jobId) return
   editOrUpdate.value = true
-  const { data } = await axios.get<{ data: JobItem }>(`/api/admin/jobs/${jobId}`)
-  Object.assign(job, data.data)
+  const result = await request.get<JobItem>(api.admin.job.detail(jobId))
+  if (!result.ok) {
+    return
+  }
+  Object.assign(job, result.data)
   dialogFormVisible.value = true
 }
 
@@ -565,33 +554,25 @@ const crontabFill = (value: string) => {
 
 const handleEditOrUpdate = async () => {
   if (editOrUpdate.value) {
-    const { data } = await axios.put<CommonResponse>('/api/admin/jobs', job)
-    if (data.flag) {
-      ElNotification.success({
-        title: '修改成功',
-        message: data.message || '修改成功',
-      })
-      listJobs()
-    } else {
-      ElNotification.error({
-        title: '修改失败',
-        message: data.message || '修改失败',
-      })
+    const result = await request.put<null>(api.admin.job.list, job)
+    if (!result.ok) {
+      return
     }
+    ElNotification.success({
+      title: '修改成功',
+      message: result.message || '修改成功',
+    })
+    listJobs()
   } else {
-    const { data } = await axios.post<CommonResponse>('/api/admin/jobs', job)
-    if (data.flag) {
-      ElNotification.success({
-        title: '添加成功',
-        message: data.message || '添加成功',
-      })
-      listJobs()
-    } else {
-      ElNotification.error({
-        title: '添加失败',
-        message: data.message || '添加失败',
-      })
+    const result = await request.post<null>(api.admin.job.list, job)
+    if (!result.ok) {
+      return
     }
+    ElNotification.success({
+      title: '添加成功',
+      message: result.message || '添加成功',
+    })
+    listJobs()
   }
   dialogFormVisible.value = false
 }
@@ -613,21 +594,17 @@ const handleDropdownCommand = (payload: { action: string; row: JobItem }) => {
 }
 
 const handleRun = async (item: JobItem) => {
-  const { data } = await axios.put<CommonResponse>('/api/admin/jobs/run', {
+  const result = await request.put<null>(api.admin.job.run, {
     id: item.id,
     jobGroup: item.jobGroup,
   })
-  if (data.flag) {
-    ElNotification.success({
-      title: '执行成功',
-      message: data.message || '执行成功',
-    })
-  } else {
-    ElNotification.error({
-      title: '执行失败',
-      message: data.message || '执行失败',
-    })
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '执行成功',
+    message: result.message || '执行成功',
+  })
 }
 
 const handleView = (item: JobItem) => {

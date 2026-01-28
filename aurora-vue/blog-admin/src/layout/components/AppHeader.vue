@@ -81,7 +81,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { api, request } from '@/api'
 import { Close, Expand, Fold, FullScreen, Moon, Sunny } from '@element-plus/icons-vue'
 import { resetRouter } from '@/router'
 import { useAppStore, type TabItem } from '@/stores/app'
@@ -165,7 +165,7 @@ const handleCommand = async (command: string) => {
     return
   }
   if (command === 'logout') {
-    await axios.post('/api/users/logout').catch(() => {})
+    await request.post(api.users.logout, undefined, undefined, { silent: true })
     appStore.logout()
     resetRouter()
     router.push({ path: '/login' })

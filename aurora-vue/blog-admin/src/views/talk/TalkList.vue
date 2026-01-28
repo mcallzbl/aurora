@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElNotification } from 'element-plus'
 import { Delete, Edit, Lock, MoreFilled, Top } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -100,14 +100,7 @@ interface Talk {
   imgs?: string[] | null
 }
 
-interface TalkListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: Talk[]
-    count: number
-  }
-}
+type TalkListData = PageData<Talk>
 
 const route = useRoute()
 const router = useRouter()
@@ -148,15 +141,18 @@ const formatDate = (dateStr: string) => {
 const fetchTalks = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<TalkListResponse>('/api/admin/talks', {
+    const result = await request.get<TalkListData>(api.admin.talk.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
         status: activeStatus.value,
       },
     })
-    talks.value = data.data?.records ?? []
-    pagination.total = data.data?.count ?? 0
+    if (!result.ok) {
+      return
+    }
+    talks.value = result.data.records ?? []
+    pagination.total = result.data.count ?? 0
   } finally {
     loading.value = false
   }
@@ -178,25 +174,27 @@ const handleCommand = (command: string) => {
 
 const confirmDelete = async () => {
   if (!pendingDeleteId.value) return
-  try {
-    const { data } = await axios.delete<{ flag: boolean; message?: string }>('/api/admin/talks', {
+  const result = await request.delete<null>(
+    api.admin.talk.list,
+    {
       data: [pendingDeleteId.value],
+    },
+    { silent: true },
+  )
+  if (!result.ok) {
+    ElNotification.error({
+      title: '失败',
+      message: result.message || '删除失败',
     })
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '删除成功',
-      })
-      await fetchTalks()
-    } else {
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '删除失败',
-      })
-    }
-  } finally {
     showDeleteDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchTalks()
+  showDeleteDialog.value = false
 }
 
 const changeStatus = (status: string | number | null) => {

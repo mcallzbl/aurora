@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Clock, Delete, Plus, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -116,24 +116,12 @@ interface CategoryItem {
   createTime: string
 }
 
-interface CategoryListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: CategoryItem[]
-    count: number
-  }
-}
-
 interface CategoryForm {
   id: number | null
   categoryName: string
 }
 
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type CategoryListData = PageData<CategoryItem>
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -168,15 +156,18 @@ const formatDate = (dateStr: string) => {
 const fetchCategories = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<CategoryListResponse>('/api/admin/categories', {
+    const result = await request.get<CategoryListData>(api.admin.category.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
         keywords: keywords.value,
       },
     })
-    categories.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    categories.value = result.data.records
+    pagination.total = result.data.count
   } finally {
     loading.value = false
   }
@@ -219,37 +210,29 @@ const submitCategory = async () => {
     ElMessage.error('分类名不能为空')
     return
   }
-  const { data } = await axios.post<CommonResponse>('/api/admin/categories', categoryForm)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchCategories()
-  } else {
-    ElNotification.error({
-      title: '失败',
-      message: data.message || '操作失败',
-    })
+  const result = await request.post<null>(api.admin.category.list, categoryForm)
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchCategories()
   showEditorDialog.value = false
 }
 
 const deleteCategory = async (id: number | null) => {
   const payload = id ? [id] : selectedIds.value
-  const { data } = await axios.delete<CommonResponse>('/api/admin/categories', { data: payload })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchCategories()
-  } else {
-    ElNotification.error({
-      title: '失败',
-      message: data.message || '删除失败',
-    })
+  const result = await request.delete<null>(api.admin.category.list, { data: payload })
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchCategories()
   showDeleteDialog.value = false
 }
 

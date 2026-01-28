@@ -31,7 +31,7 @@
               <el-upload
                 ref="avatarUpload"
                 class="avatar-uploader"
-                action="/api/users/avatar"
+                :action="api.users.avatar"
                 accept="image/*"
                 :show-file-list="false"
                 :headers="headers"
@@ -115,7 +115,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
-import axios from 'axios'
+import { api, request } from '@/api'
 import * as imageConversion from 'image-conversion'
 import ImageCropperDialog from '@/components/ImageCropperDialog.vue'
 import { useAppStore } from '@/stores/app'
@@ -128,12 +128,6 @@ defineOptions({
 interface AvatarCropResult {
   blob: Blob
   mime: string
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-  data?: string
 }
 
 const UPLOAD_SIZE = 1024 // 1MB
@@ -190,17 +184,22 @@ const onAvatarCropped = async ({ blob, mime }: AvatarCropResult) => {
     const ext = mime === 'image/png' ? 'png' : 'jpg'
     const form = new FormData()
     form.append('file', uploadBlob, `avatar.${ext}`)
-    const { data } = await axios.post<CommonResponse>('/api/users/avatar', form, {
-      headers: headers.value,
-    })
-    if (data.flag) {
-      ElMessage.success(data.message || '上传成功')
-      if (data.data) {
-        appStore.updateAvatar(data.data)
-      }
+    const result = await request.post<string>(
+      api.users.avatar,
+      form,
+      {
+        headers: headers.value,
+      },
+      { silent: true },
+    )
+    if (!result.ok) {
+      ElMessage.error(result.message || '上传失败')
       return
     }
-    ElMessage.error(data.message || '上传失败')
+    ElMessage.success(result.message || '上传成功')
+    if (result.data) {
+      appStore.updateAvatar(result.data)
+    }
   } catch {
     ElMessage.error('上传失败')
   }
@@ -211,30 +210,25 @@ const updateInfo = async () => {
     ElMessage.error('昵称不能为空')
     return
   }
-  try {
-    const { data } = await axios.put<CommonResponse>('/api/users/info', infoForm)
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '修改成功',
-      })
-      appStore.updateUserInfo({
-        nickname: infoForm.nickname,
-        intro: infoForm.intro,
-        webSite: infoForm.webSite,
-      })
-    } else {
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '修改失败',
-      })
-    }
-  } catch {
+  const result = await request.put<null>(api.users.info, infoForm, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: '修改失败',
+      message: result.message || '修改失败',
     })
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '修改成功',
+  })
+  appStore.updateUserInfo({
+    nickname: infoForm.nickname,
+    intro: infoForm.intro,
+    webSite: infoForm.webSite,
+  })
 }
 
 const updatePassword = async () => {
@@ -254,28 +248,23 @@ const updatePassword = async () => {
     ElMessage.error('两次密码输入不一致')
     return
   }
-  try {
-    const { data } = await axios.put<CommonResponse>('/api/admin/users/password', passwordForm)
-    if (data.flag) {
-      passwordForm.oldPassword = ''
-      passwordForm.newPassword = ''
-      passwordForm.confirmPassword = ''
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '修改成功',
-      })
-    } else {
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '修改失败',
-      })
-    }
-  } catch {
+  const result = await request.put<null>(api.admin.user.password, passwordForm, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: '修改失败',
+      message: result.message || '修改失败',
     })
+    return
   }
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '修改成功',
+  })
 }
 </script>
 

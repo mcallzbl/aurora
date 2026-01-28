@@ -139,7 +139,7 @@
           <el-upload
             class="upload-cover"
             drag
-            action="/api/admin/articles/images"
+            :action="api.admin.article.images"
             :headers="uploadHeaders"
             :before-upload="handleBeforeUpload"
             :on-success="handleUploadCover"
@@ -196,7 +196,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import axios from 'axios'
+import { api, request, type ApiResponse } from '@/api'
 import dayjs from 'dayjs'
 import * as imageConversion from 'image-conversion'
 
@@ -230,19 +230,7 @@ interface Article {
   password?: string
 }
 
-interface ArticleResponse {
-  data: Article
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-  data?: string
-}
-
-interface SearchResponse<T> {
-  data: T[]
-}
+type UploadResponse = ApiResponse<string>
 
 const UPLOAD_SIZE = 1024 // 1MB
 
@@ -286,20 +274,26 @@ const getTagClass = (item: Tag) => {
 }
 
 const fetchCategories = async () => {
-  const { data } = await axios.get<SearchResponse<Category>>('/api/admin/categories/search')
-  categoryList.value = data.data
+  const result = await request.get<Category[]>(api.admin.category.search)
+  if (!result.ok) {
+    return
+  }
+  categoryList.value = result.data
 }
 
 const fetchTags = async () => {
-  const { data } = await axios.get<SearchResponse<Tag>>('/api/admin/tags/search')
-  tagList.value = data.data
+  const result = await request.get<Tag[]>(api.admin.tag.search)
+  if (!result.ok) {
+    return
+  }
+  tagList.value = result.data
 }
 
 const handleSearchCategories = async (keywords: string, cb: (results: Category[]) => void) => {
-  const { data } = await axios.get<SearchResponse<Category>>('/api/admin/categories/search', {
+  const result = await request.get<Category[]>(api.admin.category.search, {
     params: { keywords },
   })
-  cb(data.data)
+  cb(result.ok ? result.data : [])
 }
 
 const handleSelectCategory = (item: Category) => {
@@ -322,10 +316,10 @@ const handleRemoveCategory = () => {
 }
 
 const handleSearchTags = async (keywords: string, cb: (results: Tag[]) => void) => {
-  const { data } = await axios.get<SearchResponse<Tag>>('/api/admin/tags/search', {
+  const result = await request.get<Tag[]>(api.admin.tag.search, {
     params: { keywords },
   })
-  cb(data.data)
+  cb(result.ok ? result.data : [])
 }
 
 const handleSelectTag = (item: Tag) => {
@@ -359,9 +353,13 @@ const handleBeforeUpload = async (file: File): Promise<File | Blob> => {
   return await imageConversion.compressAccurately(file, UPLOAD_SIZE)
 }
 
-const handleUploadCover = (response: CommonResponse) => {
-  if (response.data) {
+const handleUploadCover = (response: UploadResponse) => {
+  if (response.flag && response.data) {
     article.articleCover = response.data
+    return
+  }
+  if (!response.flag) {
+    ElMessage.error(response.message || '上传失败')
   }
 }
 
@@ -376,8 +374,14 @@ const handleUploadImg = async (files: File[], callback: (urls: string[]) => void
     }
 
     formData.append('file', fileToUpload)
-    const { data } = await axios.post<CommonResponse>('/api/admin/articles/images', formData)
-    return data.data || ''
+    const result = await request.post<string>(api.admin.article.images, formData, undefined, {
+      silent: true,
+    })
+    if (!result.ok) {
+      ElMessage.error(result.message || '上传失败')
+      return ''
+    }
+    return result.data || ''
   })
 
   const urls = await Promise.all(uploadPromises)
@@ -409,27 +413,23 @@ const handleSaveDraft = async () => {
   }
 
   article.status = 3
-  try {
-    const { data } = await axios.post<CommonResponse>('/api/admin/articles', article)
-    if (data.flag) {
-      sessionStorage.removeItem('article')
-      router.push({ path: '/article-list' })
-      ElNotification.success({
-        title: '成功',
-        message: '保存草稿成功',
-      })
-    } else {
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '保存草稿失败',
-      })
-    }
-  } catch {
+  const result = await request.post<null>(api.admin.article.list, article, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: '保存草稿失败',
+      message: result.message || '保存草稿失败',
     })
+    autoSave.value = false
+    return
   }
+  sessionStorage.removeItem('article')
+  router.push({ path: '/article-list' })
+  ElNotification.success({
+    title: '成功',
+    message: '保存草稿成功',
+  })
   autoSave.value = false
 }
 
@@ -455,30 +455,26 @@ const handlePublishArticle = async () => {
     return
   }
 
-  try {
-    const { data } = await axios.post<CommonResponse>('/api/admin/articles', article)
-    if (data.flag) {
-      sessionStorage.removeItem('article')
-      await router.push({ path: '/article-list' })
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '发布成功',
-      })
-    } else {
-      ElNotification.error({
-        title: '失败',
-        message: data.message || '发布失败',
-      })
-    }
-  } catch {
+  const result = await request.post<null>(api.admin.article.list, article, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: '发布失败',
+      message: result.message || '发布失败',
     })
-  } finally {
     showPublishDialog.value = false
     autoSave.value = false
+    return
   }
+  sessionStorage.removeItem('article')
+  await router.push({ path: '/article-list' })
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '发布成功',
+  })
+  showPublishDialog.value = false
+  autoSave.value = false
 }
 
 const handleAutoSave = () => {
@@ -488,19 +484,21 @@ const handleAutoSave = () => {
     article.articleContent.trim() &&
     article.id != null
   ) {
-    axios.post<CommonResponse>('/api/admin/articles', article).then(({ data }) => {
-      if (data.flag) {
-        ElNotification.success({
-          title: '成功',
-          message: '自动保存成功',
-        })
-      } else {
-        ElNotification.error({
-          title: '失败',
-          message: data.message || '自动保存失败',
-        })
-      }
-    })
+    request
+      .post<null>(api.admin.article.list, article, undefined, { silent: true })
+      .then((result) => {
+        if (result.ok) {
+          ElNotification.success({
+            title: '成功',
+            message: '自动保存成功',
+          })
+        } else {
+          ElNotification.error({
+            title: '失败',
+            message: result.message || '自动保存失败',
+          })
+        }
+      })
   }
 
   if (autoSave.value && article.id == null) {
@@ -511,8 +509,11 @@ const handleAutoSave = () => {
 const loadArticle = async () => {
   const articleId = route.params.id as string | undefined
   if (articleId) {
-    const { data } = await axios.get<ArticleResponse>(`/api/admin/articles/${articleId}`)
-    Object.assign(article, data.data)
+    const result = await request.get<Article>(api.admin.article.detail(articleId))
+    if (!result.ok) {
+      return
+    }
+    Object.assign(article, result.data)
   } else {
     const savedArticle = sessionStorage.getItem('article')
     if (savedArticle) {

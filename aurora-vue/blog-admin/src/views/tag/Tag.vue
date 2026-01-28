@@ -98,7 +98,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Clock, Delete, Plus, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -115,24 +115,12 @@ interface TagItem {
   createTime: string
 }
 
-interface TagListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: TagItem[]
-    count: number
-  }
-}
-
 interface TagForm {
   id: number | null
   tagName: string
 }
 
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type TagListData = PageData<TagItem>
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -167,15 +155,18 @@ const formatDate = (dateStr: string) => {
 const fetchTags = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<TagListResponse>('/api/admin/tags', {
+    const result = await request.get<TagListData>(api.admin.tag.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
         keywords: keywords.value,
       },
     })
-    tags.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    tags.value = result.data.records
+    pagination.total = result.data.count
   } finally {
     loading.value = false
   }
@@ -218,37 +209,29 @@ const submitTag = async () => {
     ElMessage.error('标签名不能为空')
     return
   }
-  const { data } = await axios.post<CommonResponse>('/api/admin/tags', tagForm)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchTags()
-  } else {
-    ElNotification.error({
-      title: '失败',
-      message: data.message || '操作失败',
-    })
+  const result = await request.post<null>(api.admin.tag.list, tagForm)
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchTags()
   showEditorDialog.value = false
 }
 
 const deleteTag = async (id: number | null) => {
   const payload = id ? [id] : selectedIds.value
-  const { data } = await axios.delete<CommonResponse>('/api/admin/tags', { data: payload })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchTags()
-  } else {
-    ElNotification.error({
-      title: '失败',
-      message: data.message || '删除失败',
-    })
+  const result = await request.delete<null>(api.admin.tag.list, { data: payload })
+  if (!result.ok) {
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchTags()
   showDeleteDialog.value = false
 }
 

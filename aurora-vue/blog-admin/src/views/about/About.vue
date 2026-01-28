@@ -25,23 +25,15 @@ import { useRoute } from 'vue-router'
 import { ElNotification } from 'element-plus'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import axios from 'axios'
+import { api, request } from '@/api'
 import * as imageConversion from 'image-conversion'
 
 defineOptions({
   name: 'AboutEditor',
 })
 
-interface AboutResponse {
-  data: {
-    content: string
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-  data?: string
+interface AboutContent {
+  content: string
 }
 
 const UPLOAD_SIZE = 1024 // 1MB
@@ -61,8 +53,13 @@ const handleUploadImg = async (files: File[], callback: (urls: string[]) => void
     }
 
     formData.append('file', fileToUpload)
-    const { data } = await axios.post<CommonResponse>('/api/admin/articles/images', formData)
-    return data.data || ''
+    const result = await request.post<string>(api.admin.article.images, formData, undefined, {
+      silent: true,
+    })
+    if (!result.ok) {
+      return ''
+    }
+    return result.data || ''
   })
 
   const urls = await Promise.all(uploadPromises)
@@ -71,8 +68,11 @@ const handleUploadImg = async (files: File[], callback: (urls: string[]) => void
 
 const fetchAbout = async () => {
   try {
-    const { data } = await axios.get<AboutResponse>('/api/about')
-    aboutContent.value = data.data.content
+    const result = await request.get<AboutContent>(api.about)
+    if (!result.ok) {
+      return
+    }
+    aboutContent.value = result.data.content
   } catch {
     ElNotification.error({
       title: '失败',
@@ -84,20 +84,25 @@ const fetchAbout = async () => {
 const handleSave = async () => {
   saving.value = true
   try {
-    const { data } = await axios.put<CommonResponse>('/api/admin/about', {
-      content: aboutContent.value,
-    })
-    if (data.flag) {
-      ElNotification.success({
-        title: '成功',
-        message: data.message || '保存成功',
-      })
-    } else {
+    const result = await request.put<null>(
+      api.admin.about,
+      {
+        content: aboutContent.value,
+      },
+      undefined,
+      { silent: true },
+    )
+    if (!result.ok) {
       ElNotification.error({
         title: '失败',
-        message: data.message || '保存失败',
+        message: result.message || '保存失败',
       })
+      return
     }
+    ElNotification.success({
+      title: '成功',
+      message: result.message || '保存成功',
+    })
   } catch {
     ElNotification.error({
       title: '失败',

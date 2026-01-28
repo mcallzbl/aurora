@@ -16,7 +16,7 @@
       <div class="operation-row">
         <div class="left-actions">
           <el-upload
-            action="/api/admin/talks/images"
+            :action="api.admin.talk.images"
             :headers="uploadHeaders"
             :before-upload="handleBeforeUpload"
             :on-success="handleUploadSuccess"
@@ -63,7 +63,7 @@
       <el-upload
         v-show="uploads.length > 0"
         class="talk-image-upload"
-        action="/api/admin/talks/images"
+        :action="api.admin.talk.images"
         list-type="picture-card"
         multiple
         :headers="uploadHeaders"
@@ -81,7 +81,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { api, request, type ApiResponse } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import type { UploadFile, UploadUserFile } from 'element-plus'
 import { ArrowDown, Picture, Plus } from '@element-plus/icons-vue'
@@ -100,17 +100,7 @@ interface Talk {
   imgs?: string[] | null
 }
 
-interface TalkResponse {
-  flag: boolean
-  message?: string
-  data: Talk
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-  data?: string
-}
+type UploadResponse = ApiResponse<string>
 
 const UPLOAD_SIZE = 1024 // 1MB
 
@@ -150,12 +140,16 @@ const handleRemove = (file: UploadFile) => {
   uploads.value = uploads.value.filter((item) => item.url !== file.url)
 }
 
-const handleUploadSuccess = (response: CommonResponse) => {
-  if (response.data) {
+const handleUploadSuccess = (response: UploadResponse) => {
+  if (response.flag && response.data) {
     uploads.value.push({
       name: `talk-${Date.now()}`,
       url: response.data,
     })
+    return
+  }
+  if (!response.flag) {
+    ElMessage.error(response.message || '上传失败')
   }
 }
 
@@ -176,18 +170,21 @@ const hydrateUploads = (images: string[]) => {
 const loadTalk = async () => {
   const talkId = route.params.talkId as string | undefined
   if (!talkId) return
-  const { data } = await axios.get<TalkResponse>(`/api/admin/talks/${talkId}`)
-  Object.assign(talk, data.data)
+  const result = await request.get<Talk>(api.admin.talk.detail(talkId))
+  if (!result.ok) {
+    return
+  }
+  Object.assign(talk, result.data)
 
-  const imagesFromArray = Array.isArray(data.data.imgs) ? data.data.imgs : []
+  const imagesFromArray = Array.isArray(result.data.imgs) ? result.data.imgs : []
   if (imagesFromArray.length) {
     hydrateUploads(imagesFromArray)
     return
   }
 
-  if (data.data.images) {
+  if (result.data.images) {
     try {
-      const parsed = JSON.parse(data.data.images) as string[]
+      const parsed = JSON.parse(result.data.images) as string[]
       if (Array.isArray(parsed)) {
         hydrateUploads(parsed)
       }
@@ -206,21 +203,23 @@ const saveOrUpdateTalk = async () => {
     ? JSON.stringify(uploads.value.map((item) => item.url).filter(Boolean))
     : ''
 
-  const { data } = await axios.post<CommonResponse>('/api/admin/talks', talk)
-  if (data.flag) {
-    talk.content = ''
-    uploads.value = []
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '发布成功',
-    })
-    router.push({ path: '/talk-list' })
-  } else {
+  const result = await request.post<null>(api.admin.talk.list, talk, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '发布失败',
+      message: result.message || '发布失败',
     })
+    return
   }
+  talk.content = ''
+  uploads.value = []
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '发布成功',
+  })
+  router.push({ path: '/talk-list' })
 }
 
 onMounted(() => {

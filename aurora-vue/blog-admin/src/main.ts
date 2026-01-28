@@ -9,8 +9,8 @@ import App from './App.vue'
 import router from './router'
 import { generateMenu } from './router/menu'
 import i18n from './i18n'
-import ElementPlus, { ElMessage } from 'element-plus'
-import axios, { AxiosHeaders } from 'axios'
+import ElementPlus from 'element-plus'
+import { http } from '@/api'
 import NProgress from 'nprogress'
 import dayjs from 'dayjs'
 import { persistedStatePlugin } from './stores/plugins/persistedState'
@@ -61,7 +61,7 @@ useThemeStore().syncTheme()
 app.component('VChart', VChart)
 app.component('MdEditor', MdEditor)
 
-app.config.globalProperties.$axios = axios
+app.config.globalProperties.$axios = http
 app.config.globalProperties.$moment = dayjs
 app.config.globalProperties.$filters = {
   date(value: string | number | Date, formatStr = 'YYYY-MM-DD') {
@@ -103,29 +103,5 @@ router.beforeEach(async (to) => {
 router.afterEach(() => {
   NProgress.done()
 })
-
-axios.interceptors.request.use((request) => {
-  const token = sessionStorage.getItem('token')
-  if (token) {
-    const headers = AxiosHeaders.from(request.headers ?? {})
-    headers.set('Authorization', `Bearer ${token}`)
-    request.headers = headers
-  }
-  return request
-})
-
-axios.interceptors.response.use(
-  (response) => {
-    const { code, message } = (response.data ?? {}) as { code?: number; message?: string }
-    if (code === 40001) {
-      ElMessage.error(message || 'Unauthorized')
-      router.push({ path: '/login' })
-    } else if (code === 50000) {
-      ElMessage.error(message || 'Server error')
-    }
-    return response
-  },
-  (error) => Promise.reject(error),
-)
 
 app.mount('#app')

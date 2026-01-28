@@ -151,7 +151,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import { api, request, type PageData } from '@/api'
 import { ElMessage, ElNotification } from 'element-plus'
 import { Clock, Delete, Plus, Search } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
@@ -177,19 +177,7 @@ interface TreeItem {
   children?: TreeItem[]
 }
 
-interface RoleListResponse {
-  flag: boolean
-  message?: string
-  data: {
-    records: RoleItem[]
-    count: number
-  }
-}
-
-interface CommonResponse {
-  flag: boolean
-  message?: string
-}
+type RoleListData = PageData<RoleItem>
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -235,15 +223,18 @@ const formatDate = (dateStr?: string) => {
 const fetchRoles = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get<RoleListResponse>('/api/admin/roles', {
+    const result = await request.get<RoleListData>(api.admin.role.list, {
       params: {
         current: pagination.current,
         size: pagination.size,
         keywords: keywords.value,
       },
     })
-    roles.value = data.data.records
-    pagination.total = data.data.count
+    if (!result.ok) {
+      return
+    }
+    roles.value = result.data.records
+    pagination.total = result.data.count
     selectedIds.value = []
   } finally {
     loading.value = false
@@ -252,11 +243,15 @@ const fetchRoles = async () => {
 
 const fetchRoleTrees = async () => {
   const [resourceRes, menuRes] = await Promise.all([
-    axios.get<{ data: TreeItem[] }>('/api/admin/role/resources'),
-    axios.get<{ data: TreeItem[] }>('/api/admin/role/menus'),
+    request.get<TreeItem[]>(api.admin.role.resources),
+    request.get<TreeItem[]>(api.admin.role.menus),
   ])
-  resources.value = resourceRes.data.data
-  menus.value = menuRes.data.data
+  if (resourceRes.ok) {
+    resources.value = resourceRes.data
+  }
+  if (menuRes.ok) {
+    menus.value = menuRes.data
+  }
 }
 
 const handleSelectionChange = (rows: RoleItem[]) => {
@@ -322,21 +317,26 @@ const deleteRoles = async (id: number | null) => {
     showDeleteDialog.value = false
     return
   }
-  const { data } = await axios.delete<CommonResponse>('/api/admin/roles', {
-    data: ids,
-  })
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '删除成功',
-    })
-    await fetchRoles()
-  } else {
+  const result = await request.delete<null>(
+    api.admin.role.list,
+    {
+      data: ids,
+    },
+    { silent: true },
+  )
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '删除失败',
+      message: result.message || '删除失败',
     })
+    showDeleteDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '删除成功',
+  })
+  await fetchRoles()
   showDeleteDialog.value = false
 }
 
@@ -349,38 +349,44 @@ const saveOrUpdateRoleMenu = async () => {
   const checkedKeys = menuTreeRef.value?.getCheckedKeys?.() || []
   const halfCheckedKeys = menuTreeRef.value?.getHalfCheckedKeys?.() || []
   roleForm.menuIds = [...checkedKeys, ...halfCheckedKeys]
-  const { data } = await axios.post<CommonResponse>('/api/admin/role', roleForm)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchRoles()
-  } else {
+  const result = await request.post<null>(api.admin.role.save, roleForm, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '操作失败',
+      message: result.message || '操作失败',
     })
+    showRoleDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchRoles()
   showRoleDialog.value = false
 }
 
 const saveOrUpdateRoleResource = async () => {
   roleForm.menuIds = []
   roleForm.resourceIds = resourceTreeRef.value?.getCheckedKeys?.() || []
-  const { data } = await axios.post<CommonResponse>('/api/admin/role', roleForm)
-  if (data.flag) {
-    ElNotification.success({
-      title: '成功',
-      message: data.message || '操作成功',
-    })
-    await fetchRoles()
-  } else {
+  const result = await request.post<null>(api.admin.role.save, roleForm, undefined, {
+    silent: true,
+  })
+  if (!result.ok) {
     ElNotification.error({
       title: '失败',
-      message: data.message || '操作失败',
+      message: result.message || '操作失败',
     })
+    showResourceDialog.value = false
+    return
   }
+  ElNotification.success({
+    title: '成功',
+    message: result.message || '操作成功',
+  })
+  await fetchRoles()
   showResourceDialog.value = false
 }
 
