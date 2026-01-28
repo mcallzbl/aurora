@@ -61,7 +61,7 @@ const isCollapsed = computed(() => appStore.collapse)
 }
 
 .main-content {
-  background: #f7f9fb;
+  background: var(--surface-0);
   padding: 1.25rem;
   flex: 1;
   min-height: 0;

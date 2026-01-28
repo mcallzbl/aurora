@@ -42,7 +42,7 @@ html {
   --ink-900: #e2e8f0;
   --ink-700: #cbd5f5;
   --ink-500: #94a3b8;
-  --surface-0: #0b0f14;
+  --surface-0: #000;
   --surface-1: rgba(15, 23, 42, 0.88);
   --surface-2: rgba(15, 23, 42, 0.72);
   --surface-3: rgba(30, 41, 59, 0.85);
@@ -69,11 +69,11 @@ body {
 }
 
 html[data-theme='dark'] body {
-  background:
-    radial-gradient(1200px 520px at 8% -10%, rgba(69, 196, 184, 0.2), transparent 60%),
-    radial-gradient(900px 540px at 92% 0%, rgba(59, 130, 246, 0.16), transparent 55%),
-    radial-gradient(700px 480px at 50% 110%, rgba(148, 163, 184, 0.15), transparent 60%),
-    linear-gradient(180deg, #0b0f14 0%, #0f172a 100%);
+  background: #000;
+}
+
+html[data-theme='dark'] .header-shell {
+  background: #000;
 }
 
 #app {
