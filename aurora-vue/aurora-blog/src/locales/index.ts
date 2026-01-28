@@ -57,6 +57,25 @@ const datetimeFormats: IntlDateTimeFormats = {
       year: 'numeric',
       month: 'long'
     }
+  },
+  ja: {
+    short: {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    },
+    long: {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+      hour: 'numeric',
+      minute: 'numeric'
+    },
+    monthYear: {
+      year: 'numeric',
+      month: 'short'
+    }
   }
 }
 

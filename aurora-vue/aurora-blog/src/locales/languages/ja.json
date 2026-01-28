@@ -1,0 +1,282 @@
+{
+  "menu": {
+    "home": "ホーム",
+    "about": "このサイトについて",
+    "archives": "アーカイブ",
+    "categories": "カテゴリ",
+    "tags": "タグ",
+    "post": "記事",
+    "talks": "つぶやき",
+    "search": "検索結果",
+    "message": "メッセージ",
+    "friends": "リンク集",
+    "album": "アルバム",
+    "not-found": "ページが見つかりません"
+  },
+  "home": {
+    "recommended": "おすすめ記事"
+  },
+  "titles": {
+    "articles": "記事一覧",
+    "talks": "つぶやき",
+    "about": "About",
+    "category_list": "カテゴリ一覧",
+    "tag_list": "タグ一覧",
+    "message": "メッセージ",
+    "friends": "リンク集",
+    "toc": "目次",
+    "comment": "コメント",
+    "recent_comment": "最近のコメント",
+    "website_info": "サイト情報",
+    "notice": "お知らせ"
+  },
+  "settings": {
+    "months": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+    "articles": "記事",
+    "talks": "つぶやき",
+    "categories": "カテゴリ",
+    "tags": "タグ",
+    "words": "文字数",
+    "visitor_count": "総訪問者数",
+    "visit_count": "総アクセス数",
+    "button-all": "すべて",
+    "paginator": {
+      "newer": "新しい",
+      "older": "以前",
+      "pre": "前へ",
+      "next": "次へ"
+    },
+    "more-tags": "もっと見る",
+    "admin-user": "管理者",
+    "shared-on": "投稿日",
+    "recently-search": "最近の検索",
+    "search-result": "[total] 件見つかりました",
+    "no-recent-search": "最近の検索履歴はありません。",
+    "no-search-result": "一致する結果がありません。",
+    "cmd-to-select": "選択",
+    "cmd-to-navigate": "移動",
+    "cmd-to-close": "閉じる",
+    "searched-by": "検索エンジン",
+    "tips-back-to-top": "トップへ戻る",
+    "tips-open-menu": "メニューを開く",
+    "tips-back-to-home": "ホームへ戻る",
+    "tips-open-search": "検索を開く",
+    "default-category": "記事",
+    "default-tag": "未分類",
+    "empty-tag": "タグが見つかりません。",
+    "pinned": "固定",
+    "featured": "おすすめ",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "personal-center": "マイページ",
+    "running-time": "稼働時間",
+    "view-count": "閲覧数",
+    "tips-open-language": "言語を選択",
+    "days_suffix": "日",
+    "hours_suffix": "時間",
+    "minutes_suffix": "分",
+    "seconds_suffix": "秒",
+    "words_suffix_k": "k文字"
+  },
+  "dia": {
+    "messages": [
+      "こんにちは、<span>Dia</span>だよ。よろしくね〜",
+      "お久しぶり。時間が経つのはあっという間だね…",
+      "やっほ〜、遊びに来て〜！",
+      "*にゃんこパンチで胸をトントン*",
+      "showQuote"
+    ],
+    "console": "えへへ、開発者ツールを開いたの？私の秘密を探してるのかな？",
+    "copy": "コピーしたの？引用するときは出典を忘れずにね。",
+    "visibility_change": "おかえりなさい、待ってたよ〜",
+    "welcome": {
+      "5_7": [
+        "おはようございます！気持ちのいい朝だね。",
+        "早起きは三文の得。今日の小さな目標を決めよう。",
+        "澄んだ空気で頭もすっきり。いいスタートを！"
+      ],
+      "7_11": ["おはよう！調子はどう？座りっぱなしに注意だよ。", "水分補給してね。", "少し歩くとアイデアが湧くかも。"],
+      "11_13": ["お昼だよ。午前中お疲れさま。", "ランチタイム！目も休めよう。", "軽く仮眠すると午後が楽になるよ。"],
+      "13_17": ["午後は眠くなりがち。軽く伸びをしよう。", "お茶かコーヒーでリフレッシュ！", "まばたきを忘れずにね。"],
+      "17_19": ["夕方だね。窓の外の夕焼けがきれい。", "そろそろゆっくり締めよう。", "今日の自分にちょっと拍手。"],
+      "19_21": ["こんばんは。今日の調子はどう？", "一日の成果を振り返ってみよう。", "読書や音楽でひと息ついてね。"],
+      "21_23": ["夜更かし注意だよ。そろそろ休もうね。", "目を大事にね。", "保存とバックアップも忘れずに。"],
+      "24": ["夜型モード？体は大切にね。", "静かな夜は素敵だけど、目を労って。", "明日の自分が喜ぶようにね。"]
+    },
+    "referrer": {
+      "self": "ようこそ <span>「[PLACEHOLDER]」</span>へ",
+      "baidu": "Baidu検索から来てくれたんだね。<br><span>「[PLACEHOLDER]」</span>を探してた？",
+      "so": "360検索からようこそ。<br><span>「[PLACEHOLDER]」</span>を探してた？",
+      "google": "Google検索からようこそ。<br><span>「[PLACEHOLDER]」</span>を楽しんでね。",
+      "site": "<span>[PLACEHOLDER]</span>から来てくれたんだね、こんにちは！",
+      "other": "ようこそ <span>「[PLACEHOLDER]」</span>へ"
+    },
+    "mouseover": [
+      {
+        "selector": "#Aurora-Dia",
+        "text": [
+          "わああ…<span>何するの</span>? O.O",
+          "やさしくしてね、私はとっても繊細だよ! O.O",
+          "<span>ご用命を。</span> 何でも言ってね。O.O",
+          "じっと見つめないで…<span>照れちゃう</span> >///<",
+          "カーソルが冷たいよ！<span>離して</span>〜 (｡>皿<｡)"
+        ]
+      },
+      { "selector": "[data-menu='Home']", "text": ["ホームへ戻るよ。", "ホームを見に行こう。"] },
+      { "selector": "[data-menu='Talks']", "text": ["ご主人のつぶやきがあるよ。"] },
+      {
+        "selector": "[data-menu='Archives']",
+        "text": ["ここにはご主人の作品が全部あるよ。", "ご主人の書庫を覗いてみる？"]
+      },
+      {
+        "selector": "[data-menu='About']",
+        "text": ["ご主人のことが気になる？", "ここにご主人の秘密があるよ。", "ご主人の出没ポイント発見！"]
+      },
+      {
+        "selector": "[data-menu='Tags']",
+        "text": ["タグ一覧だよ。", "タグで記事を整理できるよ。"]
+      },
+      { "selector": "[data-menu='Message']", "text": ["ここでご主人にメッセージを残してね。"] },
+      { "selector": "[data-menu='Friends']", "text": ["ご主人のお友だちリンクだよ。"] },
+      { "selector": "[data-menu='PhotoAlbums']", "text": ["ご主人の日常写真があるよ。"] },
+      { "selector": "[data-dia='language']", "text": "このブログは多言語対応だよ。" },
+      { "selector": "[data-dia='light-switch']", "text": "ライト/ダークを切り替えできるよ。" },
+      {
+        "selector": "[data-dia='author']",
+        "text": ["ご主人のプロフィールだよ。", "どのリンクからでも別の世界へ行けるよ。"]
+      },
+      {
+        "selector": "[data-dia='jump-to-comment']",
+        "text": ["コメントを見たい？", "ここからコメント欄へジャンプできるよ。"]
+      }
+    ],
+    "click": [
+      {
+        "selector": "[data-dia='search']",
+        "text": [
+          "探してる記事がない？ここで検索してみてね。",
+          "ショートカット <span>ctrl/cmd + k</span> でも開けるよ。"
+        ]
+      },
+      {
+        "selector": "[data-dia='article-link']",
+        "text": [
+          "読書を楽しんでね：<span>「{text}」</span>。",
+          "いい選択だね。ゆっくり読んでね。",
+          "<span>「{text}」</span>から学びがあるといいな。"
+        ]
+      },
+      {
+        "selector": ".gt-header-textarea",
+        "text": ["何か書く？", "コメントは丁寧に書いてね〜", "ご主人に伝えたいことはある？", "良かったら一言残してね。"]
+      },
+      {
+        "selector": ".veditor",
+        "text": ["何か書く？", "コメントは丁寧に書いてね〜", "ご主人に伝えたいことはある？", "良かったら一言残してね。"]
+      }
+    ],
+    "events": [
+      { "date": "01/01", "text": "<span>元日</span>だよ。{year}年がスタート！" },
+      { "date": "02/14", "text": "今日は<span>バレンタインデー</span>。{year}年はいい出会いあった？" },
+      { "date": "03/08", "text": "今日は<span>国際女性デー</span>！" },
+      { "date": "03/12", "text": "今日は<span>植樹節（中国）</span>。環境を大切にね！" },
+      { "date": "04/01", "text": "こっそりね…今日は<span>エイプリルフール</span>だよ。" },
+      { "date": "05/01", "text": "今日は<span>メーデー</span>。お休みの予定は？" },
+      { "date": "06/01", "text": "<span>国際子どもの日</span>だよ。心はいつも若く！" },
+      { "date": "07/04", "text": "今日はアメリカの<span>独立記念日</span>。" },
+      {
+        "date": "09/03",
+        "text": "今日は<span>中国の抗日戦争勝利記念日</span>。歴史を忘れず、平和を大切に。"
+      },
+      { "date": "09/10", "text": "<span>中国の教師の日</span>。感謝を伝えよう。" },
+      { "date": "10/01", "text": "<span>中国の国慶節</span>だよ。" },
+      { "date": "10/31", "text": ["<span>ハロウィン</span>だよ！", "トリック・オア・トリート！"] },
+      {
+        "date": "10/24",
+        "text": ["今日は<span>プログラマの日（1024）</span>！コードを書くみんなに敬意を。", "Happy 1024!"]
+      },
+      {
+        "rule": { "type": "nth-weekday", "month": 5, "weekday": 0, "nth": 2 },
+        "text": ["今日は<span>母の日</span>。お母さんに連絡しようね。", "Happy Mother's Day!"]
+      },
+      {
+        "rule": { "type": "nth-weekday", "month": 6, "weekday": 0, "nth": 3 },
+        "text": ["今日は<span>父の日</span>。お父さんに感謝を伝えよう。", "Happy Father's Day!"]
+      },
+      { "date": "11/05-11/12", "text": "中国の<span>独身の日（双十一）</span>セールの季節だよ。" },
+      { "date": "12/20-12/31", "text": "<span>クリスマス</span>シーズンだね。" }
+    ]
+  },
+  "errors": {
+    "article_password_failed": "記事パスワードの確認に失敗しました"
+  },
+  "article": {
+    "protected_login_required": "この記事はパスワードで保護されています。ログインしてアクセスしてください。"
+  },
+  "comments": {
+    "placeholder": "コメントを書く...",
+    "submit": "コメントする",
+    "load_more": "さらに読み込む",
+    "login_required": "ログインしてコメントしてください",
+    "empty": "コメントを入力してください",
+    "pending_review": "コメントを送信しました。承認待ちです",
+    "success": "コメントを投稿しました",
+    "reply": "返信",
+    "reply_placeholder": "返信を書く..."
+  },
+  "message": {
+    "notice_line1": "これはメッセージボードです",
+    "notice_line2": "コメントをお待ちしています 💖"
+  },
+  "friend": {
+    "link_notice_line1": "リンク交換をご希望の方は下にコメントしてください 💖",
+    "link_notice_line2": "リンク情報として、名前・アバター・URL・簡単な紹介をお願いします。"
+  },
+  "languages": {
+    "en": "English",
+    "zh": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語"
+  },
+  "common": {
+    "success": "成功",
+    "warning": "警告",
+    "confirm": "確認",
+    "submit": "送信",
+    "upload_success": "アップロードしました"
+  },
+  "auth": {
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "new_password": "新しいパスワード",
+    "code": "認証コード",
+    "send_code": "送信",
+    "register": "登録",
+    "register_now": "今すぐ登録",
+    "login_existing": "すでにアカウントをお持ちですか？ログイン",
+    "forgot_password": "パスワードをお忘れですか？",
+    "qq_login": "QQログイン",
+    "back_to_login": "ログインに戻る",
+    "article_password_placeholder": "この記事は保護されています。パスワードを入力してください",
+    "verify_password": "パスワードを確認",
+    "login_success": "ログインしました",
+    "logout_success": "ログアウトしました",
+    "register_success": "登録しました",
+    "code_sent": "認証コードを送信しました",
+    "update_success": "更新しました",
+    "password_empty": "パスワードを入力してください",
+    "bind": "連携",
+    "change": "変更",
+    "bind_success": "連携しました"
+  },
+  "user": {
+    "info_privacy_hint": "(このページの情報は厳重に保護されます)",
+    "nickname": "ニックネーム",
+    "website": "Webサイト",
+    "website_placeholder": "https:// または http:// を含めてください",
+    "intro": "自己紹介",
+    "intro_placeholder": "自己紹介を書いてください",
+    "subscribe": "購読",
+    "email_unbound_warning": "メールが未連携です。先に連携してください"
+  }
+}
