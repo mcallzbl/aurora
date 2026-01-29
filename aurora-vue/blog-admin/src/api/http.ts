@@ -15,11 +15,11 @@ http.interceptors.request.use((request) => {
 })
 
 http.interceptors.response.use(
-  (response) => {
+  async (response) => {
     const { code, message } = (response.data ?? {}) as { code?: number; message?: string }
     if (code === 40001) {
       ElMessage.error(message || 'Unauthorized')
-      router.push({ path: '/login' })
+      await router.push({ path: '/login' })
     } else if (code === 50000) {
       ElMessage.error(message || 'Server error')
     }

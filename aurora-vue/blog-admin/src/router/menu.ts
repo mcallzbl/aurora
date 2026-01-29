@@ -66,6 +66,19 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
     | undefined
   const { component, viewPath } = resolveViewComponent(item.component)
   const resolvedComponent = component ?? (children?.length ? Layout : undefined)
+  const isContainerOnly =
+    Boolean(children?.length) && (!item.component || item.component === 'Layout') && !item.redirect
+  const meta = {
+    ...(item.meta ?? {}),
+    title: item.name,
+    icon: normalizeIcon(item.icon),
+    hidden: item.hidden,
+    viewPath,
+    breadcrumbClickable:
+      typeof item.meta?.breadcrumbClickable === 'boolean'
+        ? (item.meta?.breadcrumbClickable as boolean)
+        : !isContainerOnly,
+  }
 
   if (!resolvedComponent) {
     console.warn('[menu] route skipped due to missing component:', item)
@@ -79,13 +92,7 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
       component: resolvedComponent,
       redirect: item.redirect,
       children,
-      meta: {
-        ...(item.meta ?? {}),
-        title: item.name,
-        icon: normalizeIcon(item.icon),
-        hidden: item.hidden,
-        viewPath,
-      },
+      meta,
     } satisfies RouteRecordRaw
   }
 
@@ -93,13 +100,7 @@ const mapMenuToRoute = (item: RawMenu): RouteRecordRaw | null => {
     path: normalizeRoutePath(item.path),
     name: item.name,
     component: resolvedComponent,
-    meta: {
-      ...(item.meta ?? {}),
-      title: item.name,
-      icon: normalizeIcon(item.icon),
-      hidden: item.hidden,
-      viewPath,
-    },
+    meta,
   } satisfies RouteRecordRaw
 }
 

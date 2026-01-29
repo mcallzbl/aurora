@@ -15,7 +15,7 @@
 
       <el-breadcrumb>
         <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path">
-          <span v-if="item.isCurrent">{{ item.label }}</span>
+          <span v-if="item.isCurrent || !item.isClickable">{{ item.label }}</span>
           <RouterLink v-else :to="item.path">{{ item.label }}</RouterLink>
         </el-breadcrumb-item>
       </el-breadcrumb>
@@ -91,6 +91,7 @@ interface BreadcrumbItem {
   path: string
   label: string
   isCurrent: boolean
+  isClickable: boolean
 }
 
 defineOptions({
@@ -130,10 +131,11 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
         (record.meta?.title as string | undefined) ||
         (typeof record.name === 'string' ? record.name : record.path),
       isCurrent: index === array.length - 1,
+      isClickable: (record.meta?.breadcrumbClickable as boolean | undefined) ?? true,
     }))
 
   if (items[0]?.path !== '/') {
-    items.unshift({ path: '/', label: '首页', isCurrent: false })
+    items.unshift({ path: '/', label: '首页', isCurrent: false, isClickable: true })
   }
   return items
 })
