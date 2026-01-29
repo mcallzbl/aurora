@@ -173,8 +173,6 @@ const formatDate = (dateStr: string) => {
 
 const tagType = (type: string) => {
   switch (type) {
-    case 'GET':
-      return ''
     case 'POST':
       return 'success'
     case 'PUT':
@@ -182,7 +180,7 @@ const tagType = (type: string) => {
     case 'DELETE':
       return 'danger'
     default:
-      return ''
+      return undefined
   }
 }
 

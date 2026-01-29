@@ -60,17 +60,43 @@
     </div>
 
     <div class="tabs-view">
-      <div class="tabs-wrapper">
+      <div class="tabs-scroll">
         <button
-          v-for="tab in tabs"
-          :key="tab.path"
-          class="tab-item"
-          :class="{ active: tab.path === route.path }"
+          v-if="hasTabsOverflow"
+          class="tabs-nav"
           type="button"
-          @click="goTo(tab.path)"
+          :disabled="!canScrollLeft"
+          aria-label="Scroll tabs left"
+          @click="scrollTabs('left')"
         >
-          <span>{{ tab.label }}</span>
-          <span v-if="tab.closable" class="tab-close" @click.stop="removeTab(tab.path)">x</span>
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
+        </button>
+        <div ref="tabsWrapperRef" class="tabs-wrapper" @scroll="updateTabsOverflow">
+          <button
+            v-for="tab in tabs"
+            :key="tab.path"
+            class="tab-item"
+            :class="{ active: tab.path === route.path }"
+            type="button"
+            @click="goTo(tab.path)"
+          >
+            <span class="tab-label" :title="tab.label">{{ tab.label }}</span>
+            <span v-if="tab.closable" class="tab-close" @click.stop="removeTab(tab.path)">x</span>
+          </button>
+        </div>
+        <button
+          v-if="hasTabsOverflow"
+          class="tabs-nav"
+          type="button"
+          :disabled="!canScrollRight"
+          aria-label="Scroll tabs right"
+          @click="scrollTabs('right')"
+        >
+          <el-icon>
+            <ArrowRight />
+          </el-icon>
         </button>
       </div>
       <button class="tabs-close" type="button" @click="closeAllTabs">全部关闭</button>
@@ -79,10 +105,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { api, request } from '@/api'
-import { Close, Expand, Fold, FullScreen, Moon, Sunny } from '@element-plus/icons-vue'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Close,
+  Expand,
+  Fold,
+  FullScreen,
+  Moon,
+  Sunny,
+} from '@element-plus/icons-vue'
 import { resetRouter } from '@/router'
 import { useAppStore, type TabItem } from '@/stores/app'
 import { useThemeStore } from '@/stores/theme'
@@ -109,6 +144,11 @@ const avatarFallback = computed(() => (appStore.userInfo?.nickname || 'A').slice
 const isCollapsed = computed(() => appStore.collapse)
 const isFullscreen = ref(false)
 const isDark = computed(() => themeStore.mode === 'dark')
+const tabsWrapperRef = ref<HTMLDivElement | null>(null)
+const canScrollLeft = ref(false)
+const canScrollRight = ref(false)
+
+const hasTabsOverflow = computed(() => canScrollLeft.value || canScrollRight.value)
 
 const buildTab = (): TabItem => {
   const label =
@@ -186,6 +226,62 @@ const toggleTheme = () => {
   themeStore.toggleMode()
 }
 
+const onTabsWheel = (event: WheelEvent) => {
+  const wrapper = tabsWrapperRef.value
+  if (!wrapper) {
+    return
+  }
+  if (wrapper.scrollWidth <= wrapper.clientWidth + 1) {
+    return
+  }
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+  if (delta === 0) {
+    return
+  }
+  event.preventDefault()
+  wrapper.scrollLeft += delta
+  updateTabsOverflow()
+}
+
+const updateTabsOverflow = () => {
+  const wrapper = tabsWrapperRef.value
+  if (!wrapper) {
+    return
+  }
+  const maxScrollLeft = wrapper.scrollWidth - wrapper.clientWidth
+  canScrollLeft.value = wrapper.scrollLeft > 0
+  canScrollRight.value = wrapper.scrollLeft < maxScrollLeft - 1
+}
+
+const scrollTabs = (direction: 'left' | 'right') => {
+  const wrapper = tabsWrapperRef.value
+  if (!wrapper) {
+    return
+  }
+  const delta = Math.max(160, wrapper.clientWidth * 0.6)
+  wrapper.scrollBy({ left: direction === 'left' ? -delta : delta, behavior: 'smooth' })
+}
+
+const scrollActiveTabIntoView = () => {
+  const wrapper = tabsWrapperRef.value
+  if (!wrapper) {
+    return
+  }
+  const activeTab = wrapper.querySelector<HTMLElement>('.tab-item.active')
+  if (!activeTab) {
+    return
+  }
+  const wrapperRect = wrapper.getBoundingClientRect()
+  const activeRect = activeTab.getBoundingClientRect()
+  if (activeRect.left < wrapperRect.left) {
+    wrapper.scrollBy({ left: activeRect.left - wrapperRect.left - 24, behavior: 'smooth' })
+    return
+  }
+  if (activeRect.right > wrapperRect.right) {
+    wrapper.scrollBy({ left: activeRect.right - wrapperRect.right + 24, behavior: 'smooth' })
+  }
+}
+
 const syncFullscreen = () => {
   isFullscreen.value = Boolean(document.fullscreenElement)
 }
@@ -193,20 +289,43 @@ const syncFullscreen = () => {
 onMounted(() => {
   syncFullscreen()
   document.addEventListener('fullscreenchange', syncFullscreen)
+  window.addEventListener('resize', updateTabsOverflow)
+  nextTick(() => {
+    updateTabsOverflow()
+    scrollActiveTabIntoView()
+    if (tabsWrapperRef.value) {
+      tabsWrapperRef.value.addEventListener('wheel', onTabsWheel, { passive: false })
+    }
+  })
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', syncFullscreen)
+  window.removeEventListener('resize', updateTabsOverflow)
+  if (tabsWrapperRef.value) {
+    tabsWrapperRef.value.removeEventListener('wheel', onTabsWheel)
+  }
 })
 
 watch(
   () => route.path,
-  () => {
+  async () => {
     if (route.path !== '/login') {
       appStore.addTab(buildTab())
     }
+    await nextTick()
+    updateTabsOverflow()
+    scrollActiveTabIntoView()
   },
   { immediate: true },
+)
+
+watch(
+  () => tabs.value.length,
+  async () => {
+    await nextTick()
+    updateTabsOverflow()
+  },
 )
 </script>
 
@@ -343,12 +462,50 @@ watch(
   padding: 0.4rem 1.5rem 0.65rem;
 }
 
+.tabs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.tabs-nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.82);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow:
+    0 8px 16px rgba(31, 24, 16, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.tabs-nav:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: none;
+}
+
 .tabs-wrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   overflow-x: auto;
   flex: 1;
+  min-width: 0;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.tabs-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-item {
@@ -362,6 +519,14 @@ watch(
   gap: 0.5rem;
   cursor: pointer;
   color: var(--ink-700);
+  flex: 0 0 auto;
+}
+
+.tab-label {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab-item.active {
@@ -452,6 +617,20 @@ watch(
   background: rgba(10, 14, 21, 0.7);
   border-color: rgba(148, 163, 184, 0.16);
   color: var(--ink-500);
+}
+
+:global(html[data-theme='dark']) .tabs-nav {
+  background: rgba(10, 14, 21, 0.78);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(148, 163, 184, 0.1);
+  color: var(--ink-500);
+}
+
+:global(html[data-theme='dark']) .tabs-nav:disabled {
+  opacity: 0.35;
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {
