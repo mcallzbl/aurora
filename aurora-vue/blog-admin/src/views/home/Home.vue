@@ -241,8 +241,9 @@ const formatMapTooltip = (params: TooltipComponentFormatterCallbackParams) => {
   const name = target?.name ?? ''
   const seriesName = target?.seriesName ?? ''
   const rawValue = target?.value
-  const value = Array.isArray(rawValue) ? Number(rawValue[0] ?? 0) : Number(rawValue ?? 0)
-  return `${seriesName}<br />${name}：${value}`
+  const value = Array.isArray(rawValue) ? Number(rawValue[0]) : Number(rawValue)
+  const displayValue = Number.isFinite(value) ? value : 0
+  return `${seriesName}<br />${name}：${displayValue}`
 }
 
 const articleContributionOption = ref<EChartsOption>({
