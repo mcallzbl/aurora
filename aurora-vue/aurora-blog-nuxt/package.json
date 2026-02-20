@@ -11,8 +11,8 @@
     "type-check": "nuxt typecheck"
   },
   "dependencies": {
-    "@babel/runtime": "^7.28.4",
     "@agoose77/markdown-it-mermaid": "^1.1.0",
+    "@babel/runtime": "^7.28.4",
     "@iktakahiro/markdown-it-katex": "^4.0.1",
     "@vue/reactivity": "^3.5.28",
     "axios": "^1.13.2",
@@ -59,6 +59,7 @@
     "sass": "^1.97.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vite-plugin-prismjs": "^0.0.11",
     "vite-plugin-svg-icons": "^2.0.1"
   }

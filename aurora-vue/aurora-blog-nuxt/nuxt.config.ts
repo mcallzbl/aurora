@@ -1,6 +1,5 @@
 import { resolve } from 'node:path'
 import { defineNuxtConfig } from 'nuxt/config'
-import type { PluginOption } from 'vite'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import prismjs from 'vite-plugin-prismjs'
 import { SUPPORTED_LOCALES } from './app/config/i18n'
@@ -174,7 +173,7 @@ const localeRouteRules = Object.fromEntries(
 const svgIconsPlugin = createSvgIconsPlugin({
   iconDirs: [resolve(__dirname, 'app/icons/svg')],
   symbolId: 'icon-[name]'
-}) as unknown as PluginOption
+})
 
 const prismPlugin = prismjs({
   languages: [
@@ -197,7 +196,7 @@ const prismPlugin = prismjs({
   plugins: ['line-numbers', 'toolbar', 'copy-to-clipboard'],
   theme: 'okaidia',
   css: true
-}) as unknown as PluginOption
+})
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -242,7 +241,8 @@ export default defineNuxtConfig({
     async 'nitro:config'(nitroConfig) {
       nitroConfig.prerender = nitroConfig.prerender || {}
       nitroConfig.prerender.crawlLinks = true
-      const routeSet = new Set<string>([...(nitroConfig.prerender.routes || []), '/', ...STATIC_LOCALIZED_ROUTES])
+      const prerenderRoutes = (nitroConfig.prerender.routes || []).filter((route): route is string => typeof route === 'string')
+      const routeSet = new Set<string>([...prerenderRoutes, '/', ...STATIC_LOCALIZED_ROUTES])
       const dynamicRoutes = await collectDynamicPrerenderRoutes(API_TARGET)
       dynamicRoutes.forEach((route) => routeSet.add(route))
       nitroConfig.prerender.routes = Array.from(routeSet)
@@ -255,8 +255,8 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [
-      svgIconsPlugin,
-      prismPlugin
+      svgIconsPlugin as any,
+      prismPlugin as any
     ],
     resolve: {
       alias: {

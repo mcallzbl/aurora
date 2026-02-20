@@ -5,5 +5,5 @@ Allow: /
 Disallow: /api/
 
 # Point to the sitemap (adjust to your domain during deploy)
-Sitemap: /sitemap.xml
+Sitemap: https://blog.mcallzbl.com/sitemap.xml
 
