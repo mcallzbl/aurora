@@ -1,0 +1,246 @@
+<template>
+  <div>
+    <div>
+      <div class="flex flex-col">
+        <div class="post-header">
+          <h1 class="post-title text-white uppercase">{{ t('titles.talks') }}</h1>
+        </div>
+        <div class="main-grid">
+          <div class="relative space-y-5">
+            <div class="bg-ob-deep-800 flex p-3 md:p-4 lg:p-8 rounded-2xl shadow-xl mb-8 lg:mb-0">
+              <Avatar v-if="talk.avatar" :url="talk.avatar" />
+              <div class="talk-info">
+                <div class="user-nickname text-sm">
+                  {{ talk.nickname }}
+                </div>
+                <div v-if="talk.createTime" class="time">
+                  {{ t('settings.shared-on') }}
+                  <time :datetime="new Date(talk.createTime).toISOString()">
+                    {{ d(new Date(talk.createTime), 'short') }}
+                  </time>
+                  <svg-icon class="message-svg" icon-class="message" />
+                  {{ talk.commentCount == null ? 0 : talk.commentCount }}
+                </div>
+                <div class="talk-content" v-html="talk.content" />
+                <el-row v-if="talk.imgs" class="talk-images">
+                  <el-col v-for="(img, index) of talk.imgs" :key="index" :md="4">
+                    <el-image
+                      :src="img"
+                      aspect-ratio="1"
+                      class="images-talks"
+                      max-height="200"
+                      @click.prevent="handlePreview(img)" />
+                  </el-col>
+                </el-row>
+              </div>
+            </div>
+            <Comment />
+          </div>
+          <div class="col-span-1">
+            <Sidebar>
+              <Profile />
+            </Sidebar>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted, provide, reactive, toRef } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { Profile, Sidebar } from '../components/Sidebar'
+import { Comment } from '../components/Comment'
+import Avatar from '../components/Avatar.vue'
+import { useCommentStore } from '@/stores/comment'
+import v3ImgPreviewPkg from 'v3-img-preview'
+import emitter from '@/utils/mitt'
+import api from '@/api/api'
+
+type ImgPreviewFn = (options: { images: string[]; index: number }) => void
+type TalkData = {
+  avatar?: string
+  nickname?: string
+  createTime?: string | number | Date
+  commentCount?: number | null
+  content?: string
+  imgs?: string[]
+}
+type CommentRecord = {
+  id: string | number
+  replyDTOs?: unknown[]
+}
+type ReactiveData = {
+  talk: TalkData
+  comments: CommentRecord[]
+  haveMore: boolean
+  isReload: boolean
+  images: string[]
+}
+
+const { v3ImgPreviewFn } = v3ImgPreviewPkg as { v3ImgPreviewFn: ImgPreviewFn }
+
+defineOptions({ name: 'TalkDetail' })
+
+const { t, d } = useI18n()
+const commentStore = useCommentStore()
+const route = useRoute()
+const router = useRouter()
+const reactiveData = reactive<ReactiveData>({
+  talk: {},
+  comments: [],
+  haveMore: false,
+  isReload: false,
+  images: []
+})
+const pageInfo = reactive({
+  current: 1,
+  size: 7
+})
+const talk = toRef(reactiveData, 'talk')
+
+commentStore.type = 5
+
+onMounted(() => {
+  toPageTop()
+  fetchTalk()
+  fetchComments()
+})
+
+provide(
+  'comments',
+  computed(() => reactiveData.comments)
+)
+provide(
+  'haveMore',
+  computed(() => reactiveData.haveMore)
+)
+
+emitter.on('talkFetchComment', () => {
+  pageInfo.current = 1
+  reactiveData.isReload = true
+  fetchComments()
+})
+
+emitter.on('talkFetchReplies', (payload: unknown) => {
+  const index = typeof payload === 'number' ? payload : Number(payload)
+  if (!Number.isFinite(index)) return
+  fetchReplies(index)
+})
+
+emitter.on('talkLoadMore', () => {
+  fetchComments()
+})
+
+const handlePreview = (image: string) => {
+  v3ImgPreviewFn({ images: reactiveData.images, index: reactiveData.images.indexOf(image) })
+}
+
+const getTalkIdParam = (value: string | string[] | undefined) => {
+  return Array.isArray(value) ? (value[0] ?? '') : (value ?? '')
+}
+
+const fetchTalk = () => {
+  const talkId = getTalkIdParam(route.params.talkId as string | string[] | undefined)
+  api.getTalkById(talkId).then(({ data }) => {
+    if (data.data === null) {
+      router.push({ path: '/出错啦' })
+      return
+    }
+    reactiveData.talk = data.data
+    if (reactiveData.talk.imgs) {
+      reactiveData.images.push(...reactiveData.talk.imgs)
+    }
+  })
+}
+
+const fetchComments = () => {
+  const params = {
+    type: 5,
+    topicId: getTalkIdParam(route.params.talkId as string | string[] | undefined),
+    current: pageInfo.current,
+    size: pageInfo.size
+  }
+  api.getComments(params).then(({ data }) => {
+    if (reactiveData.isReload) {
+      reactiveData.comments = data.data.records
+      reactiveData.isReload = false
+    } else {
+      reactiveData.comments.push(...data.data.records)
+    }
+    if (data.data.count <= reactiveData.comments.length) {
+      reactiveData.haveMore = false
+    } else {
+      reactiveData.haveMore = true
+    }
+    pageInfo.current++
+  })
+}
+
+const fetchReplies = (index: number) => {
+  api.getRepliesByCommentId(reactiveData.comments[index].id).then(({ data }) => {
+    reactiveData.comments[index].replyDTOs = data.data
+  })
+}
+
+const toPageTop = () => {
+  window.scrollTo({
+    top: 0
+  })
+}
+</script>
+
+<style lang="scss" scoped>
+.message-svg {
+  margin-left: 5px;
+  font-size: 15px;
+}
+
+.el-card {
+  background: var(--background-primary);
+  border-radius: 10px;
+  border: 0;
+}
+
+.talk-user-avatar {
+  flex: 1;
+}
+
+.talk-info {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.user-nickname {
+  font-weight: 500;
+}
+
+.time {
+  color: #999;
+  font-size: 13px;
+  @media (min-width: 1280px) {
+    margin-top: 4px;
+  }
+}
+
+.talk-content {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 26px;
+  white-space: pre-line;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.talk-images {
+  margin-top: 8px;
+}
+
+.images-items {
+  cursor: pointer;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+</style>

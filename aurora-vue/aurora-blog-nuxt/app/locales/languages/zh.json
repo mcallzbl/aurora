@@ -1,0 +1,292 @@
+{
+  "menu": {
+    "home": "首页",
+    "about": "关于",
+    "archives": "归档",
+    "categories": "分类",
+    "tags": "标签",
+    "post": "文章",
+    "talks": "说说",
+    "message": "留言",
+    "friends": "友链",
+    "album": "相册",
+    "search": "搜索结果",
+    "not-found": "无法找到页面"
+  },
+  "home": {
+    "recommended": "推荐文章"
+  },
+  "titles": {
+    "articles": "文章列表",
+    "talks": "说说",
+    "about": "关于",
+    "category_list": "分类目录",
+    "tag_list": "标签目录",
+    "message": "留言",
+    "friends": "朋友们",
+    "toc": "文章目录",
+    "comment": "评论区",
+    "recent_comment": "最近评论",
+    "website_info": "网站信息",
+    "notice": "公告"
+  },
+  "settings": {
+    "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    "articles": "文章",
+    "talks": "说说",
+    "categories": "分类",
+    "tags": "标签",
+    "words": "文字",
+    "visitor_count": "总共访客数",
+    "visit_count": "总共访问数",
+    "button-all": "全部",
+    "paginator": {
+      "newer": "新的",
+      "older": "以往",
+      "pre": "上一篇更回味",
+      "next": "下一篇更精彩"
+    },
+    "more-tags": "查看更多",
+    "admin-user": "博主",
+    "shared-on": "发布于",
+    "recently-search": "最近搜索",
+    "search-result": "一共找到 [total] 个结果",
+    "no-recent-search": "没有最近搜索记录。",
+    "no-search-result": "没有找到任何记录。",
+    "cmd-to-select": "查看",
+    "cmd-to-navigate": "选择",
+    "cmd-to-close": "关闭",
+    "searched-by": "搜索引擎",
+    "tips-back-to-top": "返回顶部",
+    "tips-open-menu": "打开菜单",
+    "tips-back-to-home": "返回首页",
+    "tips-open-search": "打开搜索",
+    "default-category": "文章",
+    "default-tag": "未分类",
+    "empty-tag": "目前没有标签",
+    "pinned": "置顶",
+    "featured": "推荐",
+    "login": "登录",
+    "logout": "登出",
+    "personal-center": "个人中心",
+    "running-time": "运行时间",
+    "view-count": "总访问量",
+    "tips-open-language": "选择语言",
+    "days_suffix": "天",
+    "hours_suffix": "时",
+    "minutes_suffix": "分钟",
+    "seconds_suffix": "秒",
+    "words_suffix_k": "k字"
+  },
+  "settings_more": {},
+  "time": {},
+
+  "errors": {
+    "article_password_failed": "文章密码认证未通过"
+  },
+  "article": {
+    "protected_login_required": "该文章受密码保护,请登录后访问"
+  },
+  "comments": {
+    "placeholder": "发表评论...",
+    "submit": "发表评论",
+    "load_more": "加载更多",
+    "login_required": "请登录后评论",
+    "empty": "评论不能为空",
+    "pending_review": "评论成功，正在审核中",
+    "success": "评论成功",
+    "reply": "回复",
+    "reply_placeholder": "添加回复..."
+  },
+  "message": {
+    "notice_line1": "这是一个留言版",
+    "notice_line2": "欢迎大家前来留言💖"
+  },
+  "friend": {
+    "link_notice_line1": "需要交换友链的可在下方留言💖",
+    "link_notice_line2": "友链信息展示需要，你的信息格式要包含：名称、头像、链接、介绍"
+  },
+  "languages": {
+    "en": "English",
+    "zh": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日语"
+  },
+  "common": {
+    "success": "成功",
+    "warning": "警告",
+    "confirm": "确定",
+    "submit": "提交",
+    "upload_success": "上传成功"
+  },
+  "auth": {
+    "email": "邮箱",
+    "password": "密码",
+    "new_password": "新密码",
+    "code": "验证码",
+    "send_code": "发送",
+    "register": "注册",
+    "register_now": "立即注册",
+    "login_existing": "已有账号？去登录",
+    "forgot_password": "忘记密码？",
+    "qq_login": "QQ登录",
+    "back_to_login": "返回登录",
+    "article_password_placeholder": "此文章已加密，请输入访问密码",
+    "verify_password": "验证密码",
+    "login_success": "登录成功",
+    "logout_success": "退出成功",
+    "register_success": "注册成功",
+    "code_sent": "验证码已发送",
+    "update_success": "更新成功",
+    "password_empty": "密码不能为空",
+    "bind": "绑定",
+    "change": "修改",
+    "bind_success": "绑定成功"
+  },
+  "user": {
+    "info_privacy_hint": "(该页面的信息,本网站将严格保密)",
+    "nickname": "昵称",
+    "website": "网址",
+    "website_placeholder": "请包含 https:// 或 http://",
+    "intro": "描述",
+    "intro_placeholder": "简单介绍一下你自己",
+    "subscribe": "订阅",
+    "email_unbound_warning": "邮箱未绑定,尽快绑定哦"
+  },
+  "dia": {
+    "messages": [
+      "你好，我是 <span>Dia</span>，好高兴遇见你～",
+      "好久不见，日子过得好快呢……",
+      "<span>大坏蛋！</span>你都多久没理人家了呀，嘤嘤嘤～",
+      "嗨～快来逗我玩吧！",
+      "拿小拳拳锤你胸口！",
+      "学习使我们快乐，快乐使我们更想学习～",
+      "showQuote"
+    ],
+    "console": "哈哈，你打开了控制台，是想要看看我的小秘密吗？",
+    "copy": "你都复制了些什么呀，转载要记得加上出处哦！",
+    "visibility_change": "老朋友，你怎么才回来呀～",
+    "welcome": {
+      "5_7": [
+        "早上好！一日之计在于晨，美好的一天开始啦～",
+        "清晨的空气真好，给今天定个小目标吧～",
+        "新的一天，元气满满出发！"
+      ],
+      "7_11": [
+        "上午好！工作顺利嘛？别久坐，起来走动一下～",
+        "喝口水，补充能量，继续加油！",
+        "适当活动一下，灵感可能就在下一步。"
+      ],
+      "11_13": ["中午啦～辛苦了一个上午，午餐时间到！", "午饭好好吃，眼睛也要休息一下～", "小憩片刻，下午更有精神～"],
+      "13_17": ["午后容易犯困，伸个懒腰醒醒神～", "来杯茶/咖啡继续冲刺吧！", "记得眨眨眼，缓解下用眼疲劳～"],
+      "17_19": ["傍晚好～夕阳很美呢，今天也要好好收尾～", "微风拂面，慢慢放松～", "给今天的自己点个赞～"],
+      "19_21": ["晚上好～今天过得怎么样？", "适当放松一下，回顾今天的小收获～", "读会儿书或听听歌也不错～"],
+      "21_23": ["已经这么晚啦，早点休息，晚安～", "深夜也要好好护眼哦～", "记得保存和备份，明天的你会感谢现在的你。"],
+      "24": ["夜猫子上线？也要注意休息呀～", "深夜安静又迷人，但要善待眼睛～", "确保明天的你也能元气满满～"]
+    },
+    "referrer": {
+      "self": "欢迎来到<span>「[PLACEHOLDER]」</span>",
+      "baidu": "Hello！来自 百度搜索 的朋友<br>你是搜索 <span>「[PLACEHOLDER]」</span> 找到的我吗？",
+      "so": "Hello！来自 360搜索 的朋友<br>你是搜索 <span>「[PLACEHOLDER]」</span> 找到的我吗？",
+      "google": "Hello！来自 谷歌搜索 的朋友<br>欢迎阅读<span>「[PLACEHOLDER]」</span>",
+      "site": "Hello！来自 <span>[PLACEHOLDER]</span> 的朋友",
+      "other": "欢迎来到<span>「[PLACEHOLDER]」</span>"
+    },
+    "mouseover": [
+      {
+        "selector": "#Aurora-Dia",
+        "text": [
+          "哇啊啊啊啊啊啊... <span>你想干嘛</span>? O.O",
+          "请您轻一点，我是<span>很昂贵</span>的机器人哦! O.O",
+          "<span>领导，我在呢!</span> 我有什么可以帮到你呢? O.O",
+          "不要一直盯着人家看啦，会<span>害羞</span>的... >///<",
+          "鼠标指针很凉的！快<span>拿开</span>啦~ (｡>皿<｡)"
+        ]
+      },
+      { "selector": "[data-menu='Home']", "text": ["点它就可以回到首页啦！", "回首页看看吧。"] },
+      { "selector": "[data-menu='Talks']", "text": ["这里有主人日常的说说哦!"] },
+      { "selector": "[data-menu='Archives']", "text": ["这里存储了主人的所有作品哦！", "想看看主人的图书馆吗？"] },
+      {
+        "selector": "[data-menu='About']",
+        "text": ["你想知道我家主人是谁吗？", "这里有一些关于我家主人的秘密哦，要不要看看呢？", "发现主人出没地点！"]
+      },
+      {
+        "selector": "[data-menu='Tags']",
+        "text": ["点击就可以看文章的标签啦！", "使用标签可以更好的分类你的文章哦～"]
+      },
+      { "selector": "[data-menu='Message']", "text": ["来这里给主人留言吧！"] },
+      { "selector": "[data-menu='Friends']", "text": ["这里有主人的朋友们哦！"] },
+      { "selector": "[data-menu='PhotoAlbums']", "text": ["这里有主人的日常照片哦！"] },
+      { "selector": "[data-dia='language']", "text": "主人的博客支持多种语言。" },
+      { "selector": "[data-dia='light-switch']", "text": "您可以点击这里切换黑白模式哦！" },
+      {
+        "selector": "[data-dia='author']",
+        "text": ["这是我主人的简介。", "点击其中任何一个链接都可以传送到我主人的其他世界。"]
+      },
+      {
+        "selector": "[data-dia='jump-to-comment']",
+        "text": ["你想看看评论吗?", "点击这里可以帮助你直接跳转到评论部分。"]
+      }
+    ],
+    "click": [
+      {
+        "selector": "[data-dia='search']",
+        "text": ["没有看到你想要的文章，那么就输入你想搜索的关键词吧～", "可以使用 ctrl/cmd + k 快捷键打开搜索哦～"]
+      },
+      {
+        "selector": "[data-dia='article-link']",
+        "text": [
+          "希望你会喜欢这篇文章：<span>「{text}」</span>.",
+          "您的选择真的不错哦！好好享受这篇文章吧～",
+          "希望您能从 <span>「{text}」</span>这篇文章中学到点东西。"
+        ]
+      },
+      {
+        "selector": ".gt-header-textarea",
+        "text": [
+          "要吐槽些什么呢？",
+          "一定要认真填写喵～",
+          "有什么想说的吗？",
+          "如果觉得文章不错的话，就给博主留个言吧～"
+        ]
+      },
+      {
+        "selector": ".veditor",
+        "text": [
+          "要吐槽些什么呢？",
+          "一定要认真填写喵～",
+          "有什么想说的吗？",
+          "如果觉得文章不错的话，就给博主留个言吧～"
+        ]
+      }
+    ],
+    "events": [
+      { "date": "01/01", "text": "<span>元旦</span>了呢，新的一年又开始了，今年是{year}年～" },
+      { "date": "02/14", "text": "又是一年<span>情人节</span>，{year}年找到对象了嘛～" },
+      { "date": "03/08", "text": "今天是<span>国际妇女节</span>！" },
+      { "date": "03/12", "text": "今天是<span>植树节</span>，要保护环境呀！" },
+      { "date": "04/01", "text": "悄悄告诉你一个秘密～<span>今天是愚人节，不要被骗了哦～</span>" },
+      { "date": "05/01", "text": "今天是<span>五一劳动节</span>，计划好假期去哪里了吗～" },
+      { "date": "06/01", "text": "<span>儿童节</span>到啦～童心万岁！" },
+      { "date": "07/04", "text": "今天是美国的<span>独立日</span>，顺便了解下他国的节日文化吧～" },
+      { "date": "09/03", "text": "<span>中国人民抗日战争胜利纪念日</span>，铭记历史、缅怀先烈、珍爱和平、开创未来。" },
+      { "date": "09/10", "text": "<span>教师节</span>，在学校要给老师问声好呀～" },
+      { "date": "10/01", "text": "<span>国庆节</span>到了，为祖国母亲庆生！" },
+      { "date": "10/31", "text": ["<span>万圣节</span>到啦～不给糖就捣蛋！", "Happy Halloween~"] },
+      {
+        "date": "10/24",
+        "text": ["今天是<span>1024 程序员节</span>，向每一位码农致敬！", "保持热爱，持续精进，Happy 1024!"]
+      },
+      {
+        "rule": { "type": "nth-weekday", "month": 5, "weekday": 0, "nth": 2 },
+        "text": ["今天是<span>母亲节</span>，给妈妈打个电话吧～", "Happy Mother's Day!"]
+      },
+      {
+        "rule": { "type": "nth-weekday", "month": 6, "weekday": 0, "nth": 3 },
+        "text": ["今天是<span>父亲节</span>，别忘了向爸爸说声辛苦啦～", "Happy Father's Day!"]
+      },
+      { "date": "11/05-11/12", "text": "今年的<span>双十一</span>是和谁一起过的呢～" },
+      { "date": "12/20-12/31", "text": "这几天是<span>圣诞节</span>，主人肯定又去剁手买买买了～" }
+    ]
+  }
+}

@@ -1,0 +1,164 @@
+<template>
+  <div class="flex space-x-3 xl:space-x-5">
+    <Avatar :url="avatar" />
+    <div class="reply flex flex-col flex-wrap-reverse w-full max-w-full-calc" style="width: fit-content">
+      <textarea
+        v-model="commentContent"
+        :placeholder="initialContent"
+        class="w-full shadow-md rounded-md p-4 focus:outline-none input"
+        cols="30"
+        rows="5" />
+      <div class="justify-between" style="text-align: right">
+        <button
+          id="submit-button"
+          class="mt-5 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
+          @click="saveReply">
+          <span class="text-center flex-grow commit">{{ t('comments.reply') }}</span>
+        </button>
+        <button
+          id="submit-button"
+          class="mt-5 mr-3 w-16 text-white p-2 rounded-lg shadow-lg transition transform hover:scale-105 flex float-right"
+          @click="cancelReply">
+          <span class="text-center flex-grow commit">{{ t('common.cancel') }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, getCurrentInstance, inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import Avatar from '@/components/Avatar.vue'
+import emitter from '@/utils/mitt'
+import { useUserStore } from '@/stores/user'
+import { useCommentStore } from '@/stores/comment'
+import { useAppStore } from '@/stores/app'
+import { useRoute } from 'vue-router'
+import api from '@/api/api'
+
+defineOptions({ name: 'CommentReplyForm' })
+
+const props = defineProps<{ replyUserId: number | string; initialContent: string }>()
+const emit = defineEmits<{ (e: 'changeShow'): void }>()
+
+const { t } = useI18n()
+type NotifyFn = (options: { title: string; message: string; type: 'warning' | 'success' | 'error' | 'info' }) => void
+type SaveCommentParams = {
+  type: number
+  replyUserId: number | string
+  parentId: number | string | null
+  commentContent: string
+  topicId?: string | number
+}
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
+const userStore = useUserStore()
+const commentStore = useCommentStore()
+const appStore = useAppStore()
+const route = useRoute()
+
+const commentContent = ref<string>('')
+const parentId = inject<number | string | null>('parentId', null)
+const index = inject<number>('index', -1)
+
+const saveReply = () => {
+  if (userStore.userInfo === '') {
+    proxy?.$notify?.({
+      title: t('common.warning'),
+      message: t('comments.login_required'),
+      type: 'warning'
+    })
+    return
+  }
+  if (commentContent.value.trim() === '') {
+    proxy?.$notify?.({
+      title: t('common.warning'),
+      message: t('comments.empty'),
+      type: 'warning'
+    })
+    return
+  }
+  const path = route.path
+  const arr = path.split('/')
+  const params: SaveCommentParams = {
+    type: commentStore.type,
+    replyUserId: props.replyUserId,
+    parentId: parentId,
+    commentContent: commentContent.value
+  }
+  params.topicId = arr[2]
+  api.saveComment(params).then(({ data }) => {
+    if (data.flag) {
+      emit('changeShow')
+      fetchReplies()
+      const isCommentReview = appStore.websiteConfig.isCommentReview
+      if (isCommentReview) {
+        proxy?.$notify?.({
+          title: t('common.warning'),
+          message: t('comments.pending_review'),
+          type: 'warning'
+        })
+      } else {
+        proxy?.$notify?.({
+          title: t('common.success'),
+          message: t('comments.reply_success'),
+          type: 'success'
+        })
+      }
+      commentContent.value = ''
+    }
+  })
+}
+
+const fetchReplies = async () => {
+  switch (commentStore.type) {
+    case 1:
+      emitter.emit('articleFetchReplies', index)
+      break
+    case 2:
+      emitter.emit('messageFetchReplies', index)
+      break
+    case 3:
+      emitter.emit('aboutFetchReplies', index)
+      break
+    case 4:
+      emitter.emit('friendLinkFetchReplies', index)
+      break
+    case 5:
+      emitter.emit('talkFetchReplies', index)
+  }
+}
+
+const cancelReply = () => {
+  emit('changeShow')
+}
+
+const avatar = computed(() => (userStore.userInfo === '' ? '' : userStore.userInfo.avatar))
+</script>
+<style lang="scss" scoped>
+.reply::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-right: 8px solid var(--background-primary);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  left: -8px;
+  top: 14px;
+}
+
+.input {
+  background: var(--background-primary);
+  resize: none;
+}
+
+#submit-button {
+  outline: none;
+  background: var(--main-gradient);
+}
+
+.wire {
+  border-color: var(--text-normal);
+}
+</style>

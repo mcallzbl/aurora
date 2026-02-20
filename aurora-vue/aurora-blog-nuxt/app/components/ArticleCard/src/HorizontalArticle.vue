@@ -1,0 +1,173 @@
+<template>
+  <div class="article-container" @click="toArticle">
+    <span v-if="article.isTop" class="article-tag">
+      <b>
+        <svg-icon icon-class="pin" />
+        {{ t('settings.pinned') }}
+      </b>
+    </span>
+    <span v-else-if="article.isfeatured" class="article-tag">
+      <b>
+        <svg-icon icon-class="hot" />
+        {{ t('settings.featured') }}
+      </b>
+    </span>
+    <div class="feature-article">
+      <div class="feature-thumbnail">
+        <img v-if="article.articleCover" v-lazy="article.articleCover" class="ob-hz-thumbnail" />
+        <img v-else class="ob-hz-thumbnail" src="@/assets/default-cover.jpg" />
+        <span :style="bannerHoverGradient" class="thumbnail-screen" />
+      </div>
+      <div class="feature-content">
+        <span>
+          <b v-if="article.categoryName">
+            {{ article.categoryName }}
+          </b>
+          <ob-skeleton v-else height="20px" tag="b" width="35px" />
+          <ul>
+            <template v-if="article.tags && article.tags.length > 0">
+              <li v-for="tag in article.tags" :key="tag.id">
+                <em># {{ tag.tagName }}</em>
+              </li>
+            </template>
+            <template v-else-if="article.tags && article.tags.length <= 0">
+              <li>
+                <em># {{ t('settings.default-tag') }}</em>
+              </li>
+            </template>
+            <ob-skeleton v-else :count="2" height="16px" tag="li" width="35px" />
+          </ul>
+        </span>
+        <h1 v-if="article.articleTitle" class="article-title">
+          <a>
+            <span data-dia="article-link">{{ article.articleTitle }}</span>
+            <svg-icon v-if="article.status == 2" class="lock-svg" icon-class="lock" />
+          </a>
+        </h1>
+        <ob-skeleton v-else height="3rem" tag="h1" />
+        <p v-if="article.articleContent" class="article-content-main">{{ article.articleContent }}</p>
+        <ob-skeleton v-else :count="4" height="20px" tag="p" />
+        <div v-if="article && article.author" class="article-footer">
+          <div class="flex flex-row items-center">
+            <img
+              :src="article.author.avatar || ''"
+              alt=""
+              class="hover:opacity-50 cursor-pointer"
+              @click="handleAuthorClick(article.author.website)" />
+            <span class="text-ob-dim">
+              <strong
+                class="text-ob-normal pr-1.5 hover:text-ob hover:opacity-50 cursor-pointer"
+                @click="handleAuthorClick(article.author.website)">
+                {{ article.author.nickname }}
+              </strong>
+              <time :datetime="toIso(article.createTime)" class="opacity-70">
+                {{ t('settings.shared-on') }} {{ formatDate(article.createTime) }}
+              </time>
+            </span>
+          </div>
+        </div>
+        <div v-else class="article-footer">
+          <div class="flex flex-row items-center mt-6">
+            <ob-skeleton :circle="true" class="mr-2" height="28px" width="28px" />
+            <span class="text-ob-dim mt-1">
+              <ob-skeleton height="20px" width="150px" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, getCurrentInstance, toRef, type Ref } from 'vue'
+import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+import { useArticleStore } from '@/stores/article'
+import { useI18n } from 'vue-i18n'
+import emitter from '@/utils/mitt'
+
+defineOptions({ name: 'HorizontalArticle' })
+
+type TagInfo = {
+  id: string | number
+  tagName?: string
+}
+type AuthorInfo = {
+  avatar?: string
+  website?: string
+  nickname?: string
+}
+type HorizontalArticleData = {
+  id?: string | number
+  isTop?: boolean
+  isfeatured?: boolean
+  articleCover?: string
+  categoryName?: string
+  tags?: TagInfo[]
+  articleTitle?: string
+  status?: number
+  articleContent?: string
+  author?: AuthorInfo
+  createTime?: string | number | Date
+}
+
+type NotifyFn = (options: { title: string; message: string; type: string }) => void
+const proxy = getCurrentInstance()?.appContext.config.globalProperties as { $notify?: NotifyFn } | undefined
+const appStore = useAppStore()
+const articleStore = useArticleStore()
+const userStore = useUserStore()
+const router = useRouter()
+const { t, d } = useI18n()
+
+const article = toRef(articleStore.$state, 'topArticle') as Ref<HorizontalArticleData>
+
+const handleAuthorClick = (link?: string | null) => {
+  const target = link && link !== '' ? link : window.location.href
+  window.open(target)
+}
+
+const toArticle = () => {
+  let isAccess = false
+  userStore.accessArticles.forEach((item) => {
+    if (item == articleStore.topArticle.id) {
+      isAccess = true
+    }
+  })
+  if (articleStore.topArticle.status == 2 && isAccess == false) {
+    if (userStore.userInfo === '') {
+      proxy?.$notify?.({
+        title: t('common.warning'),
+        message: t('article.protected_login_required'),
+        type: 'warning'
+      })
+    } else {
+      emitter.emit('changeArticlePasswordDialogVisible', articleStore.topArticle.id)
+    }
+  } else {
+    router.push({ path: '/articles/' + articleStore.topArticle.id })
+  }
+}
+
+const bannerHoverGradient = computed(() => ({
+  background: appStore.themeConfig.header_gradient_css
+}))
+
+const toIso = (value?: string | number | Date) => {
+  return value ? new Date(value).toISOString() : ''
+}
+
+const formatDate = (value?: string | number | Date) => {
+  return value ? d(new Date(value), 'short') : ''
+}
+</script>
+<style lang="scss" scoped>
+.article-title:hover {
+  cursor: default;
+}
+
+.article-content-main:hover {
+  cursor: default;
+}
+</style>
