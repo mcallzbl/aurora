@@ -36,6 +36,9 @@
 - [x] 安装依赖并完成 `pnpm build` 验证（完成日期：2026-02-20，当前可构建，仍有 Tailwind CSS minify 警告待后续清理）
 - [x] 修复 Nuxt 首轮回归问题：Header 控件可见性、导航偏移、底部高度计算、多语言开关兼容（完成日期：2026-02-20）
 - [x] 修复 Tailwind `@apply` 在 Nuxt 中的编译链（完成日期：2026-02-20，已切换 `@tailwindcss/postcss` 并通过构建验证）
+- [x] 实现 Nuxt 预渲染 SEO 方案（静态路由 + 构建期动态路由采集，含多语言路径）（完成日期：2026-02-20）
+- [x] 输出部署文档（SSR 推荐方案 + 静态部署备选 + systemd/nginx 示例）（完成日期：2026-02-20，文档见 `aurora-blog-nuxt/docs/deployment.md`）
+- [x] 实现 `SSR` 实时 `sitemap.xml`（按最新 API 数据动态生成，移除静态 sitemap 文件）（完成日期：2026-02-20）
 
 ## 更新规则（强制）
 - 完成任意 TODO 后，必须在本文件把对应项改为 `[x]`，并补充完成日期。
