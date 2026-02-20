@@ -1,4 +1,5 @@
 import { i18n } from '@/locales'
+import { normalizeLocaleKey } from '@/config/i18n'
 
 // interface AWFConfig {
 //   resourcePath: string
@@ -257,9 +258,7 @@ class AuroraBotSoftware {
     // Prefer project i18n's `dia` namespace; fall back to base-locale or current locale.
     const resolveLocale = (value: string): string => {
       const available = i18n.global.availableLocales
-      const normalized = value.replace('_', '-')
-      const lower = normalized.toLowerCase()
-      const normalizedKey = lower === 'cn' ? 'zh' : lower
+      const normalizedKey = normalizeLocaleKey(value.replace('_', '-')).toLowerCase()
       const exact = available.find((item) => item.toLowerCase() === normalizedKey)
       if (exact) return exact
       const base = normalizedKey.split('-')[0]
@@ -505,7 +504,7 @@ class AuroraBotSoftware {
 
   showQuote() {
     const rawLocale = this.config.locale || 'en'
-    const normalized = rawLocale === 'cn' ? 'zh' : rawLocale
+    const normalized = normalizeLocaleKey(rawLocale)
     if (normalized.toLowerCase().startsWith('zh')) {
       this.getHitokoto()
     } else {

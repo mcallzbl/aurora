@@ -11,7 +11,7 @@
               <b class="font-extrabold">&nbsp;{{ websiteConfig.author }}</b>
             </li>
             <li
-              v-if="websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined"
+              v-if="shouldShowBeian && websiteConfig.gonganBeianNumber != '' && websiteConfig.gonganBeianNumber != undefined"
               class="flex flex-row mx-auto">
               <a href="https://beian.mps.gov.cn/#/query/webSearch" target="_blank">
                 <img alt="" src="https://oss.supermouse.cn/aurora/config/gongan-beian-icon.png" style="float: left" />
@@ -20,7 +20,7 @@
               </a>
             </li>
             <li
-              v-if="websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined"
+              v-if="shouldShowBeian && websiteConfig.beianNumber != '' && websiteConfig.beianNumber != undefined"
               class="flex flex-row mx-auto">
               <a href="https://beian.miit.gov.cn/" target="_blank">
                 <b class="font-extrabold border-b-2 border-ob hover:text-ob"> {{ websiteConfig.beianNumber }} </b>
@@ -35,11 +35,13 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { useRequestURL } from '#imports'
 import { useAppStore } from '@/stores/app'
 
 defineOptions({ name: 'AppFooter' })
 
 const appStore = useAppStore()
+const requestURL = useRequestURL()
 
 const gradientBackground = computed(() => ({
   background: appStore.themeConfig.header_gradient_css
@@ -47,4 +49,5 @@ const gradientBackground = computed(() => ({
 
 const currentYear = computed(() => new Date().getUTCFullYear())
 const websiteConfig = computed(() => appStore.websiteConfig)
+const shouldShowBeian = computed(() => requestURL.hostname === 'www.devillusion.asia')
 </script>

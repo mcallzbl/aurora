@@ -18,6 +18,7 @@ NITRO_HOST=0.0.0.0
 
 说明：
 - `VITE_API_BASE` 会用于客户端请求和构建期动态路由预渲染采集。
+- `SITE_URL`（可选）用于显式指定 sitemap/SEO 使用的站点域名，优先级最高；未设置时会自动回退到当前请求域名。
 - `NUXT_DEVTOOLS` 生产建议关闭。
 
 ## 3. 方案 A（推荐）：SSR Node 服务
@@ -122,7 +123,7 @@ server {
 
 ## 5. 预渲染策略说明
 项目当前预渲染包含：
-- 多语言静态页面：`/en`、`/zh`、`/ja`、`/zh-TW` 及其核心子路由。
+- 多语言静态页面：`/en`、`/zh-CN`、`/ja`、`/zh-TW` 及其核心子路由。
 - 构建期动态采集：文章、说说、标签列表、相册详情页面。
 - `crawlLinks: true`：自动补采页面中的可爬取链接。
 - `sitemap.xml`：由 SSR 路由实时生成（`server/routes/sitemap.xml.ts`），非静态文件。

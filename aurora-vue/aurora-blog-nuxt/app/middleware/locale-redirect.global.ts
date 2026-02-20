@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, isSupportedLocale, normalizeLocaleKey } from '@/config/i18n'
+import { isSupportedLocale, normalizeLocaleKey, resolvePreferredLocale } from '@/config/i18n'
 
 const getLocaleFromPath = (path: string) => {
   const segment = path.split('/').filter(Boolean)[0]
@@ -6,7 +6,19 @@ const getLocaleFromPath = (path: string) => {
   return normalizeLocaleKey(segment)
 }
 
-export default defineNuxtRouteMiddleware((to, from) => {
+const getSystemLocaleCandidates = (): string[] => {
+  if (import.meta.client) {
+    return [...(navigator.languages || []), navigator.language].filter(Boolean)
+  }
+
+  const acceptLanguage = useRequestHeaders(['accept-language'])['accept-language'] || ''
+  return acceptLanguage
+    .split(',')
+    .map((part) => part.split(';')[0]?.trim() || '')
+    .filter(Boolean)
+}
+
+export default defineNuxtRouteMiddleware((to) => {
   const localeFromTo = getLocaleFromPath(to.path)
 
   if (isSupportedLocale(localeFromTo)) {
@@ -18,12 +30,8 @@ export default defineNuxtRouteMiddleware((to, from) => {
     return
   }
 
-  const localeFromFrom = getLocaleFromPath(from.path)
-  const localeFromStorage = import.meta.client ? normalizeLocaleKey(localStorage.getItem('locale') || '') : ''
-  const preferredLocale = [localeFromFrom, localeFromStorage, DEFAULT_LOCALE].find((item) => isSupportedLocale(item))
-
-  const fallbackLocale = preferredLocale || DEFAULT_LOCALE
-  const target = to.fullPath === '/' ? `/${fallbackLocale}` : `/${fallbackLocale}${to.fullPath}`
+  const targetLocale = resolvePreferredLocale(getSystemLocaleCandidates())
+  const target = to.fullPath === '/' ? `/${targetLocale}` : `/${targetLocale}${to.fullPath}`
 
   return navigateTo(target, { redirectCode: 302 })
 })

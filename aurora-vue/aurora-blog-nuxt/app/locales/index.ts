@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+import { DEFAULT_LOCALE, isSupportedLocale, normalizeLocaleKey } from '@/config/i18n'
 
 type LocaleMessages = Record<string, Record<string, Record<string, string>>>
 
@@ -22,7 +23,7 @@ const datetimeFormats = {
       month: 'short'
     }
   },
-  zh: {
+  'zh-CN': {
     short: {
       year: 'numeric',
       month: 'long',
@@ -79,13 +80,6 @@ const datetimeFormats = {
   }
 }
 
-const normalizeLocaleKey = (value: string) => {
-  const normalized = value === 'cn' ? 'zh' : value
-  const lower = normalized.toLowerCase()
-  if (lower === 'zh-tw' || lower === 'zh_tw') return 'zh-TW'
-  return normalized
-}
-
 function loadLocaleMessages(): LocaleMessages {
   const locales = import.meta.glob<{ default: Record<string, Record<string, string>> }>('../locales/languages/*.json', {
     eager: true
@@ -103,9 +97,9 @@ function loadLocaleMessages(): LocaleMessages {
 
 const isClient = typeof window !== 'undefined'
 const storedLocale = isClient ? window.localStorage.getItem('locale') : null
-const rawLocale = storedLocale ? String(storedLocale) : 'en'
+const rawLocale = storedLocale ? String(storedLocale) : DEFAULT_LOCALE
 const normalizedLocale = normalizeLocaleKey(rawLocale)
-const localeKey = normalizedLocale
+const localeKey = isSupportedLocale(normalizedLocale) ? normalizedLocale : DEFAULT_LOCALE
 
 export const i18n = createI18n({
   locale: localeKey,

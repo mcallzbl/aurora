@@ -22,6 +22,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDiaStore } from '@/stores/dia'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
+import { normalizeLocaleKey } from '@/config/i18n'
 import type { DiaConfig } from '@/utils/aurora-dia'
 
 defineOptions({ name: 'AuroraDia' })
@@ -34,10 +35,7 @@ const showDia = ref(false)
 
 const initializeBot = (): void => {
   if (!appStore.aurora_bot_enable) return
-  const rawLocale = String(locale.value || 'en')
-  const normalized = rawLocale === 'cn' ? 'zh' : rawLocale
-  const normalizedKey = normalized.toLowerCase()
-  const botLocale = normalizedKey === 'zh-tw' || normalizedKey === 'zh_tw' ? 'zh-TW' : normalized
+  const botLocale = normalizeLocaleKey(String(locale.value || 'en'))
   // Update software config in place, then reload
   const botState = diaStore.aurora_bot as { tips?: DiaConfig['tips'] }
   diaStore.initializeBot({

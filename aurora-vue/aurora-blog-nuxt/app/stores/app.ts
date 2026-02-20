@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { i18n } from '@/locales'
+import { isSupportedLocale, normalizeLocaleKey } from '@/config/i18n'
 import nProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -52,13 +53,6 @@ type I18nLocaleTarget = { value: string }
 type I18nGlobals = {
   locale: string | I18nLocaleTarget
   fallbackLocale?: string | I18nLocaleTarget
-}
-
-const normalizeLocaleKey = (value: string) => {
-  const normalized = value === 'cn' ? 'zh' : value
-  const lower = normalized.toLowerCase()
-  if (lower === 'zh-tw' || lower === 'zh_tw') return 'zh-TW'
-  return normalized
 }
 
 const setI18nLocale = (locale: string) => {
@@ -114,6 +108,7 @@ export const useAppStore = defineStore('appStore', {
   actions: {
     changeLocale(locale: string) {
       const normalized = normalizeLocaleKey(locale)
+      if (!isSupportedLocale(normalized)) return
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('locale', normalized)
       }

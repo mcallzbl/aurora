@@ -6,7 +6,7 @@ import prismjs from 'vite-plugin-prismjs'
 import { SUPPORTED_LOCALES } from './app/config/i18n'
 
 const API_TARGET = process.env.VITE_API_BASE || 'https://www.devillusion.asia/api'
-const SITE_TARGET = process.env.SITE_URL || 'https://www.devillusion.asia'
+const SITE_TARGET = process.env.NUXT_PUBLIC_SITE_URL || process.env.SITE_URL || ''
 const PAGE_SIZE = 100
 const MAX_PAGE = 80
 const SEO_CACHE_CONTROL = 'public, max-age=300, s-maxage=900, stale-while-revalidate=3600'

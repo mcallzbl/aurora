@@ -8,7 +8,7 @@ export const useDiaStore = defineStore('diaStore', {
       dia: new AuroraDia(),
       aurora_bot: {
         enable: true,
-        locale: 'zh',
+        locale: 'zh-CN',
         bot_type: 'dia'
       }
     }
