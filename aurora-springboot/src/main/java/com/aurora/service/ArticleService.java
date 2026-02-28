@@ -14,6 +14,8 @@ public interface ArticleService extends IService<Article> {
 
     PageResultDTO<ArticleCardDTO> listArticles();
 
+    String getRssFeed(Integer size);
+
     PageResultDTO<ArticleCardDTO> listArticlesByCategoryId(Integer categoryId);
 
     ArticleDTO getArticleById(Integer articleId);

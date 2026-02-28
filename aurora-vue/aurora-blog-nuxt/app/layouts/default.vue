@@ -30,10 +30,19 @@
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useHead } from '#imports'
+import { useI18n } from 'vue-i18n'
+import { useHead, useRuntimeConfig } from '#imports'
 import { useAppStore } from '@/stores/app'
 import { useCommonStore } from '@/stores/common'
 import { useMetaStore } from '@/stores/meta'
+import {
+  DEFAULT_LOCALE,
+  isSupportedLocale,
+  normalizeLocaleKey,
+  SUPPORTED_LOCALES,
+  toOgLocale,
+  type SupportedLocale
+} from '@/config/i18n'
 import HeaderMain from '@/components/Header/src/Header.vue'
 import Footer from '@/components/Footer.vue'
 import MobileMenu from '@/components/MobileMenu.vue'
@@ -48,6 +57,8 @@ const appStore = useAppStore()
 const commonStore = useCommonStore()
 const metaStore = useMetaStore()
 const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const { t } = useI18n()
 const MOBILE_WIDTH = 996
 const appWrapperClass = 'app-wrapper'
 const wrapperStyle = ref({ minHeight: '100vh' })
@@ -170,9 +181,55 @@ const initFavicon = (faviconUrl: string) => {
 const title = computed(() => appStore.websiteConfig.websiteTitle || metaStore.title)
 const theme = computed(() => appStore.themeConfig.theme)
 
-useHead({
-  title
+const routeLocale = computed<SupportedLocale>(() => {
+  const firstSegment = String(route.path.split('/').filter(Boolean)[0] || '')
+  const normalized = normalizeLocaleKey(firstSegment)
+  return isSupportedLocale(normalized) ? normalized : DEFAULT_LOCALE
 })
+
+const siteOrigin = computed(() => {
+  const configured = String(runtimeConfig.public.siteUrl || '').trim()
+  if (configured.length > 0) return configured.replace(/\/$/, '')
+  if (import.meta.client) return window.location.origin
+  return 'https://www.devillusion.asia'
+})
+
+const siteAuthor = computed(() => {
+  const author = appStore.websiteConfig.author
+  if (typeof author === 'string' && author.trim().length > 0) return author.trim()
+  return 'mcallzbl'
+})
+
+const siteDescription = computed(() => {
+  return String(t('seo.site_description'))
+})
+
+const canonicalUrl = computed(() => `${siteOrigin.value}${route.path}`)
+const alternateOgLocales = computed(() => SUPPORTED_LOCALES.filter((item) => item !== routeLocale.value).map((item) => toOgLocale(item)))
+
+useHead(() => ({
+  title: title.value,
+  htmlAttrs: {
+    lang: routeLocale.value
+  },
+  meta: [
+    { key: 'description', name: 'description', content: siteDescription.value },
+    { key: 'author', name: 'author', content: siteAuthor.value },
+    { key: 'og:title', property: 'og:title', content: title.value },
+    { key: 'og:description', property: 'og:description', content: siteDescription.value },
+    { key: 'og:type', property: 'og:type', content: 'website' },
+    { key: 'og:url', property: 'og:url', content: canonicalUrl.value },
+    { key: 'og:site_name', property: 'og:site_name', content: title.value },
+    { key: 'og:locale', property: 'og:locale', content: toOgLocale(routeLocale.value) },
+    ...(alternateOgLocales.value.length > 0
+      ? [{ key: 'og:locale:alternate', property: 'og:locale:alternate', content: alternateOgLocales.value.join(',') }]
+      : []),
+    { key: 'twitter:card', name: 'twitter:card', content: 'summary' },
+    { key: 'twitter:title', name: 'twitter:title', content: title.value },
+    { key: 'twitter:description', name: 'twitter:description', content: siteDescription.value }
+  ],
+  link: [{ key: 'canonical', rel: 'canonical', href: canonicalUrl.value }]
+}))
 
 const headerImage = computed(() => ({
   backgroundImage: `url(${commonStore.headerImage}), url(${defaultCover})`,

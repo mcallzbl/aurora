@@ -138,6 +138,18 @@
                  LEFT JOIN t_category c ON a.category_id = c.id
                  LEFT JOIN t_user_info u ON a.user_id = u.id
     </select>
+    <select id="listRssArticles" resultType="com.aurora.model.dto.ArticleCardDTO">
+        SELECT id,
+               article_title,
+               if(article_abstract is null or article_abstract = '', SUBSTR(article_content, 1, 500),
+                  article_abstract) AS article_content,
+               create_time
+        FROM t_article
+        WHERE is_delete = 0
+          and status = 1
+        ORDER BY create_time DESC
+        LIMIT #{size}
+    </select>
     <select id="getArticlesByCategoryId" resultMap="ArticleCardDTOResultMap">
         SELECT a.id                 AS id,
                article_cover,

@@ -31,11 +31,15 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -48,6 +52,10 @@ import static com.aurora.enums.StatusCodeEnum.ARTICLE_ACCESS_FAIL;
 
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
+
+    private static final int RSS_DEFAULT_SIZE = 20;
+
+    private static final int RSS_MAX_SIZE = 100;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -79,6 +87,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Autowired
     private SearchStrategyContext searchStrategyContext;
 
+    @Value("${website.url:}")
+    private String websiteUrl;
+
+    @Value("${website.name:Aurora}")
+    private String websiteName;
+
     @SneakyThrows
     @Override
     public TopAndFeaturedArticlesDTO listTopAndFeaturedArticles() {
@@ -104,6 +118,37 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         CompletableFuture<Long> asyncCount = CompletableFuture.supplyAsync(() -> articleMapper.selectCount(queryWrapper));
         List<ArticleCardDTO> articles = articleMapper.listArticles(PageUtil.getLimitCurrent(), PageUtil.getSize());
         return new PageResultDTO<>(articles, asyncCount.get());
+    }
+
+    @Override
+    public String getRssFeed(Integer size) {
+        int feedSize = normalizeRssSize(size);
+        List<ArticleCardDTO> articles = articleMapper.listRssArticles(feedSize);
+        String baseUrl = getNormalizedWebsiteUrl();
+        String buildTime = formatRssDate(LocalDateTime.now());
+        StringBuilder rss = new StringBuilder(4096);
+        rss.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        rss.append("<rss version=\"2.0\">\n");
+        rss.append("<channel>\n");
+        rss.append("<title>").append(escapeXml(websiteName)).append("</title>\n");
+        rss.append("<link>").append(escapeXml(baseUrl)).append("</link>\n");
+        rss.append("<description>").append(escapeXml(websiteName)).append(" RSS Feed</description>\n");
+        rss.append("<lastBuildDate>").append(buildTime).append("</lastBuildDate>\n");
+        for (ArticleCardDTO article : articles) {
+            String articleUrl = baseUrl + "/articles/" + article.getId();
+            String title = Optional.ofNullable(article.getArticleTitle()).orElse("Untitled");
+            String description = Optional.ofNullable(article.getArticleContent()).orElse("");
+            rss.append("<item>\n");
+            rss.append("<title>").append(escapeXml(title)).append("</title>\n");
+            rss.append("<link>").append(escapeXml(articleUrl)).append("</link>\n");
+            rss.append("<description>").append(escapeXml(description)).append("</description>\n");
+            rss.append("<pubDate>").append(formatRssDate(article.getCreateTime())).append("</pubDate>\n");
+            rss.append("<guid isPermaLink=\"true\">").append(escapeXml(articleUrl)).append("</guid>\n");
+            rss.append("</item>\n");
+        }
+        rss.append("</channel>\n");
+        rss.append("</rss>\n");
+        return rss.toString();
     }
 
     @SneakyThrows
@@ -319,6 +364,38 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public List<ArticleSearchDTO> listArticlesBySearch(ConditionVO condition) {
         return searchStrategyContext.executeSearchStrategy(condition.getKeywords());
+    }
+
+    private int normalizeRssSize(Integer size) {
+        if (Objects.isNull(size) || size <= 0) {
+            return RSS_DEFAULT_SIZE;
+        }
+        return Math.min(size, RSS_MAX_SIZE);
+    }
+
+    private String getNormalizedWebsiteUrl() {
+        if (Objects.isNull(websiteUrl) || websiteUrl.isBlank()) {
+            return "";
+        }
+        return websiteUrl.endsWith("/") ? websiteUrl.substring(0, websiteUrl.length() - 1) : websiteUrl;
+    }
+
+    private String formatRssDate(LocalDateTime localDateTime) {
+        LocalDateTime safeTime = Objects.nonNull(localDateTime) ? localDateTime : LocalDateTime.now();
+        ZonedDateTime zonedDateTime = safeTime.atZone(ZoneId.systemDefault());
+        return DateTimeFormatter.RFC_1123_DATE_TIME.format(zonedDateTime);
+    }
+
+    private String escapeXml(String source) {
+        if (Objects.isNull(source) || source.isBlank()) {
+            return "";
+        }
+        return source
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 
     public void updateArticleViewsCount(Integer articleId) {

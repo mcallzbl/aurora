@@ -18,6 +18,17 @@ export const isSupportedLocale = (value: string): value is SupportedLocale => {
   return SUPPORTED_LOCALES.includes(value as SupportedLocale)
 }
 
+const LOCALE_OG_MAP: Record<SupportedLocale, string> = {
+  en: 'en_US',
+  'zh-CN': 'zh_CN',
+  'zh-TW': 'zh_TW',
+  ja: 'ja_JP'
+}
+
+export const toOgLocale = (locale: SupportedLocale): string => {
+  return LOCALE_OG_MAP[locale]
+}
+
 const BASE_LANGUAGE_LOCALE_MAP: Record<string, SupportedLocale> = {
   en: 'en',
   ja: 'ja',

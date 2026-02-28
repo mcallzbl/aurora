@@ -152,7 +152,7 @@ import {
 } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter, type RouteLocationNormalizedLoaded } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '#imports'
+import { useHead, useRuntimeConfig } from '#imports'
 import { Comment } from '@/components/Comment'
 import { SubTitle } from '@/components/Title'
 import { ArticleCard } from '@/components/ArticleCard'
@@ -166,6 +166,13 @@ import emitter from '@/utils/mitt'
 import v3ImgPreviewPkg from 'v3-img-preview'
 import api from '@/api/api'
 import markdownToHtml from '@/utils/markdown'
+import {
+  DEFAULT_LOCALE,
+  isSupportedLocale,
+  normalizeLocaleKey,
+  toOgLocale,
+  type SupportedLocale
+} from '@/config/i18n'
 
 type ImgPreviewFn = (options: { images: string[]; index: number }) => void
 type TagInfo = {
@@ -220,6 +227,7 @@ const commonStore = useCommonStore()
 const commentStore = useCommentStore()
 const route = useRoute()
 const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
 const { t, d } = useI18n()
 
 // Avoid skeletons in SSR HTML: default loading=false when SSR renders
@@ -256,6 +264,18 @@ const getArticleIdFromParam = (param: unknown): string | number | undefined => {
   return undefined
 }
 
+const withFallbackAuthor = (article: ArticleDetail): ArticleDetail => {
+  const nickname = article.author?.nickname
+  if (typeof nickname === 'string' && nickname.trim().length > 0) return article
+  return {
+    ...article,
+    author: {
+      ...(article.author || {}),
+      nickname: 'mcallzbl'
+    }
+  }
+}
+
 // SSR: prefetch and render article HTML (no top-level await -> no async setup)
 onServerPrefetch(async () => {
   try {
@@ -271,7 +291,7 @@ onServerPrefetch(async () => {
       const { default: MarkdownIt } = await import('markdown-it')
       const mdSSR = new MarkdownIt({ html: true })
       a.articleContent = mdSSR.render(a.articleContent || '')
-      reactiveData.article = a
+      reactiveData.article = withFallbackAuthor(a)
       const plain = String(a.articleContent)
         .replace(/<\/?[^>]*>/g, '')
         .replace(/[|]*\n/, '')
@@ -421,7 +441,7 @@ const fetchArticle = () => {
     commonStore.setHeaderImage(data.data.articleCover)
     const a = data.data as ArticleDetail
     a.articleContent = markdownToHtml(a.articleContent || '')
-    reactiveData.article = a
+    reactiveData.article = withFallbackAuthor(a)
     reactiveData.wordNum = Math.round(deleteHTMLTag(a.articleContent || '').length / 100) / 10 + 'k'
     reactiveData.readTime = Math.round(deleteHTMLTag(a.articleContent || '').length / 400) + 'mins'
     loading.value = false
@@ -512,8 +532,20 @@ const deleteHTMLTag = (content: string) => {
 const isMobile = computed(() => commonStore.isMobile)
 
 // SEO head tags
-const ORIGIN = typeof window !== 'undefined' ? window.location.origin : 'https://www.devillusion.asia'
-const canonicalUrl = computed(() => `${ORIGIN}/articles/${reactiveData.articleId ?? ''}`)
+const routeLocale = computed<SupportedLocale>(() => {
+  const firstSegment = String(route.path.split('/').filter(Boolean)[0] || '')
+  const normalized = normalizeLocaleKey(firstSegment)
+  return isSupportedLocale(normalized) ? normalized : DEFAULT_LOCALE
+})
+
+const siteOrigin = computed(() => {
+  const configured = String(runtimeConfig.public.siteUrl || '').trim()
+  if (configured.length > 0) return configured.replace(/\/$/, '')
+  if (import.meta.client) return window.location.origin
+  return 'https://www.devillusion.asia'
+})
+
+const canonicalUrl = computed(() => `${siteOrigin.value}${route.path}`)
 const plainText = computed(() => {
   const raw = reactiveData.article.articleContent || ''
   return String(raw)
@@ -524,24 +556,40 @@ const plainText = computed(() => {
     .trim()
 })
 const headTitle = computed(() => reactiveData.article.articleTitle || 'Article')
-const headDesc = computed(() => (plainText.value || headTitle.value).slice(0, 160))
-const headImage = computed(() => reactiveData.article.articleCover || `${ORIGIN}/favicon.ico`)
+const articleAuthor = computed(() => {
+  const nickname = reactiveData.article.author?.nickname
+  if (typeof nickname === 'string' && nickname.trim().length > 0) return nickname.trim()
+  return 'mcallzbl'
+})
+
+const localeSummary = computed(() => {
+  return String(t('seo.article_page_suffix'))
+})
+const headDesc = computed(() => `${(plainText.value || headTitle.value).slice(0, 120)} | ${localeSummary.value}`.slice(0, 200))
+const headImage = computed(() => reactiveData.article.articleCover || `${siteOrigin.value}/favicon.ico`)
 
 useHead(() => ({
   title: headTitle.value,
+  htmlAttrs: {
+    lang: routeLocale.value
+  },
   meta: [
-    { name: 'description', content: headDesc.value },
-    { property: 'og:title', content: headTitle.value },
-    { property: 'og:description', content: headDesc.value },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: canonicalUrl.value },
-    { property: 'og:image', content: headImage.value },
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: headTitle.value },
-    { name: 'twitter:description', content: headDesc.value },
-    { name: 'twitter:image', content: headImage.value }
+    { key: 'description', name: 'description', content: headDesc.value },
+    { key: 'author', name: 'author', content: articleAuthor.value },
+    { key: 'og:title', property: 'og:title', content: headTitle.value },
+    { key: 'og:description', property: 'og:description', content: headDesc.value },
+    { key: 'og:type', property: 'og:type', content: 'article' },
+    { key: 'og:url', property: 'og:url', content: canonicalUrl.value },
+    { key: 'og:image', property: 'og:image', content: headImage.value },
+    { key: 'og:site_name', property: 'og:site_name', content: "mcallzbl's blog" },
+    { key: 'og:locale', property: 'og:locale', content: toOgLocale(routeLocale.value) },
+    { key: 'article:author', property: 'article:author', content: articleAuthor.value },
+    { key: 'twitter:card', name: 'twitter:card', content: 'summary_large_image' },
+    { key: 'twitter:title', name: 'twitter:title', content: headTitle.value },
+    { key: 'twitter:description', name: 'twitter:description', content: headDesc.value },
+    { key: 'twitter:image', name: 'twitter:image', content: headImage.value }
   ],
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  link: [{ key: 'canonical', rel: 'canonical', href: canonicalUrl.value }],
   script: [
     {
       type: 'application/ld+json',
@@ -549,11 +597,12 @@ useHead(() => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
         headline: headTitle.value,
+        description: headDesc.value,
+        inLanguage: routeLocale.value,
         datePublished: reactiveData.article.createTime || undefined,
         dateModified: reactiveData.article.updateTime || reactiveData.article.createTime || undefined,
-        author: reactiveData.article.author?.nickname
-          ? { '@type': 'Person', name: reactiveData.article.author.nickname }
-          : undefined,
+        author: { '@type': 'Person', name: articleAuthor.value },
+        publisher: { '@type': 'Person', name: 'mcallzbl' },
         image: headImage.value,
         mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl.value }
       })

@@ -302,6 +302,10 @@
     "zh-TW": "繁體中文",
     "ja": "日本語"
   },
+  "seo": {
+    "site_description": "This is mcallzbl's blog for development notes and life updates.",
+    "article_page_suffix": "Article page of mcallzbl's blog"
+  },
   "common": {
     "success": "Success",
     "warning": "Warning",

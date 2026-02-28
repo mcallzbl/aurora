@@ -44,6 +44,12 @@ public class ArticleController {
         return ResultVO.ok(articleService.listArticles());
     }
 
+    @Operation(summary = "获取RSS订阅")
+    @GetMapping(value = "/rss.xml", produces = "application/rss+xml; charset=UTF-8")
+    public String getRss(@RequestParam(required = false) Integer size) {
+        return articleService.getRssFeed(size);
+    }
+
     @Operation(summary = "根据分类id获取文章")
     @GetMapping("/articles/categoryId")
     public ResultVO<PageResultDTO<ArticleCardDTO>> getArticlesByCategoryId(@RequestParam Integer categoryId) {

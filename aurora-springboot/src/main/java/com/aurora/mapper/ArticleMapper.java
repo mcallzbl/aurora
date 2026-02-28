@@ -20,6 +20,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     List<ArticleCardDTO> listArticles(@Param("current") Long current, @Param("size") Long size);
 
+    List<ArticleCardDTO> listRssArticles(@Param("size") Integer size);
+
     List<ArticleCardDTO> getArticlesByCategoryId(@Param("current") Long current, @Param("size") Long size, @Param("categoryId") Integer categoryId);
 
     ArticleDTO getArticleById(@Param("articleId") Integer articleId);

@@ -112,6 +112,10 @@
     "zh-TW": "繁體中文",
     "ja": "日语"
   },
+  "seo": {
+    "site_description": "这是 mcallzbl 的博客，分享开发、技术笔记与生活记录。",
+    "article_page_suffix": "mcallzbl 的博客文章页"
+  },
   "common": {
     "success": "成功",
     "warning": "警告",

@@ -238,6 +238,10 @@
     "zh-TW": "繁體中文",
     "ja": "日本語"
   },
+  "seo": {
+    "site_description": "ここは mcallzbl のブログです。開発、技術メモ、日々の記録を共有します。",
+    "article_page_suffix": "mcallzbl のブログ記事ページ"
+  },
   "common": {
     "success": "成功",
     "warning": "警告",
