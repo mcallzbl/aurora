@@ -42,6 +42,11 @@
             <result property="tagName" column="tag_name"/>
         </collection>
     </resultMap>
+    <resultMap id="ArticleSearchDTOResultMap" type="com.aurora.model.dto.ArticleSearchDTO">
+        <id property="id" column="id"/>
+        <result property="articleTitle" column="article_title"/>
+        <result property="articleContent" column="article_content"/>
+    </resultMap>
     <resultMap id="articleAdminResultMap" type="com.aurora.model.dto.ArticleAdminDTO">
         <id property="id" column="id"/>
         <result property="articleCover" column="article_cover"/>
@@ -149,6 +154,17 @@
           and status = 1
         ORDER BY create_time DESC
         LIMIT #{size}
+    </select>
+    <select id="listArticlesByFullText" resultMap="ArticleSearchDTOResultMap">
+        SELECT id,
+               article_title,
+               article_content
+        FROM t_article
+        WHERE is_delete = 0
+          AND status = 1
+          AND MATCH(article_title, article_content) AGAINST(#{booleanKeywords} IN BOOLEAN MODE)
+        ORDER BY MATCH(article_title, article_content) AGAINST(#{naturalKeywords} IN NATURAL LANGUAGE MODE) DESC,
+                 id DESC
     </select>
     <select id="getArticlesByCategoryId" resultMap="ArticleCardDTOResultMap">
         SELECT a.id                 AS id,

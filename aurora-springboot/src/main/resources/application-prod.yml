@@ -72,7 +72,12 @@ jwt:
   secret: ${AURORA_BLOG_JWT_SECRET:aurorajwtsecretmustlongthan32byte}
 
 search:
-  mode: elasticsearch
+  mode: mysql
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
 
 upload:
   mode: oss

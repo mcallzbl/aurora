@@ -4,6 +4,7 @@ import com.aurora.entity.Article;
 import com.aurora.model.dto.ArticleAdminDTO;
 import com.aurora.model.dto.ArticleCardDTO;
 import com.aurora.model.dto.ArticleDTO;
+import com.aurora.model.dto.ArticleSearchDTO;
 import com.aurora.model.dto.ArticleStatisticsDTO;
 import com.aurora.model.vo.ConditionVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -33,6 +34,9 @@ public interface ArticleMapper extends BaseMapper<Article> {
     ArticleCardDTO getFirstArticle();
 
     ArticleCardDTO getLastArticle();
+
+    List<ArticleSearchDTO> listArticlesByFullText(@Param("naturalKeywords") String naturalKeywords,
+                                                  @Param("booleanKeywords") String booleanKeywords);
 
     List<ArticleCardDTO> listArticlesByTagId(@Param("current") Long current, @Param("size") Long size, @Param("tagId") Integer tagId);
 

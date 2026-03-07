@@ -9,6 +9,8 @@ public enum SearchModeEnum {
 
     MYSQL("mysql", "mySqlSearchStrategyImpl"),
 
+    MYSQL_LIKE("mysql_like", "mySqlLikeSearchStrategyImpl"),
+
     ELASTICSEARCH("elasticsearch", "esSearchStrategyImpl");
 
     private final String mode;

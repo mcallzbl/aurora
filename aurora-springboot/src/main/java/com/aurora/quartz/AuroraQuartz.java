@@ -57,7 +57,7 @@ public class AuroraQuartz {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     private AuroraElasticsearchRepository auroraElasticsearchRepository;
 
 
@@ -129,6 +129,10 @@ public class AuroraQuartz {
     }
 
     public void importDataIntoES() {
+        if (Objects.isNull(auroraElasticsearchRepository)) {
+            log.warn("Elasticsearch repository is unavailable, skip importing article data into ES");
+            return;
+        }
         auroraElasticsearchRepository.deleteAll();
         List<Article> articles = articleService.list();
         for (Article article : articles) {

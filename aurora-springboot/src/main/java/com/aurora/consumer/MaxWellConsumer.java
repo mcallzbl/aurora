@@ -9,11 +9,13 @@ import com.aurora.util.BeanCopyUtil;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import static com.aurora.constant.RabbitMQConstant.MAXWELL_QUEUE;
 
 @Component
+@ConditionalOnProperty(name = "search.mode", havingValue = "elasticsearch")
 @RabbitListener(queues = MAXWELL_QUEUE)
 public class MaxWellConsumer {
 

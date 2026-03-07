@@ -46,7 +46,8 @@ CREATE TABLE `t_article`
     `original_url`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NULL     DEFAULT NULL COMMENT '原文链接',
     `create_time`      datetime                                                       NOT NULL COMMENT '发表时间',
     `update_time`      datetime                                                       NULL     DEFAULT NULL COMMENT '更新时间',
-    PRIMARY KEY (`id`) USING BTREE
+    PRIMARY KEY (`id`) USING BTREE,
+    FULLTEXT KEY `idx_article_title_content_fulltext` (`article_title`, `article_content`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 135
   CHARACTER SET = utf8mb4

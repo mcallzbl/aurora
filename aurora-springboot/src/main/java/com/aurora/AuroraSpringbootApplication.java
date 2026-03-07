@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-@SpringBootApplication
+@SpringBootApplication(excludeName = "org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration")
 @MapperScan("com.aurora.mapper")
 public class AuroraSpringbootApplication {
 

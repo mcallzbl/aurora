@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -26,6 +27,7 @@ import static com.aurora.enums.ArticleStatusEnum.PUBLIC;
 
 @Log4j2
 @Service("esSearchStrategyImpl")
+@ConditionalOnProperty(name = "search.mode", havingValue = "elasticsearch")
 public class EsSearchStrategyImpl implements SearchStrategy {
 
     @Autowired
